@@ -161,6 +161,17 @@
 		<source-file src="src/android/src/com/arellomobile/android/push/request/versions/VersionHelper.java"
 		        target-dir="src/com/arellomobile/android/push/request/versions" />
 
+
+		<source-file src="src/android/src/com/arellomobile/android/push/tags/SendPushTagsAbstractAsyncTask.java"
+		        target-dir="src/com/arellomobile/android/push/tags" />
+
+		<source-file src="src/android/src/com/arellomobile/android/push/tags/SendPushTagsAsyncTask.java"
+		        target-dir="src/com/arellomobile/android/push/tags" />
+
+		<source-file src="src/android/src/com/arellomobile/android/push/tags/SendPushTagsCallBack.java"
+		        target-dir="src/com/arellomobile/android/push/tags" />
+
+
 		<source-file src="src/android/src/com/arellomobile/android/push/utils/ExecutorHelper.java"
 		        target-dir="src/com/arellomobile/android/push/utils" />
 
