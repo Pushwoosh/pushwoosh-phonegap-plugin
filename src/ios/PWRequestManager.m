@@ -28,7 +28,7 @@
 	NSString *jsonRequestData = [NSString stringWithFormat:@"{\"request\":{%@}}", requestString];
 	[requestStringBuilder release];
 	
-	NSString *requestUrl = [kServiceAddress stringByAppendingPathComponent:[request methodName]];
+	NSString *requestUrl = [kServiceAddress stringByAppendingString:[request methodName]];
 	NSLog(@"Sending request: %@", jsonRequestData);
 	NSLog(@"To urL %@", requestUrl);
 	
