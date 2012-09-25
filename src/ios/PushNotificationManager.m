@@ -508,7 +508,7 @@
 		
 		NSString* u = [userInfo objectForKey:@"u"];
 		if (u) {
-			NSDictionary *dict = [u objectFromJSONString];
+			NSDictionary *dict = [u cdvjk_objectFromJSONString];
 			if (dict) {
 				NSMutableDictionary *pn = [NSMutableDictionary dictionaryWithDictionary:userInfo];
 				[pn setObject:dict forKey:@"u"];
@@ -517,7 +517,7 @@
 		}
 		
 		if(userInfo) {
-			NSString *jsonString = [userInfo JSONString];
+			NSString *jsonString = [userInfo cdvjk_JSONString];
 			//the webview is not loaded yet, keep it for the callback
 			pushHandler.startPushData = jsonString;
 		}
