@@ -43,7 +43,7 @@
         [outputString appendFormat:@"%02x",outputBuffer[count]];
     }
     
-    return [outputString autorelease];
+    return outputString;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -204,56 +204,47 @@
 	
 	// Create the navigation controller and present it modally.
 	UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:vc];
-	vc.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Back" style:UIBarButtonItemStyleDone target:self action:@selector(closeAction)] autorelease];
+	vc.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Back" style:UIBarButtonItemStyleDone target:self action:@selector(closeAction)];
     
 	[navController presentModalViewController:navigationController animated:YES];
 	
-	[navigationController release];
-	[vc release];
 }
 
 - (void) sendDevTokenToServer:(NSString *)deviceID {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
-	NSString * appLocale = @"en";
-	NSLocale * locale = (NSLocale *)CFLocaleCopyCurrent();
-	NSString * localeId = [locale localeIdentifier];
-	
-	if([localeId length] > 2)
-		localeId = [localeId stringByReplacingCharactersInRange:NSMakeRange(2, [localeId length]-2) withString:@""];
-	
-	[locale release]; locale = nil;
-	
-	appLocale = localeId;
-	
-	NSArray * languagesArr = (NSArray *) CFLocaleCopyPreferredLanguages();	
-	if([languagesArr count] > 0)
-	{
-		NSString * value = [languagesArr objectAtIndex:0];
+	@autoreleasepool {
+		NSString * appLocale = @"en";
+		NSLocale * locale = (NSLocale *)CFBridgingRelease(CFLocaleCopyCurrent());
+		NSString * localeId = [locale localeIdentifier];
 		
-		if([value length] > 2)
-			value = [value stringByReplacingCharactersInRange:NSMakeRange(2, [value length]-2) withString:@""];
+		if([localeId length] > 2)
+			localeId = [localeId stringByReplacingCharactersInRange:NSMakeRange(2, [localeId length]-2) withString:@""];
 		
-		appLocale = [[value copy] autorelease];
+		appLocale = localeId;
+		
+		NSArray * languagesArr = (NSArray *) CFBridgingRelease(CFLocaleCopyPreferredLanguages());	
+		if([languagesArr count] > 0)
+		{
+			NSString * value = [languagesArr objectAtIndex:0];
+			
+			if([value length] > 2)
+				value = [value stringByReplacingCharactersInRange:NSMakeRange(2, [value length]-2) withString:@""];
+			
+			appLocale = [value copy];
+		}
+		
+		PWRegisterDeviceRequest *request = [[PWRegisterDeviceRequest alloc] init];
+		request.appId = appCode;
+		request.hwid = [self uniqueGlobalDeviceIdentifier];
+		request.pushToken = deviceID;
+		request.language = appLocale;
+		request.timeZone = [NSString stringWithFormat:@"%d", [[NSTimeZone localTimeZone] secondsFromGMT]];
+		
+		if ([[PWRequestManager sharedManager] sendRequest:request]) {
+			NSLog(@"Registered for push notifications: %@", deviceID);
+		} else {
+			NSLog(@"Registered for push notifications failed");
+		}
 	}
-	
-	[languagesArr release]; languagesArr = nil;
-	
-	PWRegisterDeviceRequest *request = [[PWRegisterDeviceRequest alloc] init];
-	request.appId = appCode;
-	request.hwid = [self uniqueGlobalDeviceIdentifier];
-	request.pushToken = deviceID;
-	request.language = appLocale;
-	request.timeZone = [NSString stringWithFormat:@"%d", [[NSTimeZone localTimeZone] secondsFromGMT]];
-	
-	if ([[PWRequestManager sharedManager] sendRequest:request]) {
-		NSLog(@"Registered for push notifications: %@", deviceID);
-	} else {
-		NSLog(@"Registered for push notifications failed");
-	}
-	
-	[request release]; request = nil;
-	[pool release]; pool = nil;
 }
 
 - (void) handlePushRegistration:(NSData *)devToken {
@@ -368,64 +359,51 @@
 }
 
 - (void) sendStatsBackground {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-	PWPushStatRequest *request = [[PWPushStatRequest alloc] init];
-	request.appId = appCode;
-	request.hwid = [self uniqueGlobalDeviceIdentifier];
-	
-	if ([[PWRequestManager sharedManager] sendRequest:request]) {
-		NSLog(@"sendStats completed");
-	} else {
-		NSLog(@"sendStats failed");
+	@autoreleasepool {
+		PWPushStatRequest *request = [[PWPushStatRequest alloc] init];
+		request.appId = appCode;
+		request.hwid = [self uniqueGlobalDeviceIdentifier];
+		
+		if ([[PWRequestManager sharedManager] sendRequest:request]) {
+			NSLog(@"sendStats completed");
+		} else {
+			NSLog(@"sendStats failed");
+		}
 	}
-	
-	[request release]; request = nil;
-	
-	[pool release]; pool = nil;
 }
 
 - (void) sendTagsBackground: (NSDictionary *) tags {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    PWSetTagsRequest *request = [[PWSetTagsRequest alloc] init];
-	request.appId = appCode;
-	request.hwid = [self uniqueGlobalDeviceIdentifier];
-    request.tags = tags;
-	
-	if ([[PWRequestManager sharedManager] sendRequest:request]) {
-		NSLog(@"setTags completed");
-	} else {
-		NSLog(@"setTags failed");
+	@autoreleasepool {
+		PWSetTagsRequest *request = [[PWSetTagsRequest alloc] init];
+		request.appId = appCode;
+		request.hwid = [self uniqueGlobalDeviceIdentifier];
+		request.tags = tags;
+		
+		if ([[PWRequestManager sharedManager] sendRequest:request]) {
+			NSLog(@"setTags completed");
+		} else {
+			NSLog(@"setTags failed");
+		}
 	}
-	
-	[request release]; request = nil;
-
-	
-	[pool release]; pool = nil;
 }
 
 - (void) sendLocation: (CLLocation *) location {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
-	NSLog(@"Sending location: %@", location);
-	
-    PWGetNearestZoneRequest *request = [[PWGetNearestZoneRequest alloc] init];
-	request.appId = appCode;
-	request.hwid = [self uniqueGlobalDeviceIdentifier];
-    request.coordinate = location.coordinate;
-	
-	if ([[PWRequestManager sharedManager] sendRequest:request]) {
-		NSLog(@"getNearestZone completed");
-	} else {
-		NSLog(@"getNearestZone failed");
+	@autoreleasepool {
+		NSLog(@"Sending location: %@", location);
+		
+		PWGetNearestZoneRequest *request = [[PWGetNearestZoneRequest alloc] init];
+		request.appId = appCode;
+		request.hwid = [self uniqueGlobalDeviceIdentifier];
+		request.coordinate = location.coordinate;
+		
+		if ([[PWRequestManager sharedManager] sendRequest:request]) {
+			NSLog(@"getNearestZone completed");
+		} else {
+			NSLog(@"getNearestZone failed");
+		}
+		
+		NSLog(@"Locaiton sent");
 	}
-	
-	[request release]; request = nil;
-	
-	NSLog(@"Locaiton sent");
-	
-	[pool release]; pool = nil;
 }
 
 - (void) setTags: (NSDictionary *) tags {
@@ -434,11 +412,8 @@
 
 - (void) dealloc {
 	self.delegate = nil;
-	self.appCode = nil;
 	self.navController = nil;
-	self.pushNotifications = nil;
 	
-	[super dealloc];
 }
 
 @end

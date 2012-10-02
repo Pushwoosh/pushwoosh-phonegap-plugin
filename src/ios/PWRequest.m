@@ -46,14 +46,8 @@
 	NSMutableDictionary *dict = [NSMutableDictionary new];
 	[dict setObject:[self encodeString:appId] forKey:@"application"];
 	[dict setObject:[self encodeString:hwid] forKey:@"hwid"];
-	return [dict autorelease];
+	return dict;
 }
 
-- (void) dealloc {
-	self.appId = nil;
-	self.hwid = nil;
-	
-	[super dealloc];
-}
 
 @end

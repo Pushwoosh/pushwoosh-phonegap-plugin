@@ -20,8 +20,8 @@
 	NSString *startPushData;
 }
 
-@property (nonatomic, retain) NSMutableDictionary* callbackIds;
-@property (nonatomic, retain) PushNotificationManager *pushManager;
+@property (nonatomic, strong) NSMutableDictionary* callbackIds;
+@property (nonatomic, strong) PushNotificationManager *pushManager;
 @property (nonatomic, copy) NSString *startPushData;
 
 - (void)registerDevice:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;

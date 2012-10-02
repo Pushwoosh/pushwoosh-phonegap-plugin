@@ -13,7 +13,7 @@
 
 - (id)initWithURLString:(NSString *)url {
 	if(self = [super init]) {
-		urlToLoad = [url retain];
+		urlToLoad = url;
 	}
 	
 	return self;
@@ -45,10 +45,7 @@
 
 - (void)dealloc {
 	webview.delegate = nil;
-	[webview release];
-	[urlToLoad release];
 	
-    [super dealloc];
 }
 
 - (BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {

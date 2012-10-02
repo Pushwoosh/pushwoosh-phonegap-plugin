@@ -30,18 +30,18 @@ typedef enum enumHtmlPageSupportedOrientations {
 @interface PushNotificationManager : NSObject {
 	NSString *appCode;
 	NSString *appName;
-	UIViewController *navController;
+	UIViewController *__unsafe_unretained navController;
 
 	NSInteger internalIndex;
 	NSMutableDictionary *pushNotifications;
-	NSObject<PushNotificationDelegate> *delegate;
+	NSObject<PushNotificationDelegate> *__unsafe_unretained delegate;
 }
 
 @property (nonatomic, copy) NSString *appCode;
 @property (nonatomic, copy) NSString *appName;
-@property (nonatomic, assign) UIViewController *navController;
-@property (nonatomic, retain) NSDictionary *pushNotifications;
-@property (nonatomic, assign) NSObject<PushNotificationDelegate> *delegate;
+@property (nonatomic, unsafe_unretained) UIViewController *navController;
+@property (nonatomic, strong) NSDictionary *pushNotifications;
+@property (nonatomic, unsafe_unretained) NSObject<PushNotificationDelegate> *delegate;
 @property (nonatomic, assign) PWSupportedOrientations supportedOrientations;
 
 + (void)initializeWithAppCode:(NSString *)appCode appName:(NSString *)appName;

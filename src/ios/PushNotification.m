@@ -112,7 +112,6 @@
 	NSNumber * lon = [options objectForKey:@"lon"];
 	CLLocation * location = [[CLLocation alloc] initWithLatitude:[lat doubleValue] longitude:[lon doubleValue]];
 	[[PushNotificationManager pushManager] sendLocation:location];
-	[location release];
 	
 	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
 	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"sendLocation"]]];
@@ -254,12 +253,5 @@
 	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"cancelAllLocalNotifications"]]];
 }
 
-- (void) dealloc {
-	self.pushManager = nil;
-	self.startPushData = nil;
-
-	[_callbackIds dealloc];
-	[super dealloc];
-}
 
 @end

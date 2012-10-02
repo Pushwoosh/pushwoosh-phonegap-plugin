@@ -8,6 +8,6 @@
 
 @interface PWSetTagsRequest : PWRequest
 
-@property (nonatomic, retain) NSDictionary *tags;
+@property (nonatomic, strong) NSDictionary *tags;
 
 @end

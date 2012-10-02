@@ -17,8 +17,5 @@
 	return dict;
 }
 
-- (void) dealloc {
-	[super dealloc];
-}
 
 @end
