@@ -264,6 +264,44 @@
 	return [[NSUserDefaults standardUserDefaults] objectForKey:@"PWPushUserId"];
 }
 
+#pragma mark URL redirect handling flow
+
+//This method is added to work with shorten urls
+//According to ios 6, if user isn't logged in appstore, then when safari opens itunes url system will ask permission to run appstore.
+//But still if application open appstore url, system will open it without any alerts.
+- (void) openUrl: (NSURL *) url {
+	//When opening nsurlconnection to some url if it has some redirect, then connection will ask delegate what to do.
+	//But if url has no redirects, then THIS CODE WILL NOT WORK.
+	//
+	//Pushwoosh.com guarantee that any http/https url is shorten URL.
+	//Unshort url and open it by usual way.
+	if ([[url scheme] hasPrefix:@"http"]) {
+		NSURLConnection *connection  = [[NSURLConnection alloc] initWithRequest:[NSMutableURLRequest requestWithURL:url] delegate:self];
+		if (!connection) {
+			return;
+		}
+		
+		return;
+	}
+	
+	//If url has cusmtom scheme like facebook:// or itms:// we need to open it directly:
+	[[UIApplication sharedApplication] openURL:url];
+}
+
+- (NSURLRequest *)connection: (NSURLConnection *)inConnection
+			 willSendRequest: (NSURLRequest *)inRequest
+			redirectResponse: (NSURLResponse *)inRedirectResponse; {
+	NSLog(@"Url: %@", [inRequest URL]);
+	if(inRedirectResponse != nil) {
+		[[UIApplication sharedApplication] openURL:[inRequest URL]];
+		return nil;
+	}
+	
+	
+	return inRequest;
+}
+
+#pragma mark -
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	if(buttonIndex != 1) {
 		if(!alertView.tag)
@@ -281,7 +319,7 @@
     
 	NSString *linkUrl = [lastPushDict objectForKey:@"l"];	
 	if(linkUrl) {
-		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:linkUrl]];
+		[self openUrl:[NSURL URLWithString:linkUrl]];
 	}
 	
 	if([delegate respondsToSelector:@selector(onPushAccepted: withNotification:)] ) {
@@ -341,7 +379,7 @@
 	}
     
 	if(linkUrl) {
-		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:linkUrl]];
+		[self openUrl:[NSURL URLWithString:linkUrl]];
 	}
 	
 	if([delegate respondsToSelector:@selector(onPushAccepted: withNotification:)] ) {
