@@ -18,7 +18,7 @@ import com.arellomobile.android.push.preference.SoundType;
 import com.arellomobile.android.push.preference.VibrateType;
 import com.arellomobile.android.push.tags.SendPushTagsAsyncTask;
 import com.arellomobile.android.push.tags.SendPushTagsCallBack;
-import com.arellomobile.android.push.utils.ExecutorHelper;
+import com.arellomobile.android.push.utils.executor.ExecutorHelper;
 import com.arellomobile.android.push.utils.GeneralUtils;
 import com.arellomobile.android.push.utils.PreferenceUtils;
 import com.arellomobile.android.push.utils.WorkerTask;

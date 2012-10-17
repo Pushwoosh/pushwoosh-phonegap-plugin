@@ -18,6 +18,10 @@
 }
 
 - (BOOL) sendRequest: (PWRequest *) request {
+	return [self sendRequest:request error:nil];
+}
+
+- (BOOL) sendRequest: (PWRequest *) request error:(NSError **)retError {
 	NSMutableArray *requestStringBuilder = [NSMutableArray new];
 	NSDictionary *requestDict = [request requestDictionary];
 	
@@ -40,12 +44,15 @@
 	NSHTTPURLResponse *response = nil;
 	NSError *error = nil;
 	NSData * responseData = [NSURLConnection sendSynchronousRequest:urlRequest returningResponse:&response error:&error];
-	 urlRequest = nil;
+	urlRequest = nil;
+	
+	if(retError)
+		*retError = error;
 	
 	NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
 	NSLog(@"Response \"%d %@\": string: %@", [response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[response statusCode]], responseString);
 	
-	 responseString = nil;
+	responseString = nil;
 	if (response.statusCode != 200) 
 		return NO;
 	

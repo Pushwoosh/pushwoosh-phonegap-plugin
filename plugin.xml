@@ -172,8 +172,8 @@
 		        target-dir="src/com/arellomobile/android/push/tags" />
 
 
-		<source-file src="src/android/src/com/arellomobile/android/push/utils/ExecutorHelper.java"
-		        target-dir="src/com/arellomobile/android/push/utils" />
+		<source-file src="src/android/src/com/arellomobile/android/push/utils/executor/ExecutorHelper.java"
+		        target-dir="src/com/arellomobile/android/push/utils/executor" />
 
 		<source-file src="src/android/src/com/arellomobile/android/push/utils/GeneralUtils.java"
 		        target-dir="src/com/arellomobile/android/push/utils" />
@@ -184,11 +184,23 @@
 		<source-file src="src/android/src/com/arellomobile/android/push/utils/PreferenceUtils.java"
 		        target-dir="src/com/arellomobile/android/push/utils" />
 
-		<source-file src="src/android/src/com/arellomobile/android/push/utils/V11ExecutorHelper.java"
-		        target-dir="src/com/arellomobile/android/push/utils" />
+		<source-file src="src/android/src/com/arellomobile/android/push/utils/executor/V11ExecutorHelper.java"
+		        target-dir="src/com/arellomobile/android/push/utils/executor" />
 
 		<source-file src="src/android/src/com/arellomobile/android/push/utils/WorkerTask.java"
 		        target-dir="src/com/arellomobile/android/push/utils" />
+
+		<source-file src="src/android/src/com/arellomobile/android/push/BasePushMessageReceiver.java"
+		        target-dir="src/com/arellomobile/android/push" />
+
+		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/NotificationCreator.java"
+		        target-dir="src/com/arellomobile/android/push/utils/notification" />
+
+		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/NotificationFactory.java"
+		        target-dir="src/com/arellomobile/android/push/utils/notification" />
+
+		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/V11NotificationCreator.java"
+		        target-dir="src/com/arellomobile/android/push/utils/notification" />
 
     </platform>
     <!-- ios -->
@@ -224,5 +236,8 @@
 
         <header-file src="PWSetTagsRequest.h" />
         <source-file src="PWSetTagsRequest.m" />
+		
+        <header-file src="PWSendBadgeRequest.h" />
+        <source-file src="PWSendBadgeRequest.m" />
     </platform>
 </plugin>

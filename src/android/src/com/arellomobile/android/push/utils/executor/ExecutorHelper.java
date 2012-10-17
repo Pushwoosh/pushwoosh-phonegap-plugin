@@ -1,4 +1,4 @@
-package com.arellomobile.android.push.utils;
+package com.arellomobile.android.push.utils.executor;
 
 import android.os.AsyncTask;
 import android.os.Build;

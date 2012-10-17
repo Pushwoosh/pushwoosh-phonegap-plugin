@@ -118,7 +118,7 @@
 	
 }
 
-- (void)didRegisterForRemoteNotificationsWithDeviceToken:(NSString *)token {
+- (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString *)token {
 
     NSMutableDictionary *results = [PushNotification getRemoteNotificationStatus];
     [results setValue:token forKey:@"deviceToken"];
@@ -127,7 +127,7 @@
 	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"registerDevice"]]];
 }
 
-- (void)didFailToRegisterForRemoteNotificationsWithError:(NSError*)error {
+- (void)onDidFailToRegisterForRemoteNotificationsWithError:(NSError*)error {
 
 	NSMutableDictionary *results = [NSMutableDictionary dictionary];
 	[results setValue:[NSString stringWithFormat:@"%@", error] forKey:@"error"];

@@ -13,6 +13,12 @@
 @protocol PushNotificationDelegate
 
 @optional
+//succesfully registered for push notifications
+- (void) onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString *)token;
+
+//failed to register for push notifications
+- (void) onDidFailToRegisterForRemoteNotificationsWithError:(NSError *)error;
+
 //handle push notification, display alert, if this method is implemented onPushAccepted will not be called, internal message boxes will not be displayed
 - (void) onPushReceived:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart;
 

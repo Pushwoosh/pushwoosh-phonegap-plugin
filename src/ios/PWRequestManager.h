@@ -13,5 +13,6 @@
 
 + (PWRequestManager *) sharedManager;
 - (BOOL) sendRequest: (PWRequest *) request;
+- (BOOL) sendRequest: (PWRequest *) request error:(NSError **)error;
 
 @end

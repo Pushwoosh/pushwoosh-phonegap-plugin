@@ -10,6 +10,7 @@
 #import "PWRequestManager.h"
 #import "PWRegisterDeviceRequest.h"
 #import "PWSetTagsRequest.h"
+#import "PWSendBadgeRequest.h"
 #import "PWPushStatRequest.h"
 #import "PWGetNearestZoneRequest.h"
 
@@ -168,10 +169,10 @@
 	static PushNotificationManager * instance = nil;
 	
 	if(instance == nil) {
-		NSString * appid = [[NSUserDefaults standardUserDefaults] objectForKey:@"Pushwoosh_APPID"];
+		NSString * appid = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_APPID"];
 		
 		if(!appid) {
-			appid = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_APPID"];
+			appid = [[NSUserDefaults standardUserDefaults] objectForKey:@"Pushwoosh_APPID"];
 
 			if(!appid) {
 				return nil;
@@ -239,10 +240,19 @@
 		request.language = appLocale;
 		request.timeZone = [NSString stringWithFormat:@"%d", [[NSTimeZone localTimeZone] secondsFromGMT]];
 		
-		if ([[PWRequestManager sharedManager] sendRequest:request]) {
+		NSError *error = nil;
+		if ([[PWRequestManager sharedManager] sendRequest:request error:&error]) {
 			NSLog(@"Registered for push notifications: %@", deviceID);
+
+			if([delegate respondsToSelector:@selector(onDidRegisterForRemoteNotificationsWithDeviceToken:)] ) {
+				[delegate performSelectorOnMainThread:@selector(onDidRegisterForRemoteNotificationsWithDeviceToken:) withObject:[self getPushToken] waitUntilDone:NO];
+			}
 		} else {
 			NSLog(@"Registered for push notifications failed");
+
+			if([delegate respondsToSelector:@selector(onDidFailToRegisterForRemoteNotificationsWithError:)] ) {
+				[delegate performSelectorOnMainThread:@selector(onDidFailToRegisterForRemoteNotificationsWithError:) withObject:error waitUntilDone:NO];
+			}
 		}
 	}
 }
@@ -280,7 +290,6 @@
 		if (!connection) {
 			return;
 		}
-		
 		return;
 	}
 	
@@ -288,17 +297,11 @@
 	[[UIApplication sharedApplication] openURL:url];
 }
 
-- (NSURLRequest *)connection: (NSURLConnection *)inConnection
-			 willSendRequest: (NSURLRequest *)inRequest
-			redirectResponse: (NSURLResponse *)inRedirectResponse; {
-	NSLog(@"Url: %@", [inRequest URL]);
-	if(inRedirectResponse != nil) {
-		[[UIApplication sharedApplication] openURL:[inRequest URL]];
-		return nil;
-	}
-	
-	
-	return inRequest;
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+	NSLog(@"Url: %@", [response URL]);
+
+	//as soon as all the redirects finished we can open the final URL
+	[[UIApplication sharedApplication] openURL:[response URL]];
 }
 
 #pragma mark -
@@ -444,6 +447,25 @@
 	}
 }
 
+- (void) sendBadgesBackground: (NSNumber *) badge {
+	@autoreleasepool {
+		PWSendBadgeRequest *request = [[PWSendBadgeRequest alloc] init];
+		request.appId = appCode;
+		request.hwid = [self uniqueGlobalDeviceIdentifier];
+		request.badge = [badge intValue];
+		
+		if ([[PWRequestManager sharedManager] sendRequest:request]) {
+			NSLog(@"setBadges completed");
+		} else {
+			NSLog(@"setBadges failed");
+		}
+	}
+}
+
+- (void) sendBadges: (NSInteger) badge {
+	[self performSelectorInBackground:@selector(sendBadgesBackground:) withObject:[NSNumber numberWithInt:badge]];
+}
+
 - (void) setTags: (NSDictionary *) tags {
 	[self performSelectorInBackground:@selector(sendTagsBackground:) withObject:tags];
 }
@@ -477,8 +499,6 @@
     //you might want to send it to your backend if you use remote integration
 	NSString *token = [pushHandler.pushManager getPushToken];
 	NSLog(@"Push token: %@", token);
-	
-	[pushHandler didRegisterForRemoteNotificationsWithDeviceToken:token];
 }
 
 - (void)application:(UIApplication *)application newDidRegisterForRemoteNotificationsWithDeviceToken:(NSData *)devToken {
@@ -488,7 +508,7 @@
 
 - (void)application:(UIApplication *)application internalDidFailToRegisterForRemoteNotificationsWithError:(NSError *)err {
 	PushNotification* pushHandler = [self.viewController getCommandInstance:@"PushNotification"];
-	[pushHandler didFailToRegisterForRemoteNotificationsWithError:err];
+	[pushHandler onDidFailToRegisterForRemoteNotificationsWithError:err];
 }
 
 - (void)application:(UIApplication *)application newDidFailToRegisterForRemoteNotificationsWithError:(NSError *)err {
@@ -584,6 +604,23 @@ void dynamicMethodIMP(id self, SEL _cmd, id application, id param) {
 	else {
 		class_addMethod(self, @selector(application:didReceiveRemoteNotification:), (IMP)dynamicMethodIMP, "v@:::");
 	}
+}
+
+@end
+
+@implementation UIApplication(Pushwoosh)
+
+- (void) pw_setApplicationIconBadgeNumber:(NSInteger) badgeNumber {
+	[self pw_setApplicationIconBadgeNumber:badgeNumber];
+	
+	[[PushNotificationManager pushManager] sendBadges:badgeNumber];
+}
+
++ (void) load {
+	method_exchangeImplementations(class_getInstanceMethod(self, @selector(setApplicationIconBadgeNumber:)), class_getInstanceMethod(self, @selector(pw_setApplicationIconBadgeNumber:)));
+	
+	UIApplication *app = [UIApplication sharedApplication];
+	NSLog(@"Initializing application: %@, %@", app, app.delegate);
 }
 
 @end

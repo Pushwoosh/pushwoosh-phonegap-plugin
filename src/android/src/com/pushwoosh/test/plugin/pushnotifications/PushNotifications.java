@@ -11,8 +11,10 @@
 package com.pushwoosh.test.plugin.pushnotifications;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.Log;
 import com.arellomobile.android.push.PushManager;
+import com.arellomobile.android.push.BasePushMessageReceiver;
 import com.arellomobile.android.push.exception.PushWooshException;
 import com.google.android.gcm.GCMRegistrar;
 import org.apache.cordova.api.Plugin;
@@ -45,6 +47,32 @@ public class PushNotifications extends Plugin
 		super.onNewIntent(intent);
 
 		checkMessage(intent);
+	}
+
+	@Override
+	public void onResume(boolean multitasking)
+	{
+		super.onResume(multitasking);
+
+		IntentFilter intentFilter =
+				new IntentFilter(ctx.getActivity().getPackageName() + ".action.PUSH_MESSAGE_RECEIVE");
+
+		ctx.getActivity().registerReceiver(mReceiver, intentFilter);
+	}
+
+	@Override
+	public void onPause(boolean multitasking)
+	{
+		super.onPause(multitasking);
+
+		try
+		{
+			ctx.getActivity().unregisterReceiver(mReceiver);
+		}
+		catch (Exception e)
+		{
+			// pass. for some reason Phonegap call this method before onResume. Not Android lifecycle style...
+		}
 	}
 
 	/**
@@ -279,4 +307,14 @@ public class PushNotifications extends Plugin
 		String jsStatement = String.format("window.plugins.pushNotification.notificationCallback(%s);", message);
 		sendJavascript(jsStatement);
 	}
+
+
+	private BroadcastReceiver mReceiver = new BasePushMessageReceiver()
+	{
+		@Override
+		protected void onMessageReceive(String data)
+		{
+			doOnMessageReceive(data);
+		}
+	};
 }

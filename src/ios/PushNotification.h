@@ -29,8 +29,8 @@
 - (void)sendLocation:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
 
 - (void)onDeviceReady:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
-- (void)didRegisterForRemoteNotificationsWithDeviceToken:(NSString*)deviceToken;
-- (void)didFailToRegisterForRemoteNotificationsWithError:(NSError*)error;
+- (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString*)deviceToken;
+- (void)onDidFailToRegisterForRemoteNotificationsWithError:(NSError*)error;
 + (NSMutableDictionary*)getRemoteNotificationStatus;
 - (void)getRemoteNotificationStatus:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
 - (void)setApplicationIconBadgeNumber:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;

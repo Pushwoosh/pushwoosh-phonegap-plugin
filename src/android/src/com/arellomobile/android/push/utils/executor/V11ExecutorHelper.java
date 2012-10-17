@@ -5,7 +5,7 @@
 // www.pushwoosh.com
 //
 // MIT Licensed
-package com.arellomobile.android.push.utils;
+package com.arellomobile.android.push.utils.executor;
 
 import android.os.AsyncTask;
 
