@@ -150,6 +150,14 @@ public class PushNotifications extends Plugin
 			{
 				doOnUnregistered(intent.getExtras().getString(PushManager.UNREGISTER_ERROR_EVENT));
 			}
+
+			intent.putExtra(PushManager.PUSH_RECEIVE_EVENT, (String) null);
+			intent.putExtra(PushManager.REGISTER_EVENT, (String) null);
+			intent.putExtra(PushManager.UNREGISTER_EVENT, (String) null);
+			intent.putExtra(PushManager.REGISTER_ERROR_EVENT, (String) null);
+			intent.putExtra(PushManager.UNREGISTER_ERROR_EVENT, (String) null);
+
+			cordova.getActivity().setIntent(intent);
 		}
 	}
 
