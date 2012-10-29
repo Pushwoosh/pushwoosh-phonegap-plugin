@@ -10,6 +10,7 @@
 
 package com.pushwoosh.test.plugin.pushnotifications;
 
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
@@ -55,9 +56,9 @@ public class PushNotifications extends Plugin
 		super.onResume(multitasking);
 
 		IntentFilter intentFilter =
-				new IntentFilter(ctx.getActivity().getPackageName() + ".action.PUSH_MESSAGE_RECEIVE");
+				new IntentFilter(cordova.getActivity().getPackageName() + ".action.PUSH_MESSAGE_RECEIVE");
 
-		ctx.getActivity().registerReceiver(mReceiver, intentFilter);
+		cordova.getActivity().registerReceiver(mReceiver, intentFilter);
 	}
 
 	@Override
@@ -67,7 +68,7 @@ public class PushNotifications extends Plugin
 
 		try
 		{
-			ctx.getActivity().unregisterReceiver(mReceiver);
+			cordova.getActivity().unregisterReceiver(mReceiver);
 		}
 		catch (Exception e)
 		{
