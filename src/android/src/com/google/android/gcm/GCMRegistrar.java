@@ -279,7 +279,8 @@ public final class GCMRegistrar
     /**
      * Lazy initializes the {@link GCMBroadcastReceiver} instance.
      */
-    private static synchronized void setRetryBroadcastReceiver(Context context)
+    @SuppressWarnings("unused")
+	private static synchronized void setRetryBroadcastReceiver(Context context)
     {
         if (sRetryReceiver == null)
         {

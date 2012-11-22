@@ -36,6 +36,8 @@ public class PushNotifications extends Plugin
 	public static final String SET_TAGS = "setTags";
 	public static final String START_GEO_PUSHES = "startGeoPushes";
 	public static final String STOP_GEO_PUSHES = "stopGeoPushes";
+	
+	boolean loggedStart = false;
 
 	HashMap<String, String> callbackIds = new HashMap<String, String>();
 	PushManager mPushManager = null;
@@ -58,7 +60,8 @@ public class PushNotifications extends Plugin
 		IntentFilter intentFilter =
 				new IntentFilter(cordova.getActivity().getPackageName() + ".action.PUSH_MESSAGE_RECEIVE");
 
-		cordova.getActivity().registerReceiver(mReceiver, intentFilter);
+		//uncomment this code if you would like to receive the notifications in the app bypassing notification center if the app is in the foreground
+		//cordova.getActivity().registerReceiver(mReceiver, intentFilter);
 	}
 
 	@Override
@@ -110,7 +113,15 @@ public class PushNotifications extends Plugin
 
 		try
 		{
-			mPushManager.onStartup(cordova.getActivity());
+			if(loggedStart)
+			{
+				mPushManager.onStartup(cordova.getActivity(), false);
+			}
+			else
+			{
+				mPushManager.onStartup(cordova.getActivity(), true);
+				loggedStart = true;
+			}
 		}
 		catch (java.lang.RuntimeException e)
 		{
@@ -316,7 +327,6 @@ public class PushNotifications extends Plugin
 		String jsStatement = String.format("window.plugins.pushNotification.notificationCallback(%s);", message);
 		sendJavascript(jsStatement);
 	}
-
 
 	private BroadcastReceiver mReceiver = new BasePushMessageReceiver()
 	{

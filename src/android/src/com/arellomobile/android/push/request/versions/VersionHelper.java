@@ -32,4 +32,6 @@ public interface VersionHelper
 	Map<String,Object> getNearestZoneData(Context context, Location location);
 
 	PushZoneLocation getPushZoneLocationFromData(JSONObject resultData) throws JSONException;
+
+	Map<String, Object> getSendAppOpenData(Context context);
 }

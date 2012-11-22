@@ -33,6 +33,7 @@ public class DeviceFeature2_5
 	private static final String PUSH_STAT = "pushStat";
 	private static final String TAGS_PATH = "setTags";
 	private static final String NEAREST_ZONE = "getNearestZone";
+	private static final String APP_OPEN = "applicationOpen";
 
 	static void sendPushStat(Context context, String hash)
 	{
@@ -48,7 +49,7 @@ public class DeviceFeature2_5
 		{
 			try
 			{
-				res = NetworkUtils.makeRequest(data, NetworkUtils.BASE_URL + PUSH_STAT);
+				res = NetworkUtils.makeRequest(data, PUSH_STAT);
 				if (200 == res.getResultCode())
 				{
 					Log.w(TAG, "Send PushStat success");
@@ -62,6 +63,37 @@ public class DeviceFeature2_5
 		}
 
 		Log.e(TAG, "ERROR: Try To sent PushStat " + exception.getMessage() + ". Response = " + res.getResultData(),
+				exception);
+	}
+	
+	static void sendAppOpen(Context context)
+	{
+		final Map<String, Object> data = new HashMap<String, Object>();
+
+		data.putAll(RequestHelper.getSendAppOpenData(context, NetworkUtils.PUSH_VERSION));
+
+		Log.w(TAG, "Try To sent AppOpen");
+
+		NetworkUtils.NetworkResult res = new NetworkUtils.NetworkResult(-1, null);
+		Exception exception = new Exception();
+		for (int i = 0; i < NetworkUtils.MAX_TRIES; ++i)
+		{
+			try
+			{
+				res = NetworkUtils.makeRequest(data, APP_OPEN);
+				if (200 == res.getResultCode())
+				{
+					Log.w(TAG, "Send AppOpen success");
+					return;
+				}
+			}
+			catch (Exception e)
+			{
+				exception = e;
+			}
+		}
+
+		Log.e(TAG, "ERROR: Try To sent AppOpen " + exception.getMessage() + ". Response = " + res.getResultData(),
 				exception);
 	}
 
@@ -82,7 +114,7 @@ public class DeviceFeature2_5
 			else if (value instanceof List)
 			{
 				JSONArray values = new JSONArray();
-				for (Object item : (List) value)
+				for (Object item : (List<?>) value)
 				{
 					if (item instanceof String || item instanceof Integer)
 					{
@@ -111,7 +143,7 @@ public class DeviceFeature2_5
 		{
 			try
 			{
-				res = NetworkUtils.makeRequest(data, NetworkUtils.BASE_URL + TAGS_PATH);
+				res = NetworkUtils.makeRequest(data, TAGS_PATH);
 				if (200 == res.getResultCode())
 				{
 					Log.w(TAG, "Send Tags success");
@@ -142,7 +174,7 @@ public class DeviceFeature2_5
 		{
 			try
 			{
-				res = NetworkUtils.makeRequest(data, NetworkUtils.BASE_URL + NEAREST_ZONE);
+				res = NetworkUtils.makeRequest(data, NEAREST_ZONE);
 				if (200 == res.getResultCode())
 				{
 					Log.w(TAG, "Send Nearest Zone success");

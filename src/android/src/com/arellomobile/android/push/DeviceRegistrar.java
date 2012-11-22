@@ -88,7 +88,7 @@ public class DeviceRegistrar
 		Log.e(TAG, "Unregistration error " + exception.getMessage(), exception);
 	}
 
-	private static NetworkUtils.NetworkResult makeRequest(Context context, String deviceRegistrationID, String urlPath)
+	private static NetworkUtils.NetworkResult makeRequest(Context context, String deviceRegistrationID, String methodName)
 			throws Exception
 	{
 		Map<String, Object> data = new HashMap<String, Object>();
@@ -96,6 +96,6 @@ public class DeviceRegistrar
 		data.putAll(RequestHelper
 				.getRegistrationUnregistrationData(context, deviceRegistrationID, NetworkUtils.PUSH_VERSION));
 
-		return NetworkUtils.makeRequest(data, NetworkUtils.BASE_URL + urlPath);
+		return NetworkUtils.makeRequest(data, methodName);
 	}
 }

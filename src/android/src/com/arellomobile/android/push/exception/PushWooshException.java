@@ -15,6 +15,8 @@ package com.arellomobile.android.push.exception;
  */
 public class PushWooshException extends Exception
 {
+	private static final long serialVersionUID = 1L;
+
 	public PushWooshException(Exception e)
 	{
 		super(e);

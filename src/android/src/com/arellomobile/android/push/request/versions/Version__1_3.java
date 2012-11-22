@@ -95,4 +95,14 @@ public class Version__1_3 implements VersionHelper
 
 		return location;
 	}
+
+	@Override
+	public Map<String, Object> getSendAppOpenData(Context context) {
+		Map<String, Object> data = new HashMap<String, Object>();
+
+		data.put("application", PreferenceUtils.getApplicationId(context));
+		data.put("hwid", GeneralUtils.getDeviceUUID(context));
+
+		return data;
+	}
 }

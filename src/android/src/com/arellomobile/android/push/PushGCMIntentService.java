@@ -25,7 +25,6 @@ import org.json.JSONObject;
 
 public class PushGCMIntentService extends GCMBaseIntentService
 {
-	@SuppressWarnings("hiding")
 	private static final String TAG = "GCMIntentService";
 	private static boolean mSimpleNotification = true;
 
@@ -148,7 +147,7 @@ public class PushGCMIntentService extends GCMBaseIntentService
 	{
 		Intent broadcastIntent = new Intent();
 		broadcastIntent.setAction(context.getPackageName() + ".action.PUSH_MESSAGE_RECEIVE");
-		Bundle pushBundle = new Bundle();
+		broadcastIntent.putExtras(extras);
 
 		JSONObject dataObject = new JSONObject();
 		try
@@ -166,11 +165,13 @@ public class PushGCMIntentService extends GCMBaseIntentService
 		{
 			// pass
 		}
+		
 		broadcastIntent.putExtra(BasePushMessageReceiver.DATA_KEY, dataObject.toString());
 
 		context.sendBroadcast(broadcastIntent, context.getPackageName() + ".permission.C2D_MESSAGE");
 	}
 
+	@SuppressWarnings("deprecation")
 	private static void createSimpleNotification(Context context, Intent notifyIntent, Notification notification,
 			CharSequence appName, String title, NotificationManager manager)
 	{
@@ -182,6 +183,7 @@ public class PushGCMIntentService extends GCMBaseIntentService
 		manager.notify(PushManager.MESSAGE_ID, notification);
 	}
 
+	@SuppressWarnings("deprecation")
 	private static void createMultyNotification(Context context, Intent notifyIntent, Notification notification,
 			CharSequence appName, String title, NotificationManager manager)
 	{

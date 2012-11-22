@@ -12,6 +12,7 @@ import android.os.Bundle;
  */
 public class NotificationCreator
 {
+	@SuppressWarnings("deprecation")
 	public static Notification generateNotification(Context context, Bundle data, String title)
 	{
 		return new Notification(tryToGetIconFormStringOrGetFromApplication(data.getString("i"), context), title,

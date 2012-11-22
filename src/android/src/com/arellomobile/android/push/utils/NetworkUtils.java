@@ -31,16 +31,24 @@ public class NetworkUtils
 	public static final int MAX_TRIES = 5;
 
 	public static final String PUSH_VERSION = "1.3";
-	public static final String BASE_URL = "https://cp.pushwoosh.com/json/" + PUSH_VERSION + "/";
+	
+	public static boolean useSSL = false;
+	
+	private static final String BASE_URL_SECURE = "https://cp.pushwoosh.com/json/" + PUSH_VERSION + "/";
+	private static final String BASE_URL = "http://cp.pushwoosh.com/json/" + PUSH_VERSION + "/";
 
 
-	public static NetworkResult makeRequest(Map<String, Object> data, String urlString) throws Exception
+	public static NetworkResult makeRequest(Map<String, Object> data, String methodName) throws Exception
 	{
 		NetworkResult result = new NetworkResult(500, null);
 		OutputStream connectionOutput = null;
 		InputStream inputStream = null;
 		try
 		{
+			String urlString = NetworkUtils.BASE_URL + methodName;
+			if(useSSL)
+				urlString = NetworkUtils.BASE_URL_SECURE + methodName;
+			
 			URL url = new URL(urlString);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("POST");

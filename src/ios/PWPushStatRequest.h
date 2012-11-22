@@ -7,4 +7,7 @@
 #import "PWRequest.h"
 
 @interface PWPushStatRequest : PWRequest
+
+@property (nonatomic, copy) NSString *hash;
+
 @end

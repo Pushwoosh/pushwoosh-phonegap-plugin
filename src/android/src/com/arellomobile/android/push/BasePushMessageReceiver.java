@@ -22,6 +22,8 @@ public abstract class BasePushMessageReceiver extends BroadcastReceiver
 
 		manager.cancel(PushManager.MESSAGE_ID);
 
+		PushManager pushManager = new PushManager(context);
+		pushManager.sendPushStat(context, intent.getExtras().getString("p"));
 		onMessageReceive(intent.getStringExtra(DATA_KEY));
 	}
 

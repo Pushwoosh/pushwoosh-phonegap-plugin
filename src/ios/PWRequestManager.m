@@ -8,6 +8,8 @@
 
 @implementation PWRequestManager
 
+//we really do not transfer any sensitive data here, but you may uncomment this line out to enable plain version of the API
+//#define NOSSL
 
 + (PWRequestManager *) sharedManager {
 	static PWRequestManager *instance = nil;
@@ -31,7 +33,12 @@
 	NSString *requestString = [requestStringBuilder componentsJoinedByString:@", "];
 	NSString *jsonRequestData = [NSString stringWithFormat:@"{\"request\":{%@}}", requestString];
 	
-	NSString *requestUrl = [kServiceAddress stringByAppendingString:[request methodName]];
+#ifdef NOSSL
+	NSString *requestUrl = [kServiceAddressNoSSL stringByAppendingString:[request methodName]];
+#else
+	NSString *requestUrl = [kServiceAddressSSL stringByAppendingString:[request methodName]];
+#endif
+	
 	NSLog(@"Sending request: %@", jsonRequestData);
 	NSLog(@"To urL %@", requestUrl);
 	

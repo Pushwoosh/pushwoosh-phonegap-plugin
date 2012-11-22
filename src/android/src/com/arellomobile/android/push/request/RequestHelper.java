@@ -51,6 +51,13 @@ public class RequestHelper
 
 		return versionHelper.getSendPushStatData(context, hash);
 	}
+	
+	public static Map<String, Object> getSendAppOpenData(Context context, String pushVersion)
+	{
+		VersionHelper versionHelper = getVersionHelper(pushVersion);
+
+		return versionHelper.getSendAppOpenData(context);
+	}
 
 	public static Map<String, Object> getSendTagsData(Context context, String pushVersion)
 	{

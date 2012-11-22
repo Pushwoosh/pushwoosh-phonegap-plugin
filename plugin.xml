@@ -236,6 +236,9 @@
 
         <header-file src="PWSetTagsRequest.h" />
         <source-file src="PWSetTagsRequest.m" />
+
+        <header-file src="PWAppOpenRequest.h" />
+        <source-file src="PWAppOpenRequest.m" />
 		
         <header-file src="PWSendBadgeRequest.h" />
         <source-file src="PWSendBadgeRequest.m" />

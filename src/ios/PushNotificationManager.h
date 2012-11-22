@@ -24,6 +24,9 @@
 
 //user pressed OK on the push notification
 - (void) onPushAccepted:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification;
+
+//user pressed OK on the push notification
+- (void) onPushAccepted:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart;
 @end
 
 typedef enum enumHtmlPageSupportedOrientations {
@@ -49,6 +52,9 @@ typedef enum enumHtmlPageSupportedOrientations {
 @property (nonatomic, strong) NSDictionary *pushNotifications;
 @property (nonatomic, unsafe_unretained) NSObject<PushNotificationDelegate> *delegate;
 @property (nonatomic, assign) PWSupportedOrientations supportedOrientations;
+
+//show push notifications alert when push notification received and the app is running, default is TRUE
+@property (nonatomic, assign) BOOL showPushnotificationAlert;
 
 + (void)initializeWithAppCode:(NSString *)appCode appName:(NSString *)appName;
 

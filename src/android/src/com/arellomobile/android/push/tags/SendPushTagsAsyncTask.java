@@ -25,18 +25,21 @@ public class SendPushTagsAsyncTask extends SendPushTagsAbstractAsyncTask
 	@Override
 	public void taskStarted()
 	{
-		mCallBack.taskStarted();
+		if(mCallBack != null)
+			mCallBack.taskStarted();
 	}
 
 	@Override
 	public void onSentTagsSuccess(Map<String, String> skippedTags)
 	{
-		mCallBack.onSentTagsSuccess(skippedTags);
+		if(mCallBack != null)
+			mCallBack.onSentTagsSuccess(skippedTags);
 	}
 
 	@Override
 	public void onSentTagsError(PushWooshException error)
 	{
-		mCallBack.onSentTagsError(error);
+		if(mCallBack != null)
+			mCallBack.onSentTagsError(error);
 	}
 }

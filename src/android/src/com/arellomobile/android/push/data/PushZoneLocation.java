@@ -6,6 +6,7 @@ package com.arellomobile.android.push.data;
  *
  * @author mig35
  */
+@SuppressWarnings("unused")
 public class PushZoneLocation
 {
 	private String mName;

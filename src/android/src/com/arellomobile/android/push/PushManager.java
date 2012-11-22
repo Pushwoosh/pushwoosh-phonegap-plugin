@@ -13,6 +13,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+
 import com.arellomobile.android.push.exception.PushWooshException;
 import com.arellomobile.android.push.preference.SoundType;
 import com.arellomobile.android.push.preference.VibrateType;
@@ -55,6 +57,9 @@ public class PushManager
 	static SoundType sSoundType = SoundType.DEFAULT_MODE;
 	static VibrateType sVibrateType = VibrateType.DEFAULT_MODE;
 
+	Context getContext() {
+		return mContext;
+	}
 
 	private static final Object mSyncObj = new Object();
 	private static AsyncTask<Void, Void, Void> mRegistrationAsyncTask;
@@ -76,11 +81,16 @@ public class PushManager
 		PreferenceUtils.setApplicationId(context, mAppId);
 		PreferenceUtils.setSenderId(context, senderId);
 	}
+	
+	public void onStartup(Context context)
+	{
+		onStartup(context, true);
+	}
 
 	/**
 	 * @param context current context
 	 */
-	public void onStartup(Context context)
+	public void onStartup(Context context, boolean registerAppOpen)
 	{
 		GeneralUtils.checkNotNullOrEmpty(mAppId, "mAppId");
 		GeneralUtils.checkNotNullOrEmpty(mSenderId, "mSenderId");
@@ -90,6 +100,9 @@ public class PushManager
 		// Make sure the manifest was properly set - comment out this line
 		// while developing the app, then uncomment it when it's ready.
 		GCMRegistrar.checkManifest(context);
+		
+		if(registerAppOpen)
+			sendAppOpen(context);
 
 		final String regId = GCMRegistrar.getRegistrationId(context);
 		if (regId.equals(""))
@@ -189,9 +202,19 @@ public class PushManager
 		return wrongTags;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static void sendTagsFromUI(Context context, Map<String, Object> tags, SendPushTagsCallBack callBack)
 	{
 		new SendPushTagsAsyncTask(context, callBack).execute(tags);
+	}
+
+	public static void sendTags(final Context context, final Map<String, Object> tags, final SendPushTagsCallBack callBack)
+	{
+		Handler handler = new Handler(context.getMainLooper());
+		handler.post(new Runnable() {
+			@SuppressWarnings("unchecked")
+			public void run() { new SendPushTagsAsyncTask(context, callBack).execute(tags); }
+		});
 	}
 
 	//	------------------- 2.5 Features ENDS -------------------
@@ -257,7 +280,7 @@ public class PushManager
 			// pass
 		}
 
-		PushEventsTransmitter.onMessageReceive(mContext, dataObject.toString());
+		PushEventsTransmitter.onMessageReceive(mContext, dataObject.toString(), pushBundle);
 
 		// push message handling
 		String url = (String) pushBundle.get("h");
@@ -286,15 +309,15 @@ public class PushManager
 	private boolean neededToRequestPushWooshServer(Context context)
 	{
 		Calendar nowTime = Calendar.getInstance();
-		Calendar dayBefore = Calendar.getInstance();
-		dayBefore.roll(Calendar.DAY_OF_MONTH, false); // decrement one day
+		Calendar tenMinutesBefore = Calendar.getInstance();
+		tenMinutesBefore.add(Calendar.MINUTE, -10); // decrement 10 minutes
 
 		Calendar lastPushWooshRegistrationTime = Calendar.getInstance();
 		lastPushWooshRegistrationTime.setTime(new Date(PreferenceUtils.getLastRegistration(context)));
 
-		if (dayBefore.before(lastPushWooshRegistrationTime) && lastPushWooshRegistrationTime.before(nowTime))
+		if (tenMinutesBefore.before(lastPushWooshRegistrationTime) && lastPushWooshRegistrationTime.before(nowTime))
 		{
-			// dayBefore <= lastPushWooshRegistrationTime <= nowTime
+			// tenMinutesBefore <= lastPushWooshRegistrationTime <= nowTime
 			return false;
 		}
 		return true;
@@ -309,7 +332,7 @@ public class PushManager
 		ExecutorHelper.executeAsyncTask(mRegistrationAsyncTask);
 	}
 
-	private void sendPushStat(Context context, final String hash)
+	void sendPushStat(Context context, final String hash)
 	{
 		AsyncTask<Void, Void, Void> task;
 		try
@@ -327,6 +350,29 @@ public class PushManager
 		{
 			// we are not in UI thread. Simple run our registration
 			DeviceFeature2_5.sendPushStat(context, hash);
+			return;
+		}
+		ExecutorHelper.executeAsyncTask(task);
+	}
+	
+	private void sendAppOpen(Context context)
+	{
+		AsyncTask<Void, Void, Void> task;
+		try
+		{
+			task = new WorkerTask(context)
+			{
+				@Override
+				protected void doWork(Context context)
+				{
+					DeviceFeature2_5.sendAppOpen(context);
+				}
+			};
+		}
+		catch (Throwable e)
+		{
+			// we are not in UI thread. Simple run our registration
+			DeviceFeature2_5.sendAppOpen(context);
 			return;
 		}
 		ExecutorHelper.executeAsyncTask(task);
