@@ -180,13 +180,18 @@
 			}
 		}
 		
-		NSString * appname = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
-		if(!appname) {
+		NSString * appname = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_APPNAME"];
+		if(!appname)
+			appname = [[NSUserDefaults standardUserDefaults] objectForKey:@"Pushwoosh_APPNAME"];
+		
+		if(!appname)
+			appname = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+		
+		if(!appname)
 			appname = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];
 			
-			if(!appname) {
-				appname = @"";
-			}
+		if(!appname) {
+			appname = @"";
 		}
 		
 		instance = [[PushNotificationManager alloc] initWithApplicationCode:appid appName:appname ];
@@ -386,7 +391,6 @@
 		alert.tag = ++internalIndex;
 		[pushNotifications setObject:userInfo forKey:[NSNumber numberWithInt:internalIndex]];
 		[alert show];
-		[alert release];
 		return YES;
 	}
 	
@@ -417,7 +421,7 @@
 	return [pushNotification objectForKey:@"u"];
 }
 
-- (void) sendStatsBackground {
+- (void) sendStatsBackground:(NSString *)hash {
 	@autoreleasepool {
 		PWPushStatRequest *request = [[PWPushStatRequest alloc] init];
 		request.appId = appCode;
@@ -480,7 +484,6 @@
 		}
 	}
 }
-
 
 - (void) sendBadgesBackground: (NSNumber *) badge {
 	if([[PushNotificationManager pushManager] getPushToken] == nil)
