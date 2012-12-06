@@ -11,6 +11,7 @@ package com.arellomobile.android.push;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -216,6 +217,40 @@ public class PushManager
 			public void run() { new SendPushTagsAsyncTask(context, callBack).execute(tags); }
 		});
 	}
+	
+	public static void sendLocation(Context context, final Location location)
+	{
+		if (GCMRegistrar.isRegisteredOnServer(context) == false)
+			return;
+
+		AsyncTask<Void, Void, Void> task;
+		try
+		{
+			task = new WorkerTask(context)
+			{
+				@Override
+				protected void doWork(Context context)
+				{
+					try {
+						DeviceFeature2_5.getNearestZone(context, location);
+					} catch (Exception e) {
+//						e.printStackTrace();
+					}
+				}
+			};
+		}
+		catch (Throwable e)
+		{
+			// we are not in UI thread. Simple run our registration
+			try {
+				DeviceFeature2_5.getNearestZone(context, location);
+			} catch (Exception e1) {
+//				e1.printStackTrace();
+			}
+			return;
+		}
+		ExecutorHelper.executeAsyncTask(task);
+	}
 
 	//	------------------- 2.5 Features ENDS -------------------
 
@@ -272,7 +307,11 @@ public class PushManager
 			}
 			if (pushBundle.containsKey("u"))
 			{
-				dataObject.put("userdata", new JSONObject(pushBundle.getString("u")));
+				dataObject.put("userdata", pushBundle.get("u"));
+			}
+			if (pushBundle.containsKey("local"))
+			{
+				dataObject.put("local", pushBundle.get("local"));
 			}
 		}
 		catch (JSONException e)
@@ -357,6 +396,9 @@ public class PushManager
 	
 	private void sendAppOpen(Context context)
 	{
+		if (GCMRegistrar.isRegisteredOnServer(context) == false)
+			return;
+
 		AsyncTask<Void, Void, Void> task;
 		try
 		{
@@ -409,5 +451,26 @@ public class PushManager
 			}
 			mRegistrationAsyncTask = null;
 		}
+	}
+	
+	static public void scheduleLocalNotification(Context context, String message, int seconds)
+	{
+		scheduleLocalNotification(context, message, null, seconds);
+	}
+	
+    //extras parameters:
+    //title - message title, same as message parameter
+    //l - link to open when notification has been tapped
+    //b - banner URL to show in the notification instead of text
+    //u - user data
+    //i - identifier string of the image from the app to use as the icon in the notification
+    //ci - URL of the icon to use in the notification
+	static public void scheduleLocalNotification(Context context, String message, Bundle extras, int seconds)
+	{
+		AlarmReceiver.setAlarm(context, message, extras, seconds);
+	}
+
+	static public void clearLocalNotifications(Context context) {
+		AlarmReceiver.clearAlarm(context);
 	}
 }

@@ -166,11 +166,61 @@
 	}
 }
 
++ (BOOL) getAPSProductionStatus {
+	NSString * provisioning = [[NSBundle mainBundle] pathForResource:@"embedded.mobileprovision" ofType:nil];
+	if(!provisioning)
+		return YES;	//AppStore
+	
+	NSString * contents = [NSString stringWithContentsOfFile:provisioning encoding:NSASCIIStringEncoding error:nil];
+	if(!contents)
+		return YES;
+
+	NSRange start = [contents rangeOfString:@"<?xml"];
+	NSRange end = [contents rangeOfString:@"</plist>"];
+	start.length = end.location + end.length - start.location;
+	
+	NSString * profile =[contents substringWithRange:start];
+	if(!profile)
+		return YES;
+	
+	NSData * profileData = [profile dataUsingEncoding:NSUTF8StringEncoding];
+	NSString *error = nil;;
+	NSPropertyListFormat format;
+	NSDictionary* plist = [NSPropertyListSerialization propertyListFromData:profileData mutabilityOption:NSPropertyListImmutable format:&format errorDescription:&error];
+	
+	NSDictionary * entitlements = [plist objectForKey:@"Entitlements"];
+//	NSNumber * allowNumber = [entitlements objectForKey:@"get-task-allow"];
+	
+	//could be development or production
+	NSString * apsGateway = [entitlements objectForKey:@"aps-environment"];
+	
+	if(!apsGateway) {
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Pushwoosh Error" message:@"Your provisioning profile does not have APS entry. Please make your profile push compatible." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+		[alert show];
+	}
+	
+	if([apsGateway isEqualToString:@"development"])
+		return NO;
+	
+	return YES;
+}
+
++ (NSString *) getAppIdFromBundle:(BOOL)productionAPS {
+	NSString * appid = nil;
+	if(!productionAPS) {
+		appid = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_APPID_Dev"];
+		if(appid)
+			return appid;
+	}
+	
+	return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_APPID"];
+}
+
 + (PushNotificationManager *)pushManager {
 	static PushNotificationManager * instance = nil;
 	
 	if(instance == nil) {
-		NSString * appid = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_APPID"];
+		NSString * appid = [self getAppIdFromBundle:[self getAPSProductionStatus]];
 		
 		if(!appid) {
 			appid = [[NSUserDefaults standardUserDefaults] objectForKey:@"Pushwoosh_APPID"];

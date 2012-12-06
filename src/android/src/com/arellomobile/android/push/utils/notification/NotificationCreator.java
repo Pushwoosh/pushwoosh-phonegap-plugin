@@ -15,24 +15,7 @@ public class NotificationCreator
 	@SuppressWarnings("deprecation")
 	public static Notification generateNotification(Context context, Bundle data, String title)
 	{
-		return new Notification(tryToGetIconFormStringOrGetFromApplication(data.getString("i"), context), title,
+		return new Notification(Helper.tryToGetIconFormStringOrGetFromApplication(data.getString("i"), context), title,
 				System.currentTimeMillis());
 	}
-
-	private static int tryToGetIconFormStringOrGetFromApplication(String iconName, Context context)
-	{
-		int iconId = context.getApplicationInfo().icon;
-
-		if (null != iconName)
-		{
-			int customId = context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
-			if (0 != customId)
-			{
-				iconId = customId;
-			}
-		}
-
-		return iconId;
-	}
-
 }

@@ -80,7 +80,14 @@
 			 Application-specific subclass of PushGCMIntentService that will
 			 handle received messages.
 			 -->
-			<service android:name="com.arellomobile.android.push.PushGCMIntentService"/>        					
+			<service android:name="com.arellomobile.android.push.PushGCMIntentService"/>
+			
+	        <!--
+	          Service for sending location updates
+	        -->
+	        <service android:name="com.arellomobile.android.push.GeoLocationService"/>
+        
+	        <receiver android:name="com.arellomobile.android.push.AlarmReceiver"></receiver>
 			
 		</config-file>
 		
@@ -108,6 +115,11 @@
 		<source-file src="src/android/src/com/google/android/gcm/GCMRegistrar.java"
 		        target-dir="src/com/google/android/gcm" />
 				
+		<source-file src="src/android/src/com/arellomobile/android/push/AlarmReceiver.java"
+		        target-dir="src/com/arellomobile/android/push" />
+
+		<source-file src="src/android/src/com/arellomobile/android/push/BasePushMessageReceiver.java"
+		        target-dir="src/com/arellomobile/android/push" />
 
 		<source-file src="src/android/src/com/arellomobile/android/push/DeviceFeature2_5.java"
 		        target-dir="src/com/arellomobile/android/push" />
@@ -190,13 +202,22 @@
 		<source-file src="src/android/src/com/arellomobile/android/push/utils/WorkerTask.java"
 		        target-dir="src/com/arellomobile/android/push/utils" />
 
-		<source-file src="src/android/src/com/arellomobile/android/push/BasePushMessageReceiver.java"
-		        target-dir="src/com/arellomobile/android/push" />
+		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/BannerNotificationFactory.java"
+		        target-dir="src/com/arellomobile/android/push/utils/notification" />
+
+		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/BaseNotificationFactory.java"
+		        target-dir="src/com/arellomobile/android/push/utils/notification" />
+
+		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/Helper.java"
+		        target-dir="src/com/arellomobile/android/push/utils/notification" />
 
 		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/NotificationCreator.java"
 		        target-dir="src/com/arellomobile/android/push/utils/notification" />
 
 		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/NotificationFactory.java"
+		        target-dir="src/com/arellomobile/android/push/utils/notification" />
+
+		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/SimpleNotificationFactory.java"
 		        target-dir="src/com/arellomobile/android/push/utils/notification" />
 
 		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/V11NotificationCreator.java"

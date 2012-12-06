@@ -18,7 +18,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import com.arellomobile.android.push.utils.GeneralUtils;
+import com.arellomobile.android.push.utils.notification.BannerNotificationFactory;
 import com.arellomobile.android.push.utils.notification.NotificationFactory;
+import com.arellomobile.android.push.utils.notification.SimpleNotificationFactory;
 import com.google.android.gcm.GCMBaseIntentService;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -128,16 +130,42 @@ public class PushGCMIntentService extends GCMBaseIntentService
 
 		NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-		Notification notification = NotificationFactory
-				.generateNotification(context, extras, appName, PushManager.sSoundType, PushManager.sVibrateType);
+		NotificationFactory notificationFactory;
+		
+		//is this banner notification?
+		String bannerUrl = (String) extras.get("b");
+		
+		//also check that notification layout has been placed in layout folder
+		int layoutId =
+				context.getResources().getIdentifier(BannerNotificationFactory.sNotificationLayout, "layout", context.getPackageName());
 
-		if (mSimpleNotification)
+		if (layoutId != 0 && bannerUrl != null)
 		{
-			createSimpleNotification(context, notifyIntent, notification, appName, title, manager);
+			notificationFactory =
+					new BannerNotificationFactory(context, extras, appName.toString(), title, PushManager.sSoundType, PushManager.sVibrateType);
 		}
 		else
 		{
-			createMultyNotification(context, notifyIntent, notification, appName, title, manager);
+			notificationFactory =
+					new SimpleNotificationFactory(context, extras, appName.toString(), title, PushManager.sSoundType,
+							PushManager.sVibrateType);
+		}
+		notificationFactory.generateNotification();
+		notificationFactory.addSoundAndVibrate();
+		notificationFactory.addCancel();
+
+		Notification notification = notificationFactory.getNotification();
+
+		notification.contentIntent =
+				PendingIntent.getActivity(context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		if (mSimpleNotification)
+		{
+			manager.notify(PushManager.MESSAGE_ID, notification);
+		}
+		else
+		{
+			manager.notify(PushManager.MESSAGE_ID++, notification);
 		}
 
 		generateBroadcast(context, extras);
@@ -169,30 +197,6 @@ public class PushGCMIntentService extends GCMBaseIntentService
 		broadcastIntent.putExtra(BasePushMessageReceiver.DATA_KEY, dataObject.toString());
 
 		context.sendBroadcast(broadcastIntent, context.getPackageName() + ".permission.C2D_MESSAGE");
-	}
-
-	@SuppressWarnings("deprecation")
-	private static void createSimpleNotification(Context context, Intent notifyIntent, Notification notification,
-			CharSequence appName, String title, NotificationManager manager)
-	{
-		PendingIntent contentIntent =
-				PendingIntent.getActivity(context, 0, notifyIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-		// this will appear in the notifications list
-		notification.setLatestEventInfo(context, appName, title, contentIntent);
-		manager.notify(PushManager.MESSAGE_ID, notification);
-	}
-
-	@SuppressWarnings("deprecation")
-	private static void createMultyNotification(Context context, Intent notifyIntent, Notification notification,
-			CharSequence appName, String title, NotificationManager manager)
-	{
-		PendingIntent contentIntent = PendingIntent
-				.getActivity(context, PushManager.MESSAGE_ID, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-		// this will appear in the notifications list
-		notification.setLatestEventInfo(context, appName, title, contentIntent);
-		manager.notify(PushManager.MESSAGE_ID++, notification);
 	}
 }
 

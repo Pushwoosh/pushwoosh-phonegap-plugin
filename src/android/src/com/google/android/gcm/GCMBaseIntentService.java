@@ -209,19 +209,25 @@ public abstract class GCMBaseIntentService extends IntentService
 
             // If onMessage() needs to spawn a thread or do something else,
             // it should use its own lock.
-            synchronized (LOCK)
-            {
-                // sanity check for null as this is a public method
-                if (sWakeLock != null)
-                {
-                    Log.v(TAG, "Releasing wakelock");
-                    sWakeLock.release();
-                }
-                else
-                {
-                    // should never happen during normal workflow
-                    Log.e(TAG, "Wakelock reference is null");
-                }
+        	try {
+	            synchronized (LOCK)
+	            {
+	                // sanity check for null as this is a public method
+	                if (sWakeLock != null)
+	                {
+	                    Log.v(TAG, "Releasing wakelock");
+	                    sWakeLock.release();
+	                }
+	                else
+	                {
+	                    // should never happen during normal workflow
+	                    Log.e(TAG, "Wakelock reference is null");
+	                }
+	            }
+        	}
+            catch(Exception e) {
+            	//the exception could happen when we trigger local notification that does not obtaining the lock therefore there is nothing to release
+            	//just pass through
             }
         }
     }

@@ -22,9 +22,14 @@ public class V11NotificationCreator
 {
 	public static Notification generateNotification(Context context, Bundle data, String title)
 	{
-		int simpleIcon = tryToGetIconFormStringOrGetFromApplication(data.getString("i"), context);
+		int simpleIcon = Helper.tryToGetIconFormStringOrGetFromApplication(data.getString("i"), context);
 
-		Bitmap bitmap = tryToGetBitmapFromInternet(data.getString("ii"), context);
+		Bitmap bitmap = null;
+		String customIcon = data.getString("ci");
+		if(customIcon != null)
+		{
+			bitmap = Helper.tryToGetBitmapFromInternet(customIcon, context, 40);
+		}
 
 		Notification.Builder notificationBuilder = new Notification.Builder(context);
 		notificationBuilder.setTicker(title);
@@ -39,86 +44,5 @@ public class V11NotificationCreator
 		notificationBuilder.setSmallIcon(simpleIcon);
 
 		return notificationBuilder.getNotification();
-	}
-
-	private static int tryToGetIconFormStringOrGetFromApplication(String iconName, Context context)
-	{
-		int iconId = context.getApplicationInfo().icon;
-
-		if (null != iconName)
-		{
-			int customId = context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
-			if (0 != customId)
-			{
-				iconId = customId;
-			}
-		}
-
-		return iconId;
-	}
-
-	private static Bitmap tryToGetBitmapFromInternet(String bitmapUrl, Context context)
-	{
-		if (null != bitmapUrl)
-		{
-			InputStream inputStream = null;
-			try
-			{
-				URL url = new URL(bitmapUrl);
-
-				URLConnection connection = url.openConnection();
-
-				connection.connect();
-
-				inputStream = connection.getInputStream();
-				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-				byte[] buffer = new byte[1024];
-				int read;
-
-				while ((read = inputStream.read(buffer)) != -1)
-				{
-					byteArrayOutputStream.write(buffer, 0, read);
-				}
-				inputStream.close();
-				byteArrayOutputStream.close();
-
-				buffer = byteArrayOutputStream.toByteArray();
-
-				BitmapFactory.Options options = new BitmapFactory.Options();
-				options.inJustDecodeBounds = true;
-
-				BitmapFactory.decodeByteArray(buffer, 0, buffer.length, options);
-
-				int maxSize = Math.max(options.outWidth, options.outHeight);
-				float newImageScale = maxSize / (40 * context.getResources().getDisplayMetrics().density);
-
-				options.inJustDecodeBounds = false;
-				options.inSampleSize = Math.round(newImageScale);
-
-				return BitmapFactory.decodeByteArray(buffer, 0, buffer.length, options);
-			}
-			catch (Throwable e)
-			{
-				// pass
-			}
-			finally
-			{
-				if (null != inputStream)
-				{
-					try
-					{
-						inputStream.close();
-					}
-					catch (IOException e)
-					{
-						// pass
-					}
-					inputStream = null;
-				}
-				System.gc();
-			}
-		}
-
-		return null;
 	}
 }

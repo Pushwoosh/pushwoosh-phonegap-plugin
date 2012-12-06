@@ -22,12 +22,27 @@
 	PushNotification.prototype.setTags = function(config, success, fail) {
 		cordova.exec(success, fail, "PushNotification", "setTags", config ? [config] : []);
 	};
+	
+	// Call this to send geo location for the device
+	PushNotification.prototype.sendLocation = function(config, success, fail) {
+		cordova.exec(success, fail, "PushNotification", "sendLocation", config ? [config] : []);
+	};
 
 	//Android Only----
 	PushNotification.prototype.unregisterDevice = function(success, fail) {
 		cordova.exec(success, fail, "PushNotification", "unregisterDevice", []);
 	};
+
+	//config params: {msg:"message", seconds:30, userData:"optional"}
+	PushNotification.prototype.createLocalNotification = function(config, success, fail) {
+		cordova.exec(success, fail, "PushNotification", "createLocalNotification", config ? [config] : []);
+	};
+
+	PushNotification.prototype.clearLocalNotification = function() {
+		cordova.exec(null, null, "PushNotification", "clearLocalNotification", []);
+	};
 	
+	//advanced background task to track device position and not drain the battery
 	PushNotification.prototype.startGeoPushes = function(success, fail) {
 		cordova.exec(success, fail, "PushNotification", "startGeoPushes", []);
 	};
@@ -39,11 +54,6 @@
 	//Android End----
 	
 	//iOS only----
-	// Call this to send geo location for the device
-	PushNotification.prototype.sendLocation = function(config, success, fail) {
-		cordova.exec(success, fail, "PushNotification", "sendLocation", config ? [config] : []);
-	};
-
 	PushNotification.prototype.onDeviceReady = function() {
 		cordova.exec(null, null, "PushNotification", "onDeviceReady", []);
 	};
