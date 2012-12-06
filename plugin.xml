@@ -93,7 +93,7 @@
 		
 		<config-file target="res/xml/config.xml" parent="/cordova/plugins">
             <plugin name="PushNotification"
-			value="com.pushwoosh.test.plugin.pushnotifications.PushNotifications" onload="true"/>
+			value="com.pushwoosh.plugin.pushnotifications.PushNotifications" onload="true"/>
         </config-file>
 
 		<config-file target="res/xml/cordova.xml" parent="/cordova">
