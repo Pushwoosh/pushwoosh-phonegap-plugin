@@ -50,6 +50,14 @@
 	PushNotification.prototype.stopGeoPushes = function(success, fail) {
 		cordova.exec(success, fail, "PushNotification", "stopGeoPushes", []);
 	};
+	
+	PushNotification.prototype.setMultiNotificationMode = function(success, fail) {
+		cordova.exec(success, fail, "PushNotification", "setMultiNotificationMode", []);
+	};
+	
+	PushNotification.prototype.setSingleNotificationMode = function(success, fail) {
+		cordova.exec(success, fail, "PushNotification", "setSingleNotificationMode", []);
+	};	
 
 	//Android End----
 	

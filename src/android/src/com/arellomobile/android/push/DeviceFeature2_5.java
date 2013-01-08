@@ -127,6 +127,11 @@ public class DeviceFeature2_5
 				}
 				tagsObject.put(key, values);
 			}
+			else if (value instanceof JSONArray)
+			{
+				JSONArray values = (JSONArray)value;
+				tagsObject.put(key, values);
+			}
 			else
 			{
 				throw new RuntimeException("wrong type for tag: " + key);

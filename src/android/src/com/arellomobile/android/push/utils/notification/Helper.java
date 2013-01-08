@@ -103,4 +103,10 @@ public class Helper
 		return null;
 	}
 
+	public static Bitmap getScaleBitmap(Bitmap srcBitmap, int outHeightSimple, Context context)
+	{
+		int outHeight = (int) (outHeightSimple * context.getResources().getDisplayMetrics().density);
+		return Bitmap.createScaledBitmap(srcBitmap, srcBitmap.getWidth() * outHeight / srcBitmap.getHeight(), outHeight, true);
+	}
+
 }

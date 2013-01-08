@@ -41,9 +41,6 @@ public class PushManager
 	private volatile String mAppId;
 	volatile static String mSenderId;
 
-	// message id in the notification bar
-	public static int MESSAGE_ID = 1001;
-
 	private static final String HTML_URL_FORMAT = "https://cp.pushwoosh.com/content/%s";
 
 	public static final String REGISTER_EVENT = "REGISTER_EVENT";
@@ -54,9 +51,6 @@ public class PushManager
 
 	private Context mContext;
 	private Bundle mLastBundle;
-	static Boolean sSimpleNotification;
-	static SoundType sSoundType = SoundType.DEFAULT_MODE;
-	static VibrateType sVibrateType = VibrateType.DEFAULT_MODE;
 
 	Context getContext() {
 		return mContext;
@@ -262,7 +256,7 @@ public class PushManager
 	 */
 	public void setMultiNotificationMode()
 	{
-		sSimpleNotification = false;
+		PreferenceUtils.setMultiMode(mContext, true);
 	}
 
 	/**
@@ -270,17 +264,17 @@ public class PushManager
 	 */
 	public void setSimpleNotificationMode()
 	{
-		sSimpleNotification = true;
+		PreferenceUtils.setMultiMode(mContext, false);
 	}
 
 	public void setSoundNotificationType(SoundType soundNotificationType)
 	{
-		sSoundType = soundNotificationType;
+		PreferenceUtils.setSoundType(mContext, soundNotificationType);
 	}
 
 	public void setVibrateNotificationType(VibrateType vibrateNotificationType)
 	{
-		sVibrateType = vibrateNotificationType;
+		PreferenceUtils.setVibrateType(mContext, vibrateNotificationType);
 	}
 
 	//	------------------- PREFERENCE END -------------------

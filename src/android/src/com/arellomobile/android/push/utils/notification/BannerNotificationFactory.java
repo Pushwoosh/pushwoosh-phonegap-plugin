@@ -26,13 +26,13 @@ public class BannerNotificationFactory extends BaseNotificationFactory
 		super(context, data, appName, title, soundType, vibrateType);
 	}
 
-	@SuppressLint("NewApi") @Override
+	@SuppressLint("NewApi")
+	@Override
 	Notification generateNotificationInner(Context context, Bundle data, String appName, String tickerTitle)
 	{
 		Notification notification = new Notification();
 
-		int layoutId =
-				getContext().getResources().getIdentifier(sNotificationLayout, "layout", getContext().getPackageName());
+		int layoutId = getContext().getResources().getIdentifier(sNotificationLayout, "layout", getContext().getPackageName());
 
 		if (0 == layoutId)
 		{
@@ -47,16 +47,12 @@ public class BannerNotificationFactory extends BaseNotificationFactory
 
 		if (null != bitmap)
 		{
-			remoteViews
-					.setBitmap(getContext().getResources().getIdentifier("image", "id", getContext().getPackageName()),
-							"setImageBitmap", bitmap);
+			remoteViews.setBitmap(getContext().getResources().getIdentifier("image", "id", getContext().getPackageName()), "setImageBitmap", bitmap);
 		}
 		else
 		{
-			remoteViews
-					.setBitmap(getContext().getResources().getIdentifier("image", "id", getContext().getPackageName()),
-							"setImageBitmap", ((BitmapDrawable) getContext().getResources()
-							.getDrawable(getContext().getApplicationInfo().icon)).getBitmap());
+			remoteViews.setBitmap(getContext().getResources().getIdentifier("image", "id", getContext().getPackageName()), "setImageBitmap",
+					((BitmapDrawable) getContext().getResources().getDrawable(getContext().getApplicationInfo().icon)).getBitmap());
 		}
 
 		notification.contentView = remoteViews;
@@ -64,7 +60,7 @@ public class BannerNotificationFactory extends BaseNotificationFactory
 		{
 			notification.bigContentView = remoteViews;
 		}
-		
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
 		{
 			notification.tickerView = remoteViews;
@@ -73,9 +69,9 @@ public class BannerNotificationFactory extends BaseNotificationFactory
 		{
 			notification.tickerText = tickerTitle;
 		}
-		
+
 		notification.icon = Helper.tryToGetIconFormStringOrGetFromApplication(getData().getString("i"), getContext());
-		
+
 		return notification;
 	}
 }

@@ -8,6 +8,9 @@
 
 package com.arellomobile.android.push.utils;
 
+import com.arellomobile.android.push.preference.SoundType;
+import com.arellomobile.android.push.preference.VibrateType;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -64,5 +67,68 @@ public class PreferenceUtils
 		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
 		String applicationId = prefs.getString("dm_pwapp", "");
 		return applicationId;
+	}
+	
+	public static void setMultiMode(Context context, boolean multiOn)
+	{
+		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putBoolean("dm_multimode", multiOn);
+		editor.commit();
+	}
+
+	public static boolean getMultiMode(Context context)
+	{
+		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
+		boolean multiOn = prefs.getBoolean("dm_multimode", false);
+		return multiOn;
+	}
+	
+	public static void setSoundType(Context context, SoundType type)
+	{
+		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putInt("dm_soundtype", type.getValue());
+		editor.commit();
+	}
+
+	public static SoundType getSoundType(Context context)
+	{
+		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
+		Integer type = prefs.getInt("dm_soundtype", 0);
+		
+		return SoundType.fromInt(type);
+	}
+	
+	public static void setVibrateType(Context context, VibrateType type)
+	{
+		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putInt("dm_vibratetype", type.getValue());
+		editor.commit();
+	}
+
+	public static VibrateType getVibrateType(Context context)
+	{
+		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
+		Integer type = prefs.getInt("dm_vibratetype", 0);
+		
+		return VibrateType.fromInt(type);
+	}
+	
+	public static void setMessageId(Context context, int messageId)
+	{
+		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putInt("dm_messageid", messageId);
+		editor.commit();
+	}
+
+	public static int getMessageId(Context context)
+	{
+		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
+		int value = prefs.getInt("dm_messageid", 1001);
+		
+		return value;
 	}
 }

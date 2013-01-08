@@ -1,5 +1,7 @@
 package com.arellomobile.android.push;
 
+import com.arellomobile.android.push.utils.PreferenceUtils;
+
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -20,7 +22,7 @@ public abstract class BasePushMessageReceiver extends BroadcastReceiver
 	{
 		NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-		manager.cancel(PushManager.MESSAGE_ID);
+		manager.cancel(PreferenceUtils.getMessageId(context));
 
 		PushManager pushManager = new PushManager(context);
 		pushManager.sendPushStat(context, intent.getExtras().getString("p"));

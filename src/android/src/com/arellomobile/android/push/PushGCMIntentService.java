@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import com.arellomobile.android.push.utils.GeneralUtils;
+import com.arellomobile.android.push.utils.PreferenceUtils;
 import com.arellomobile.android.push.utils.notification.BannerNotificationFactory;
 import com.arellomobile.android.push.utils.notification.NotificationFactory;
 import com.arellomobile.android.push.utils.notification.SimpleNotificationFactory;
@@ -28,18 +29,11 @@ import org.json.JSONObject;
 public class PushGCMIntentService extends GCMBaseIntentService
 {
 	private static final String TAG = "GCMIntentService";
-	private static boolean mSimpleNotification = true;
-
 	private Handler mHandler;
 
 	public PushGCMIntentService()
 	{
 		String senderId = PushManager.mSenderId;
-		Boolean simpleNotification = PushManager.sSimpleNotification;
-		if (null != simpleNotification)
-		{
-			mSimpleNotification = simpleNotification;
-		}
 		if (null == senderId)
 		{
 			senderId = "";
@@ -142,13 +136,13 @@ public class PushGCMIntentService extends GCMBaseIntentService
 		if (layoutId != 0 && bannerUrl != null)
 		{
 			notificationFactory =
-					new BannerNotificationFactory(context, extras, appName.toString(), title, PushManager.sSoundType, PushManager.sVibrateType);
+					new BannerNotificationFactory(context, extras, appName.toString(), title, PreferenceUtils.getSoundType(context), PreferenceUtils.getVibrateType(context));
 		}
 		else
 		{
 			notificationFactory =
-					new SimpleNotificationFactory(context, extras, appName.toString(), title, PushManager.sSoundType,
-							PushManager.sVibrateType);
+					new SimpleNotificationFactory(context, extras, appName.toString(), title, PreferenceUtils.getSoundType(context),
+							PreferenceUtils.getVibrateType(context));
 		}
 		notificationFactory.generateNotification();
 		notificationFactory.addSoundAndVibrate();
@@ -159,13 +153,16 @@ public class PushGCMIntentService extends GCMBaseIntentService
 		notification.contentIntent =
 				PendingIntent.getActivity(context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		if (mSimpleNotification)
+		if (PreferenceUtils.getMultiMode(context) == false)
 		{
-			manager.notify(PushManager.MESSAGE_ID, notification);
+			int messageId = PreferenceUtils.getMessageId(context);
+			manager.notify(messageId, notification);
 		}
 		else
 		{
-			manager.notify(PushManager.MESSAGE_ID++, notification);
+			int messageId = PreferenceUtils.getMessageId(context);
+			PreferenceUtils.setMessageId(context, ++messageId);
+			manager.notify(messageId, notification);
 		}
 
 		generateBroadcast(context, extras);

@@ -378,6 +378,26 @@ public class PushNotifications extends Plugin
 			PushManager.clearLocalNotifications(cordova.getActivity());
 			return new PluginResult(Status.OK);
 		}
+		
+		if("setMultiNotificationMode".equals(action))
+		{
+			if (mPushManager == null)
+			{
+				return new PluginResult(Status.ERROR);
+			}
+
+			mPushManager.setMultiNotificationMode();
+		}
+
+		if("setSingleNotificationMode".equals(action))
+		{
+			if (mPushManager == null)
+			{
+				return new PluginResult(Status.ERROR);
+			}
+
+			mPushManager.setSimpleNotificationMode();
+		}
 
 		Log.d("DirectoryListPlugin", "Invalid action : " + action + " passed");
 		return new PluginResult(Status.INVALID_ACTION);

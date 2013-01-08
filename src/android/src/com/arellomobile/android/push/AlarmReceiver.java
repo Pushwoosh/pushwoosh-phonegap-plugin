@@ -13,6 +13,9 @@ import android.os.Bundle;
 
 public class AlarmReceiver extends BroadcastReceiver {
 
+	private static int counter = 0;
+	private static final int MAX_ALARMS = 10;
+	
     @Override
     public void onReceive(Context context, Intent intent)
     {
@@ -44,7 +47,9 @@ public class AlarmReceiver extends BroadcastReceiver {
     		intent.putExtras(extras);
     	}
     	
-    	PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    	PendingIntent sender = PendingIntent.getBroadcast(context, counter++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    	if(counter == MAX_ALARMS)
+    		counter = 0;
 
     	// Get the AlarmManager service
     	AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -52,11 +57,13 @@ public class AlarmReceiver extends BroadcastReceiver {
     }
 
 	public static void clearAlarm(Context context) {
-    	Intent intent = new Intent(context, AlarmReceiver.class);
-    	PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-    	// Get the AlarmManager service
-    	AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-    	am.cancel(sender);
+		for(int i = 0; i < MAX_ALARMS; ++i) {
+	    	Intent intent = new Intent(context, AlarmReceiver.class);
+	    	PendingIntent sender = PendingIntent.getBroadcast(context, i, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+	
+	    	// Get the AlarmManager service
+	    	AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+	    	am.cancel(sender);
+		}
 	}
 }
