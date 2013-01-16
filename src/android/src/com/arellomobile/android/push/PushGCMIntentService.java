@@ -179,7 +179,11 @@ public class PushGCMIntentService extends GCMBaseIntentService
 			}
 			if (extras.containsKey("u"))
 			{
-				dataObject.put("userdata", new JSONObject(extras.getString("u")));
+				dataObject.put("userdata", extras.get("u"));
+			}
+			if (extras.containsKey("local"))
+			{
+				dataObject.put("local", extras.get("local"));
 			}
 		}
 		catch (JSONException e)
