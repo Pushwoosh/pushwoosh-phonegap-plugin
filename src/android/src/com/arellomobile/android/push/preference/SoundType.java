@@ -14,7 +14,7 @@ package com.arellomobile.android.push.preference;
  */
 public enum SoundType
 {
-    NO_SOUND(0), DEFAULT_MODE(1), ALWAYS(2);
+	DEFAULT_MODE(0), NO_SOUND(1), ALWAYS(2);
     
     private final int value;
     private SoundType(int value) {
@@ -28,12 +28,12 @@ public enum SoundType
     public static SoundType fromInt(int x) {
         switch(x) {
         case 0:
-            return NO_SOUND;
-        case 1:
             return DEFAULT_MODE;
+        case 1:
+            return NO_SOUND;
         case 2:
             return ALWAYS;
         }
-        return NO_SOUND;
+        return DEFAULT_MODE;
     }
 }

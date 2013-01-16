@@ -150,20 +150,16 @@ public class PushGCMIntentService extends GCMBaseIntentService
 
 		Notification notification = notificationFactory.getNotification();
 
-		notification.contentIntent =
-				PendingIntent.getActivity(context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-		if (PreferenceUtils.getMultiMode(context) == false)
+		int messageId = PreferenceUtils.getMessageId(context);
+		if (PreferenceUtils.getMultiMode(context) == true)
 		{
-			int messageId = PreferenceUtils.getMessageId(context);
-			manager.notify(messageId, notification);
-		}
-		else
-		{
-			int messageId = PreferenceUtils.getMessageId(context);
 			PreferenceUtils.setMessageId(context, ++messageId);
-			manager.notify(messageId, notification);
 		}
+
+		notification.contentIntent =
+				PendingIntent.getActivity(context, messageId, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		manager.notify(messageId, notification);
 
 		generateBroadcast(context, extras);
 	}

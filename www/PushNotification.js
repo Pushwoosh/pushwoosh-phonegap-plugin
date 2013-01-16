@@ -51,12 +51,24 @@
 		cordova.exec(success, fail, "PushNotification", "stopGeoPushes", []);
 	};
 	
+	//sets multi notification mode on
 	PushNotification.prototype.setMultiNotificationMode = function(success, fail) {
 		cordova.exec(success, fail, "PushNotification", "setMultiNotificationMode", []);
 	};
 	
+	//sets single notification mode
 	PushNotification.prototype.setSingleNotificationMode = function(success, fail) {
 		cordova.exec(success, fail, "PushNotification", "setSingleNotificationMode", []);
+	};
+
+	//type: 0 default, 1 no sound, 2 always
+	PushNotification.prototype.setSoundType = function(type, success, fail) {
+		cordova.exec(success, fail, "PushNotification", "setSoundType", [type]);
+	};	
+
+	//type: 0 default, 1 no vibration, 2 always
+	PushNotification.prototype.setVibrateType = function(type, success, fail) {
+		cordova.exec(success, fail, "PushNotification", "setVibrateType", [type]);
 	};	
 
 	//Android End----

@@ -14,7 +14,7 @@ package com.arellomobile.android.push.preference;
  */
 public enum VibrateType
 {
-    NO_VIBRATE(0), DEFAULT_MODE(1), ALWAYS(2);
+	DEFAULT_MODE(0), NO_VIBRATE(1), ALWAYS(2);
     
     private final int value;
     private VibrateType(int value) {
@@ -28,12 +28,12 @@ public enum VibrateType
     public static VibrateType fromInt(int x) {
         switch(x) {
         case 0:
-            return NO_VIBRATE;
-        case 1:
             return DEFAULT_MODE;
+        case 1:
+            return NO_VIBRATE;
         case 2:
             return ALWAYS;
         }
-        return NO_VIBRATE;
+        return DEFAULT_MODE;
     }
 }
