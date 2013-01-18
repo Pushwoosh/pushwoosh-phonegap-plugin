@@ -56,6 +56,21 @@ public class Version__1_3 implements VersionHelper
 
 		return data;
 	}
+	
+	@Override
+	public Map<String, Object> getSendGoalAchievedData(Context context, String goal, Integer count)
+	{
+		Map<String, Object> data = new HashMap<String, Object>();
+
+		data.put("application", PreferenceUtils.getApplicationId(context));
+		data.put("hwid", GeneralUtils.getDeviceUUID(context));
+		data.put("goal", goal);
+		
+		if(count != null)
+			data.put("count", count);
+
+		return data;		
+	}
 
 	@Override
 	public Map<String, Object> getSendTagsData(Context context)

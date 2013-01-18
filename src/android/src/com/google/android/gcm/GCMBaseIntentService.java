@@ -28,6 +28,8 @@ import android.util.Log;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import com.arellomobile.android.push.utils.PreferenceUtils;
+
 import static com.google.android.gcm.GCMConstants.*;
 
 /**
@@ -178,7 +180,17 @@ public abstract class GCMBaseIntentService extends IntentService
                 }
                 else
                 {
+                	PowerManager.WakeLock wl = null;
+                	if(PreferenceUtils.getLightScreenOnNotification(context)) {
+                		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                		wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "GCM_MESSAGE_ALERT_LOCK");
+                		wl.acquire();
+                	}
+                	
                     onMessage(context, intent);
+                    
+                    if(wl != null)
+                    	wl.release();
                 }
             }
             else if (action.equals(INTENT_FROM_GCM_LIBRARY_RETRY))

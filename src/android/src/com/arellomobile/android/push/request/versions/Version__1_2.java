@@ -49,6 +49,11 @@ public class Version__1_2 implements VersionHelper
 	{
 		throw new UnsupportedOperationException("This feature requires 1.3 api");
 	}
+	
+	public Map<String, Object> getSendGoalAchievedData(Context context, String goal, Integer count)
+	{
+		throw new UnsupportedOperationException("This feature requires 1.3 api");
+	}
 
 	@Override
 	public Map<String, Object> getSendTagsData(Context context)

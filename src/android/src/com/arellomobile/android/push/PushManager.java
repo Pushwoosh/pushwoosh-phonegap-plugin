@@ -276,6 +276,11 @@ public class PushManager
 	{
 		PreferenceUtils.setVibrateType(mContext, vibrateNotificationType);
 	}
+	
+	public void setLightScreenOnNotification(boolean lightsOn)
+	{
+		PreferenceUtils.setLightScreenOnNotification(mContext, lightsOn);
+	}
 
 	//	------------------- PREFERENCE END -------------------
 
@@ -414,6 +419,29 @@ public class PushManager
 		ExecutorHelper.executeAsyncTask(task);
 	}
 
+	public void sendGoalAchieved(Context context, final String goal, final Integer count)
+	{
+		AsyncTask<Void, Void, Void> task;
+		try
+		{
+			task = new WorkerTask(context)
+			{
+				@Override
+				protected void doWork(Context context)
+				{
+					DeviceFeature2_5.sendGoalAchieved(context, goal, count);
+				}
+			};
+		}
+		catch (Throwable e)
+		{
+			// we are not in UI thread. Simple run our registration
+			DeviceFeature2_5.sendGoalAchieved(context, goal, count);
+			return;
+		}
+		ExecutorHelper.executeAsyncTask(task);
+	}
+	
 	private AsyncTask<Void, Void, Void> getRegisterAsyncTask(final Context context, final String regId)
 	{
 		try

@@ -243,6 +243,9 @@
         <header-file src="PWGetNearestZoneRequest.h" />
         <source-file src="PWGetNearestZoneRequest.m" />
 
+        <header-file src="PWApplicationEventRequest.h" />
+        <source-file src="PWApplicationEventRequest.m" />
+
         <header-file src="PWPushStatRequest.h" />
         <source-file src="PWPushStatRequest.m" />
 

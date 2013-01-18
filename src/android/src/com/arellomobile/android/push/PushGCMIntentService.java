@@ -162,6 +162,8 @@ public class PushGCMIntentService extends GCMBaseIntentService
 		manager.notify(messageId, notification);
 
 		generateBroadcast(context, extras);
+		
+		///DeviceFeature2_5.sendMessageDeliveryEvent(context, extras.getString("p"));
 	}
 
 	private static void generateBroadcast(Context context, Bundle extras)

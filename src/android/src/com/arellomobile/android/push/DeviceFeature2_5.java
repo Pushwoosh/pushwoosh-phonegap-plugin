@@ -34,6 +34,8 @@ public class DeviceFeature2_5
 	private static final String TAGS_PATH = "setTags";
 	private static final String NEAREST_ZONE = "getNearestZone";
 	private static final String APP_OPEN = "applicationOpen";
+	private static final String MSG_DELIVERED = "messageDeliveryEvent";
+	private static final String GOAL_ACHIEVED = "applicationEvent";
 
 	static void sendPushStat(Context context, String hash)
 	{
@@ -53,6 +55,37 @@ public class DeviceFeature2_5
 				if (200 == res.getResultCode())
 				{
 					Log.w(TAG, "Send PushStat success");
+					return;
+				}
+			}
+			catch (Exception e)
+			{
+				exception = e;
+			}
+		}
+
+		Log.e(TAG, "ERROR: Try To sent PushStat " + exception.getMessage() + ". Response = " + res.getResultData(),
+				exception);
+	}
+	
+	static void sendGoalAchieved(Context context, String goal, Integer count)
+	{
+		final Map<String, Object> data = new HashMap<String, Object>();
+
+		data.putAll(RequestHelper.getSendGoalAchievedData(context, goal, count, NetworkUtils.PUSH_VERSION));
+
+		Log.w(TAG, "Try To sent Goal");
+
+		NetworkUtils.NetworkResult res = new NetworkUtils.NetworkResult(-1, null);
+		Exception exception = new Exception();
+		for (int i = 0; i < NetworkUtils.MAX_TRIES; ++i)
+		{
+			try
+			{
+				res = NetworkUtils.makeRequest(data, GOAL_ACHIEVED);
+				if (200 == res.getResultCode())
+				{
+					Log.w(TAG, "Send Goal success");
 					return;
 				}
 			}
@@ -195,5 +228,36 @@ public class DeviceFeature2_5
 
 		Log.e(TAG, "ERROR: sent Nearest Zon " + exception.getMessage() + ". Response = " + res, exception);
 		throw exception;
+	}
+	
+	static void sendMessageDeliveryEvent(Context context, String hash)
+	{
+		final Map<String, Object> data = new HashMap<String, Object>();
+
+		data.putAll(RequestHelper.getSendPushStatData(context, hash, NetworkUtils.PUSH_VERSION));
+
+		Log.w(TAG, "Try To sent MsgDelivered");
+
+		NetworkUtils.NetworkResult res = new NetworkUtils.NetworkResult(-1, null);
+		Exception exception = new Exception();
+		for (int i = 0; i < NetworkUtils.MAX_TRIES; ++i)
+		{
+			try
+			{
+				res = NetworkUtils.makeRequest(data, MSG_DELIVERED);
+				if (200 == res.getResultCode())
+				{
+					Log.w(TAG, "Send MsgDelivered success");
+					return;
+				}
+			}
+			catch (Exception e)
+			{
+				exception = e;
+			}
+		}
+
+		Log.e(TAG, "ERROR: Try To sent MsgDelivered " + exception.getMessage() + ". Response = " + res.getResultData(),
+				exception);
 	}
 }

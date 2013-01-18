@@ -71,6 +71,15 @@
 		cordova.exec(success, fail, "PushNotification", "setVibrateType", [type]);
 	};	
 
+	PushNotification.prototype.setLightScreenOnNotification = function(on, success, fail) {
+		cordova.exec(success, fail, "PushNotification", "setLightScreenOnNotification", [on]);
+	};
+	
+	//{goal:'name', count:3} (count is optional)
+	PushNotification.prototype.sendGoalAchieved = function(config, success, fail) {
+		cordova.exec(success, fail, "PushNotification", "sendGoalAchieved", config ? [config] : []);
+	};
+
 	//Android End----
 	
 	//iOS only----

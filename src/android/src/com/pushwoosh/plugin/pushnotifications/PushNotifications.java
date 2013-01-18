@@ -453,6 +453,68 @@ public class PushNotifications extends Plugin
 			return new PluginResult(Status.OK);
 		}
 
+		if("setLightScreenOnNotification".equals(action))
+		{
+			if (mPushManager == null)
+			{
+				return new PluginResult(Status.ERROR);
+			}
+
+			JSONObject params = null;
+			try
+			{
+				boolean type = (boolean)data.getBoolean(0);
+				mPushManager.setLightScreenOnNotification(type);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				return new PluginResult(Status.ERROR);
+			}
+
+			return new PluginResult(Status.OK);
+		}
+
+		if("sendGoalAchieved".equals(action))
+		{
+			if (mPushManager == null)
+			{
+				return new PluginResult(Status.ERROR);
+			}
+			
+			JSONObject params = null;
+			try
+			{
+				params = data.getJSONObject(0);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+				return new PluginResult(Status.ERROR);
+			}
+
+			try
+			{
+				//config params: {goal:"goalName", count:30}
+				String goal = params.getString("goal");
+				if(goal == null)
+					return new PluginResult(Status.ERROR);
+
+				Integer count = null;
+				if(params.has("count"))
+					count = params.getInt("count");
+
+				mPushManager.sendGoalAchieved(cordova.getActivity(), goal, count);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				return new PluginResult(Status.ERROR);
+			}
+
+			return new PluginResult(Status.OK);
+		}
+
 		Log.d("DirectoryListPlugin", "Invalid action : " + action + " passed");
 		return new PluginResult(Status.INVALID_ACTION);
 	}

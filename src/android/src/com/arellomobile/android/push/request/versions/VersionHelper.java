@@ -26,6 +26,8 @@ public interface VersionHelper
 	Map<String, Object> getRegistrationUnregistrationData(Context context, String deviceRegistrationID);
 
 	Map<String, Object> getSendPushStatData(Context context, String hash);
+	
+	Map<String, Object> getSendGoalAchievedData(Context context, String goal, Integer count);
 
 	Map<String,Object> getSendTagsData(Context context);
 

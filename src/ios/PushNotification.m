@@ -29,9 +29,6 @@
 
 - (PushNotificationManager*)pushManager {
 	if(pushManager == nil) {
-		AppDelegate * delegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-		UIViewController * mainVC = delegate.viewController;
-		
 		NSString * appid = [[NSUserDefaults standardUserDefaults] objectForKey:@"Pushwoosh_APPID"];
 		
 		if(!appid)
@@ -41,7 +38,7 @@
 		if(!appname)
 			appname = @"";
 			
-		pushManager = [[PushNotificationManager alloc] initWithApplicationCode:appid navController:mainVC appName:appname ];
+		pushManager = [[PushNotificationManager alloc] initWithApplicationCode:appid appName:appname ];
 		pushManager.delegate = self;
 	}
 	return pushManager;

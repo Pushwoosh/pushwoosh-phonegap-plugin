@@ -5,6 +5,7 @@
 //
 
 #import "PWRegisterDeviceRequest.h"
+#import "PushNotificationManager.h"
 
 @implementation PWRegisterDeviceRequest
 @synthesize pushToken, language, timeZone;
@@ -22,6 +23,12 @@
 	[dict setObject:[self encodeString:language] forKey:@"language"];
 	[dict setObject:[self encodeString:timeZone] forKey:@"timezone"];
 
+	BOOL sandbox = ![PushNotificationManager getAPSProductionStatus];
+	[dict setObject:[self encodeString:sandbox ? @"sandbox" : @"production"] forKey:@"gateway"];
+
+	NSString * package = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"];
+	[dict setObject:[self encodeString:package] forKey:@"package"];
+	
 	return dict;
 }
 

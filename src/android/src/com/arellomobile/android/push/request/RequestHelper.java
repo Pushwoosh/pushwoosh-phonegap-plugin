@@ -51,6 +51,13 @@ public class RequestHelper
 
 		return versionHelper.getSendPushStatData(context, hash);
 	}
+
+	public static Map<String, Object> getSendGoalAchievedData(Context context, String goal, Integer count, String pushVersion)
+	{
+		VersionHelper versionHelper = getVersionHelper(pushVersion);
+
+		return versionHelper.getSendGoalAchievedData(context, goal, count);
+	}
 	
 	public static Map<String, Object> getSendAppOpenData(Context context, String pushVersion)
 	{

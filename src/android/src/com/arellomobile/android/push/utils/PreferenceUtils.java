@@ -131,4 +131,19 @@ public class PreferenceUtils
 		
 		return value;
 	}
+	
+	public static void setLightScreenOnNotification(Context context, boolean lightsOn)
+	{
+		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putBoolean("dm_lightson", lightsOn);
+		editor.commit();
+	}
+
+	public static boolean getLightScreenOnNotification(Context context)
+	{
+		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
+		boolean lightsOn = prefs.getBoolean("dm_lightson", false);
+		return lightsOn;
+	}
 }
