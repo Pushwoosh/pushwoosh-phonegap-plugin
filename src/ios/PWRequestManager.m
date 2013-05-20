@@ -32,6 +32,7 @@
 	}
 	NSString *requestString = [requestStringBuilder componentsJoinedByString:@", "];
 	NSString *jsonRequestData = [NSString stringWithFormat:@"{\"request\":{%@}}", requestString];
+	[requestStringBuilder release];
 	
 #ifdef NOSSL
 	NSString *requestUrl = [kServiceAddressNoSSL stringByAppendingString:[request methodName]];
@@ -51,7 +52,7 @@
 	NSHTTPURLResponse *response = nil;
 	NSError *error = nil;
 	NSData * responseData = [NSURLConnection sendSynchronousRequest:urlRequest returningResponse:&response error:&error];
-	urlRequest = nil;
+	[urlRequest release]; urlRequest = nil;
 	
 	if(retError)
 		*retError = error;
@@ -59,7 +60,7 @@
 	NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
 	NSLog(@"Response \"%d %@\": string: %@", [response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[response statusCode]], responseString);
 	
-	responseString = nil;
+	[responseString release]; responseString = nil;
 	if (response.statusCode != 200) 
 		return NO;
 	

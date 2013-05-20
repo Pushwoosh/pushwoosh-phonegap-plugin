@@ -20,13 +20,15 @@
 	NSString *startPushData;
 }
 
-@property (nonatomic, strong) NSMutableDictionary* callbackIds;
-@property (nonatomic, strong) PushNotificationManager *pushManager;
+@property (nonatomic, retain) NSMutableDictionary* callbackIds;
+@property (nonatomic, retain) PushNotificationManager *pushManager;
 @property (nonatomic, copy) NSString *startPushData;
 
 - (void)registerDevice:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
 - (void)setTags:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
 - (void)sendLocation:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
+- (void)startLocationTracking:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
+- (void)stopLocationTracking:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
 
 - (void)onDeviceReady:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
 - (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString*)deviceToken;

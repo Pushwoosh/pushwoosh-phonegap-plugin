@@ -146,4 +146,18 @@ public class PreferenceUtils
 		boolean lightsOn = prefs.getBoolean("dm_lightson", false);
 		return lightsOn;
 	}
+	
+	public static void setEnableLED(Context context, boolean ledOn)
+	{
+		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putBoolean("dm_ledon", ledOn);
+		editor.commit();
+	}
+
+	public static boolean getEnableLED(Context context) {
+		final SharedPreferences prefs = context.getSharedPreferences(PREFERENCE, Context.MODE_PRIVATE);
+		boolean ledOn = prefs.getBoolean("dm_ledon", false);
+		return ledOn;
+	}
 }

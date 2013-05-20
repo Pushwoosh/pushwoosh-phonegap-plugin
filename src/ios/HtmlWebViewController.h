@@ -29,9 +29,9 @@ typedef enum enumHtmlPageSupportedOrientations {
 
 - (id)initWithURLString:(NSString *)url;	//this method is to use it as a standalone webview
 
-@property (nonatomic, unsafe_unretained) id <HtmlWebViewControllerDelegate> delegate;
-@property (nonatomic, strong) IBOutlet UIWebView *webview;
-@property (nonatomic, strong) IBOutlet UIActivityIndicatorView *activityIndicator;
+@property (nonatomic, assign) id <HtmlWebViewControllerDelegate> delegate;
+@property (nonatomic, retain) IBOutlet UIWebView *webview;
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView *activityIndicator;
 @property (nonatomic, assign) PWSupportedOrientations supportedOrientations;
 
 @end

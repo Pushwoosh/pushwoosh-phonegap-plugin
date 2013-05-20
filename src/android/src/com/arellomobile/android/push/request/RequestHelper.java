@@ -98,4 +98,11 @@ public class RequestHelper
 		}
 		return versionHelper;
 	}
+	
+	public static Map<String, Object> getAppRemovedData(Context context, String packageName, String pushVersion)
+	{
+		VersionHelper versionHelper = sVersionHelpers.get(pushVersion);
+
+		return versionHelper.getAppRemovedData(context, packageName);
+	}
 }

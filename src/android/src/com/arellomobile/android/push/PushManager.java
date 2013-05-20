@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,6 +35,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class PushManager
 {
@@ -48,6 +50,8 @@ public class PushManager
 	public static final String UNREGISTER_EVENT = "UNREGISTER_EVENT";
 	public static final String UNREGISTER_ERROR_EVENT = "UNREGISTER_ERROR_EVENT";
 	public static final String PUSH_RECEIVE_EVENT = "PUSH_RECEIVE_EVENT";
+
+	public static final String REGISTER_BROAD_CAST_ACTION = "com.arellomobile.android.push.REGISTER_BROAD_CAST_ACTION";
 
 	private Context mContext;
 	private Bundle mLastBundle;
@@ -254,32 +258,37 @@ public class PushManager
 	/**
 	 * Note this will take affect only after PushGCMIntentService restart if it is already running
 	 */
-	public void setMultiNotificationMode()
+	public static void setMultiNotificationMode(Context context)
 	{
-		PreferenceUtils.setMultiMode(mContext, true);
+		PreferenceUtils.setMultiMode(context, true);
 	}
 
 	/**
 	 * Note this will take affect only after PushGCMIntentService restart if it is already running
 	 */
-	public void setSimpleNotificationMode()
+	public static void setSimpleNotificationMode(Context context)
 	{
-		PreferenceUtils.setMultiMode(mContext, false);
+		PreferenceUtils.setMultiMode(context, false);
 	}
 
-	public void setSoundNotificationType(SoundType soundNotificationType)
+	public static void setSoundNotificationType(Context context, SoundType soundNotificationType)
 	{
-		PreferenceUtils.setSoundType(mContext, soundNotificationType);
+		PreferenceUtils.setSoundType(context, soundNotificationType);
 	}
 
-	public void setVibrateNotificationType(VibrateType vibrateNotificationType)
+	public static void setVibrateNotificationType(Context context, VibrateType vibrateNotificationType)
 	{
-		PreferenceUtils.setVibrateType(mContext, vibrateNotificationType);
+		PreferenceUtils.setVibrateType(context, vibrateNotificationType);
 	}
 	
-	public void setLightScreenOnNotification(boolean lightsOn)
+	public static void setLightScreenOnNotification(Context context, boolean lightsOn)
 	{
-		PreferenceUtils.setLightScreenOnNotification(mContext, lightsOn);
+		PreferenceUtils.setLightScreenOnNotification(context, lightsOn);
+	}
+
+	public static void setEnableLED(Context context, boolean ledOn)
+	{
+		PreferenceUtils.setEnableLED(context, ledOn);
 	}
 
 	//	------------------- PREFERENCE END -------------------
@@ -298,24 +307,29 @@ public class PushManager
 		mLastBundle = pushBundle;
 
 		JSONObject dataObject = new JSONObject();
-		try
-		{
-			if (pushBundle.containsKey("title"))
+		Set<String> keys = pushBundle.keySet();
+		for (String key : keys) {
+			//backward compatibility
+			if(key.equals("u"))
 			{
-				dataObject.put("title", pushBundle.get("title"));
+				try
+				{
+					dataObject.put("userdata", pushBundle.get("u"));
+				}
+				catch (JSONException e)
+				{
+					// pass
+				}
 			}
-			if (pushBundle.containsKey("u"))
+
+			try
 			{
-				dataObject.put("userdata", pushBundle.get("u"));
+				dataObject.put(key, pushBundle.get(key));
 			}
-			if (pushBundle.containsKey("local"))
+			catch (JSONException e)
 			{
-				dataObject.put("local", pushBundle.get("local"));
+				// pass
 			}
-		}
-		catch (JSONException e)
-		{
-			// pass
 		}
 
 		PushEventsTransmitter.onMessageReceive(mContext, dataObject.toString(), pushBundle);
@@ -332,6 +346,37 @@ public class PushManager
 			intent.putExtra("url", url);
 			activity.startActivity(intent);
 		}
+		
+		//temporary disable this code until the server supports it
+		String packageName = (String) pushBundle.get("l");
+		if(false && packageName != null)
+		{
+			Intent launchIntent = null;
+			try
+			{
+				launchIntent = mContext.getPackageManager().getLaunchIntentForPackage(packageName);
+			}
+			catch(Exception e)
+			{
+			// if no application found
+			}
+			
+			if(launchIntent != null)
+			{
+				activity.startActivity(launchIntent);
+			}
+			else
+			{
+				url = (String) pushBundle.get("al");
+				if (url != null)
+				{
+					launchIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+					launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					activity.startActivity(launchIntent);
+				}
+			}
+		}
+
 
 		// send pushwoosh callback
 		sendPushStat(mContext, pushBundle.getString("p"));
@@ -395,9 +440,6 @@ public class PushManager
 	
 	private void sendAppOpen(Context context)
 	{
-		if (GCMRegistrar.isRegisteredOnServer(context) == false)
-			return;
-
 		AsyncTask<Void, Void, Void> task;
 		try
 		{
@@ -419,7 +461,7 @@ public class PushManager
 		ExecutorHelper.executeAsyncTask(task);
 	}
 
-	public void sendGoalAchieved(Context context, final String goal, final Integer count)
+	public static void sendGoalAchieved(Context context, final String goal, final Integer count)
 	{
 		AsyncTask<Void, Void, Void> task;
 		try

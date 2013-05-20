@@ -10,10 +10,35 @@ package com.arellomobile.android.push;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
+import com.arellomobile.android.push.utils.GeneralUtils;
 
 public class PushEventsTransmitter
 {
+	private static boolean getUseBroadcast(Context context)
+	{
+        ApplicationInfo ai = null;
+        try {
+            ai = context.getPackageManager().getApplicationInfo(context.getApplicationContext().getPackageName(), PackageManager.GET_META_DATA);
+            Bundle metaData = ai.metaData;
+            if(metaData != null)
+            {
+            	boolean useBroadcast = ai.metaData.getBoolean("PW_BROADCAST_REGISTRATION", true);
+            	System.out.println("Using broadcast registration: " + useBroadcast);
+            	return useBroadcast;
+            }
+            
+            return true;
+            
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return true;
+        }
+	}
+	
     private static void transmit(final Context context, String stringToShow, String messageKey)
     {
     	transmit(context, stringToShow, messageKey, null);
@@ -31,27 +56,73 @@ public class PushEventsTransmitter
         context.startActivity(notifyIntent);
     }
 
-    static void onRegistered(final Context context, String registrationId)
-    {
-        //String alertString = "Registered. RegistrationId is " + registrationId;
-        transmit(context, registrationId, PushManager.REGISTER_EVENT);
-    }
+	static void onRegistered(final Context context, String registrationId)
+	{
+		if(getUseBroadcast(context))
+		{
+			//String alertString = "Registered. RegistrationId is " + registrationId;
+			transmitBroadcast(context, registrationId, PushManager.REGISTER_EVENT);
+		}
+		else
+		{
+			transmit(context, registrationId, PushManager.REGISTER_EVENT);
+		}
+	}
 
-    static void onRegisterError(final Context context, String errorId)
-    {
-        //String alertString = "Register error. Error message is " + errorId;
-        transmit(context, errorId, PushManager.REGISTER_ERROR_EVENT);
-    }
+	static void onRegisterError(final Context context, String errorId)
+	{
+		if(getUseBroadcast(context))
+		{
+			//String alertString = "Register error. Error message is " + errorId;
+			transmitBroadcast(context, errorId, PushManager.REGISTER_ERROR_EVENT);
+		}
+		else
+		{
+			transmit(context, errorId, PushManager.REGISTER_ERROR_EVENT);
+		}
+	}
+
+	private static void transmitBroadcast(Context context, String registrationId, String registerEvent)
+	{
+		String packageName = context.getPackageName();
+		Intent intent = new Intent(packageName + "." + PushManager.REGISTER_BROAD_CAST_ACTION);
+		intent.putExtra(registerEvent, registrationId);
+		intent.setPackage(packageName);
+
+		if (GeneralUtils.checkStickyBroadcastPermissions(context))
+		{
+			context.sendStickyBroadcast(intent);
+		}
+		else
+		{
+			Log.w(PushEventsTransmitter.class.getSimpleName(), "No android.permission.BROADCAST_STICKY. Reverting to simple broadcast");
+			context.sendBroadcast(intent);
+		}
+	}
 
     static void onUnregistered(final Context context, String registrationId)
     {
-        //String alertString = "Unregistered. RegistrationId is " + registrationId;
-        transmit(context, registrationId, PushManager.UNREGISTER_EVENT);
+		if(getUseBroadcast(context))
+		{
+	        //String alertString = "Unregistered. RegistrationId is " + registrationId;
+			transmitBroadcast(context, registrationId, PushManager.UNREGISTER_EVENT);
+		}
+		else
+		{
+			transmit(context, registrationId, PushManager.UNREGISTER_EVENT);
+		}
     }
 
     static void onUnregisteredError(Context context, String errorId)
     {
-        transmit(context, errorId, PushManager.UNREGISTER_ERROR_EVENT);
+		if(getUseBroadcast(context))
+		{
+			transmitBroadcast(context, errorId, PushManager.UNREGISTER_ERROR_EVENT);
+		}
+		else
+		{
+	        transmit(context, errorId, PushManager.UNREGISTER_ERROR_EVENT);
+		}
     }
 
     static void onMessageReceive(final Context context, String message)

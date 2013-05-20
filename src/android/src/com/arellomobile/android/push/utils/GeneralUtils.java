@@ -11,6 +11,7 @@ package com.arellomobile.android.push.utils;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -124,6 +125,12 @@ public class GeneralUtils
 		}
 
 		return false;
+	}
+
+	public static boolean checkStickyBroadcastPermissions(Context context)
+	{
+		return context.getPackageManager().checkPermission("android.permission.BROADCAST_STICKY", context.getPackageName()) ==
+				PackageManager.PERMISSION_GRANTED;
 	}
 
 }

@@ -100,9 +100,21 @@
             <access origin="https://cp.pushwoosh.com" subdomains="true" />
         </config-file>
 		
-		<source-file src="src/android/src/com/pushwoosh/test/plugin/pushnotifications/PushNotifications.java"
-		        target-dir="src/com/pushwoosh/test/plugin/pushnotifications" />
-				
+		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PushNotifications.java"
+		        target-dir="src/com/pushwoosh/plugin/pushnotifications" />
+
+		<source-file src="src/android/src/com/pushwoosh/support/v4/app/NotificationCompat.java"
+		        target-dir="src/com/pushwoosh/support/v4/app/" />
+
+		<source-file src="src/android/src/com/pushwoosh/support/v4/app/NotificationCompatHoneycomb.java"
+		        target-dir="src/com/pushwoosh/support/v4/app/" />
+
+		<source-file src="src/android/src/com/pushwoosh/support/v4/app/NotificationCompatIceCreamSandwich.java"
+		        target-dir="src/com/pushwoosh/support/v4/app/" />
+
+		<source-file src="src/android/src/com/pushwoosh/support/v4/app/NotificationCompatJellybean.java"
+		        target-dir="src/com/pushwoosh/support/v4/app/" />
+
 		<source-file src="src/android/src/com/google/android/gcm/GCMBaseIntentService.java"
 		        target-dir="src/com/google/android/gcm" />
 
@@ -148,6 +160,8 @@
 		<source-file src="src/android/src/com/arellomobile/android/push/PushWebview.java"
 		        target-dir="src/com/arellomobile/android/push" />
 
+		<source-file src="src/android/src/com/arellomobile/android/push/PackageRemoveReceiver.java"
+		        target-dir="src/com/arellomobile/android/push" />
 
 		<source-file src="src/android/src/com/arellomobile/android/push/data/PushZoneLocation.java"
 		        target-dir="src/com/arellomobile/android/push/data" />
@@ -202,6 +216,9 @@
 		<source-file src="src/android/src/com/arellomobile/android/push/utils/WorkerTask.java"
 		        target-dir="src/com/arellomobile/android/push/utils" />
 
+		<source-file src="src/android/src/com/arellomobile/android/push/utils/RegisterBroadcastReceiver.java"
+		        target-dir="src/com/arellomobile/android/push/utils" />
+
 		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/BannerNotificationFactory.java"
 		        target-dir="src/com/arellomobile/android/push/utils/notification" />
 
@@ -211,16 +228,7 @@
 		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/Helper.java"
 		        target-dir="src/com/arellomobile/android/push/utils/notification" />
 
-		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/NotificationCreator.java"
-		        target-dir="src/com/arellomobile/android/push/utils/notification" />
-
-		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/NotificationFactory.java"
-		        target-dir="src/com/arellomobile/android/push/utils/notification" />
-
 		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/SimpleNotificationFactory.java"
-		        target-dir="src/com/arellomobile/android/push/utils/notification" />
-
-		<source-file src="src/android/src/com/arellomobile/android/push/utils/notification/V11NotificationCreator.java"
 		        target-dir="src/com/arellomobile/android/push/utils/notification" />
 
     </platform>
@@ -266,5 +274,20 @@
 		
         <header-file src="PWSendBadgeRequest.h" />
         <source-file src="PWSendBadgeRequest.m" />
+
+        <header-file src="PWLocationTracker.h" />
+        <source-file src="PWLocationTracker.m" />
+
+        <header-file src="PW_SBJsonBase.h" />
+        <source-file src="PW_SBJsonBase.m" />
+
+        <header-file src="PW_SBJsonParser.h" />
+        <source-file src="PW_SBJsonParser.m" />
+
+        <header-file src="PW_SBJsonWriter.h" />
+        <source-file src="PW_SBJsonWriter.m" />
+
+        <header-file src="PushRuntime.h" />
+        <source-file src="PushRuntime.m" />
     </platform>
 </plugin>

@@ -77,4 +77,9 @@ public class Version__1_2 implements VersionHelper
 	public Map<String, Object> getSendAppOpenData(Context context) {
 		throw new UnsupportedOperationException("This feature requires 1.3 api");
 	}
+	
+	@Override
+	public Map<String, Object> getAppRemovedData(Context context, String packageName) {
+		throw new UnsupportedOperationException("This feature requires 1.3 api");
+	}
 }

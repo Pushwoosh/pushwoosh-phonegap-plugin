@@ -21,14 +21,14 @@ public class BannerNotificationFactory extends BaseNotificationFactory
 {
 	public static final String sNotificationLayout = "notification";
 
-	public BannerNotificationFactory(Context context, Bundle data, String appName, String title, SoundType soundType, VibrateType vibrateType)
+	public BannerNotificationFactory(Context context, Bundle data, String header, String message, SoundType soundType, VibrateType vibrateType)
 	{
-		super(context, data, appName, title, soundType, vibrateType);
+		super(context, data, header, message, soundType, vibrateType);
 	}
 
 	@SuppressLint("NewApi")
 	@Override
-	Notification generateNotificationInner(Context context, Bundle data, String appName, String tickerTitle)
+	Notification generateNotificationInner(Context context, Bundle data, String header, String messae, String tickerTitle)
 	{
 		Notification notification = new Notification();
 

@@ -46,8 +46,12 @@
 	NSString *encodedTags = [NSString stringWithFormat:@"{%@}", [encodedTagsBuilder componentsJoinedByString:@", "]];
 	[dict setObject:encodedTags forKey:@"tags"];
 	
-	 encodedTagsBuilder = nil;
+	[encodedTagsBuilder release]; encodedTagsBuilder = nil;
 	return dict;
+}
+- (void) dealloc {
+	self.tags = nil;
+	[super dealloc];
 }
 
 @end

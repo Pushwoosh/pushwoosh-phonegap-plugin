@@ -38,8 +38,10 @@ public class Version__1_3 implements VersionHelper
 		data.put("device_name", GeneralUtils.isTablet(context) ? "Tablet" : "Phone");
 		data.put("device_type", "3");
 		data.put("language", Locale.getDefault().getLanguage());
-		data.put("timezone", Calendar.getInstance().getTimeZone().getRawOffset() / 1000); // converting from
-		// milliseconds to seconds
+		data.put("timezone", Calendar.getInstance().getTimeZone().getRawOffset() / 1000); // converting from milliseconds to seconds
+
+		String packageName = context.getApplicationContext().getPackageName();
+		data.put("android_package", packageName);
 		data.put("push_token", deviceRegistrationID);
 
 		return data;
@@ -120,4 +122,16 @@ public class Version__1_3 implements VersionHelper
 
 		return data;
 	}
+	
+	@Override
+	public Map<String, Object> getAppRemovedData(Context context, String packageName) {
+		Map<String, Object> data = new HashMap<String, Object>();
+
+		data.put("application", PreferenceUtils.getApplicationId(context));
+		data.put("android_package", packageName);
+		data.put("hwid", GeneralUtils.getDeviceUUID(context));
+
+		return data;
+	}
+
 }

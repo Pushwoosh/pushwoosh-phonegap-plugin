@@ -40,7 +40,7 @@ public class NetworkUtils
 
 	public static NetworkResult makeRequest(Map<String, Object> data, String methodName) throws Exception
 	{
-		NetworkResult result = new NetworkResult(500, null);
+		NetworkResult result = new NetworkResult(500, 0, null);
 		OutputStream connectionOutput = null;
 		InputStream inputStream = null;
 		try
@@ -95,7 +95,8 @@ public class NetworkUtils
 			JSONObject resultJSON = new JSONObject(jsonString);
 
 			result.setData(resultJSON);
-			result.setCode(resultJSON.getInt("status_code"));
+			result.setCode(connection.getResponseCode());
+			result.setPushwooshCode(resultJSON.getInt("status_code"));
 		}
 		finally
 		{
@@ -114,18 +115,25 @@ public class NetworkUtils
 
 	public static class NetworkResult
 	{
+		private int mPushwooshCode;
 		private int mResultCode;
 		private JSONObject mResultData;
 
-		public NetworkResult(int code, JSONObject data)
+		public NetworkResult(int networkCode, int pushwooshCode, JSONObject data)
 		{
-			mResultCode = code;
+			mResultCode = networkCode;
+			mPushwooshCode = pushwooshCode;
 			mResultData = data;
 		}
 
 		public void setCode(int code)
 		{
 			mResultCode = code;
+		}
+
+		public void setPushwooshCode(int code)
+		{
+			mPushwooshCode = code;
 		}
 
 		public void setData(JSONObject data)
@@ -136,6 +144,11 @@ public class NetworkUtils
 		public int getResultCode()
 		{
 			return mResultCode;
+		}
+
+		public int getPushwooshCode()
+		{
+			return mPushwooshCode;
 		}
 
 		public JSONObject getResultData()

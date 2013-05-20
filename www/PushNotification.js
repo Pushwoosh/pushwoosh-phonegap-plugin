@@ -27,6 +27,10 @@
 	PushNotification.prototype.sendLocation = function(config, success, fail) {
 		cordova.exec(success, fail, "PushNotification", "sendLocation", config ? [config] : []);
 	};
+	
+	PushNotification.prototype.onDeviceReady = function() {
+		cordova.exec(null, null, "PushNotification", "onDeviceReady", []);
+	};
 
 	//Android Only----
 	PushNotification.prototype.unregisterDevice = function(success, fail) {
@@ -74,6 +78,11 @@
 	PushNotification.prototype.setLightScreenOnNotification = function(on, success, fail) {
 		cordova.exec(success, fail, "PushNotification", "setLightScreenOnNotification", [on]);
 	};
+
+	//set to enable led blinking when notification arrives and display is off
+	PushNotification.prototype.setEnableLED = function(on, success, fail) {
+		cordova.exec(success, fail, "PushNotification", "setEnableLED", [on]);
+	};
 	
 	//{goal:'name', count:3} (count is optional)
 	PushNotification.prototype.sendGoalAchieved = function(config, success, fail) {
@@ -83,8 +92,12 @@
 	//Android End----
 	
 	//iOS only----
-	PushNotification.prototype.onDeviceReady = function() {
-		cordova.exec(null, null, "PushNotification", "onDeviceReady", []);
+	PushNotification.prototype.startLocationTracking = function(backgroundMode, success, fail) {
+		cordova.exec(success, fail, "PushNotification", "startLocationTracking", backgroundMode ? [{mode : backgroundMode}] : []);
+	};
+	 
+	PushNotification.prototype.stopLocationTracking = function(success, fail) {
+		cordova.exec(success, fail, "PushNotification", "stopLocationTracking", []);
 	};
 
 	// Call this to get a detailed status of remoteNotifications
@@ -93,8 +106,8 @@
 	};
 
 	// Call this to set the application icon badge
-	PushNotification.prototype.setApplicationIconBadgeNumber = function(badge, callback) {
-		cordova.exec(callback, callback, "PushNotification", "setApplicationIconBadgeNumber", [{badge: badge}]);
+	PushNotification.prototype.setApplicationIconBadgeNumber = function(badgeNumber, callback) {
+		cordova.exec(callback, callback, "PushNotification", "setApplicationIconBadgeNumber", [{badge: badgeNumber}]);
 	};
 
 	// Call this to clear all notifications from the notification center

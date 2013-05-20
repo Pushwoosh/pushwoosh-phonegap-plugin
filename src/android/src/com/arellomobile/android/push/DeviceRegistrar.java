@@ -39,14 +39,17 @@ public class DeviceRegistrar
 			try
 			{
 				res = makeRequest(context, deviceRegistrationID, REGISTER_PATH);
-				if (200 == res.getResultCode() || 103 == res.getResultCode())
-				{
-					GCMRegistrar.setRegisteredOnServer(context, true);
-					PushEventsTransmitter.onRegistered(context, deviceRegistrationID);
-					PreferenceUtils.setLastRegistration(context, new Date().getTime());
-					Log.w(TAG, "Registered for pushes: " + deviceRegistrationID);
-					return;
-				}
+				if (200 != res.getResultCode())
+					continue;
+				
+				if (200 != res.getPushwooshCode())
+					break;
+				
+				GCMRegistrar.setRegisteredOnServer(context, true);
+				PushEventsTransmitter.onRegistered(context, deviceRegistrationID);
+				PreferenceUtils.setLastRegistration(context, new Date().getTime());
+				Log.w(TAG, "Registered for pushes: " + deviceRegistrationID);
+				return;
 			}
 			catch (Exception e)
 			{
@@ -54,8 +57,17 @@ public class DeviceRegistrar
 			}
 		}
 
-		PushEventsTransmitter.onRegisterError(context, "status code is " + res + "\n error: " + exception.getMessage());
-		Log.e(TAG, "Registration error " + exception.getMessage(), exception);
+		if(exception.getMessage() != null)
+		{
+			PushEventsTransmitter.onRegisterError(context, exception.getMessage());
+			Log.e(TAG, "Registration error " + exception.getMessage(), exception);
+		}
+		else
+		{
+			String err = res.getResultData().toString();
+			Log.e(TAG, "Registration error " + err);
+			PushEventsTransmitter.onRegisterError(context, res.getResultData().toString());
+		}
 	}
 
 	static void unregisterWithServer(final Context context, final String deviceRegistrationID)
@@ -63,20 +75,24 @@ public class DeviceRegistrar
 		Log.w(TAG, "Try To Unregistered for pushes");
 		GCMRegistrar.setRegisteredOnServer(context, false);
 
-		NetworkUtils.NetworkResult res;
+		NetworkUtils.NetworkResult res = null;
 		Exception exception = new Exception();
 		for (int i = 0; i < NetworkUtils.MAX_TRIES; ++i)
 		{
 			try
 			{
 				res = makeRequest(context, deviceRegistrationID, UNREGISTER_PATH);
-				if (200 == res.getResultCode() || 104 == res.getResultCode())
-				{
-					PushEventsTransmitter.onUnregistered(context, deviceRegistrationID);
-					Log.w(TAG, "Unregistered for pushes: " + deviceRegistrationID);
-					PreferenceUtils.resetLastRegistration(context);
-					return;
-				}
+				
+				if (200 != res.getResultCode())
+					continue;
+				
+				if (200 != res.getPushwooshCode())
+					break;
+
+				PushEventsTransmitter.onUnregistered(context, deviceRegistrationID);
+				Log.w(TAG, "Unregistered for pushes: " + deviceRegistrationID);
+				PreferenceUtils.resetLastRegistration(context);
+				return;
 			}
 			catch (Exception e)
 			{
@@ -84,8 +100,17 @@ public class DeviceRegistrar
 			}
 		}
 
-		PushEventsTransmitter.onUnregisteredError(context, exception.getMessage());
-		Log.e(TAG, "Unregistration error " + exception.getMessage(), exception);
+		if(exception.getMessage() != null)
+		{
+			PushEventsTransmitter.onUnregisteredError(context, exception.getMessage());
+			Log.e(TAG, "Unregistration error " + exception.getMessage(), exception);
+		}
+		else
+		{
+			String err = res.getResultData().toString();
+			Log.e(TAG, "Unregistration error " + err);
+			PushEventsTransmitter.onUnregisteredError(context, res.getResultData().toString());
+		}
 	}
 
 	private static NetworkUtils.NetworkResult makeRequest(Context context, String deviceRegistrationID, String methodName)

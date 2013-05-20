@@ -9,6 +9,6 @@
 @interface PWApplicationEventRequest : PWRequest
 
 @property (nonatomic, copy) NSString *goal;
-@property (nonatomic, strong) NSNumber *count;
+@property (nonatomic, retain) NSNumber *count;
 
 @end

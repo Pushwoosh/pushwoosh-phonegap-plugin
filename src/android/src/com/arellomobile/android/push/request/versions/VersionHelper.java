@@ -36,4 +36,6 @@ public interface VersionHelper
 	PushZoneLocation getPushZoneLocationFromData(JSONObject resultData) throws JSONException;
 
 	Map<String, Object> getSendAppOpenData(Context context);
+	
+	Map<String, Object> getAppRemovedData(Context context, String packageName);
 }
