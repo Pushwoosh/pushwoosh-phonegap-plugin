@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.util.Log;
 import com.arellomobile.android.push.PushManager;
 import com.arellomobile.android.push.BasePushMessageReceiver;
+import com.arellomobile.android.push.PushManager.GetTagsListener;
 import com.arellomobile.android.push.exception.PushWooshException;
 import com.arellomobile.android.push.preference.SoundType;
 import com.arellomobile.android.push.preference.VibrateType;
@@ -46,6 +47,7 @@ public class PushNotifications extends CordovaPlugin
 	public static final String CREATE_LOCAL_NOTIFICATION = "createLocalNotification";
 	public static final String CLEAR_LOCAL_NOTIFICATION = "clearLocalNotification";
 	public static final String ON_DEVICE_READY = "onDeviceReady";
+	public static final String GET_TAGS = "getTags";
 	
 	boolean loggedStart = false;
 	boolean receiversRegistered = false;
@@ -556,6 +558,36 @@ public class PushNotifications extends CordovaPlugin
 
 			return true;
 		}
+		
+		if(GET_TAGS.equals(action))
+		{
+			callbackIds.put("getTags", callbackId);
+			
+			final class GetTagsListenerImpl implements GetTagsListener {
+				@Override
+				public void onTagsReceived(Map<String, Object> tags) {
+					CallbackContext callback = callbackIds.get("getTags");
+					if(callback == null)
+						return;
+					
+					callback.success(new JSONObject(tags));
+					callbackIds.remove("getTags");
+				}
+				
+				@Override
+				public void onError(Exception e) {
+					CallbackContext callback = callbackIds.get("getTags");
+					if(callback == null)
+						return;
+
+					callback.error(e.getMessage());
+					callbackIds.remove("getTags");
+				}
+			}
+			
+			PushManager.getTagsAsync(cordova.getActivity(), new GetTagsListenerImpl());
+			return true;
+		}
 
 		Log.d("DirectoryListPlugin", "Invalid action : " + action + " passed");
 		return false;
@@ -604,10 +636,17 @@ public class PushNotifications extends CordovaPlugin
 	private void doOnMessageReceive(String message)
 	{
 		Log.e("doOnMessageReceive", "message is: " + message);
-		String jsStatement = String.format("window.plugins.pushNotification.notificationCallback(%s);", message);
+		final String jsStatement = String.format("window.plugins.pushNotification.notificationCallback(%s);", message);
 		//webView.sendJavascript(jsStatement);
 		
-		webView.loadUrl("javascript:" + jsStatement);
+		cordova.getActivity().runOnUiThread(
+			new Runnable() { 
+				@Override
+		         public void run() {
+		        	 webView.loadUrl("javascript:" + jsStatement);
+		         }
+			}
+		);
 	}
 
 	private BroadcastReceiver mReceiver = new BasePushMessageReceiver()

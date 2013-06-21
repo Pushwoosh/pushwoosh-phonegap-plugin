@@ -118,8 +118,7 @@ public class DeviceRegistrar
 	{
 		Map<String, Object> data = new HashMap<String, Object>();
 
-		data.putAll(RequestHelper
-				.getRegistrationUnregistrationData(context, deviceRegistrationID, NetworkUtils.PUSH_VERSION));
+		data.putAll(RequestHelper.getRegistrationUnregistrationData(context, deviceRegistrationID));
 
 		return NetworkUtils.makeRequest(data, methodName);
 	}

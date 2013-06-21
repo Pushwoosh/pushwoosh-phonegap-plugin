@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 
 public class PackageRemoveReceiver extends BroadcastReceiver
 {
@@ -26,26 +28,26 @@ public class PackageRemoveReceiver extends BroadcastReceiver
 		sendPackageRemoved(context, pkg);
 	}
    
-	private void sendPackageRemoved(Context context, final String packageName)
+	private void sendPackageRemoved(final Context context, final String packageName)
 	{
-		AsyncTask<Void, Void, Void> task;
-		try
-		{
-			task = new WorkerTask(context)
-			{
-				@Override
-				protected void doWork(Context context)
+		Handler handler = new Handler(context.getMainLooper());
+		handler.post(new Runnable() {
+			public void run() {
+				AsyncTask<Void, Void, Void> task = new WorkerTask(context)
 				{
-					DeviceFeature2_5.sendAppRemovedData(context, packageName);
-				}
-			};
-		}
-		catch (Throwable e)
-		{
-			// we are not in UI thread. Simple run our registration
-			DeviceFeature2_5.sendAppRemovedData(context, packageName);
-			return;
-		}
-		ExecutorHelper.executeAsyncTask(task);
+					@Override
+					protected void doWork(Context context)
+					{
+						try {
+							DeviceFeature2_5.sendAppRemovedData(context, packageName);
+						} catch (Exception e) {
+//								e.printStackTrace();
+						}
+					}
+				};
+
+				ExecutorHelper.executeAsyncTask(task);
+			}
+		});
 	}
 }

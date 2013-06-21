@@ -10,12 +10,18 @@ package com.arellomobile.android.push.request;
 import android.content.Context;
 import android.location.Location;
 import com.arellomobile.android.push.data.PushZoneLocation;
-import com.arellomobile.android.push.request.versions.VersionHelper;
-import com.arellomobile.android.push.request.versions.Version__1_2;
-import com.arellomobile.android.push.request.versions.Version__1_3;
+import com.arellomobile.android.push.utils.GeneralUtils;
+import com.arellomobile.android.push.utils.PreferenceUtils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -26,83 +32,131 @@ import java.util.Map;
  */
 public class RequestHelper
 {
-	private static final Map<String, VersionHelper> sVersionHelpers;
-
-	static
+	static public Map<String, Object> getRegistrationUnregistrationData(Context context, String deviceRegistrationID)
 	{
-		sVersionHelpers = new HashMap<String, VersionHelper>();
+		HashMap<String, Object> data = new HashMap<String, Object>();
 
-		sVersionHelpers.put("1.1", new Version__1_2());
-		sVersionHelpers.put("1.2", new Version__1_2());
-		sVersionHelpers.put("1.3", new Version__1_3());
+		data.put("application", PreferenceUtils.getApplicationId(context));
+		data.put("hwid", GeneralUtils.getDeviceUUID(context));
+		data.put("device_name", GeneralUtils.isTablet(context) ? "Tablet" : "Phone");
+		data.put("device_type", "3");
+		data.put("language", Locale.getDefault().getLanguage());
+		data.put("timezone", Calendar.getInstance().getTimeZone().getRawOffset() / 1000); // converting from milliseconds to seconds
+
+		String packageName = context.getApplicationContext().getPackageName();
+		data.put("android_package", packageName);
+		data.put("push_token", deviceRegistrationID);
+
+		return data;
 	}
 
-	public static Map<String, Object> getRegistrationUnregistrationData(Context context, String deviceRegistrationID,
-			String pushVersion)
+	static public Map<String, Object> getSendPushStatData(Context context, String hash)
 	{
-		VersionHelper versionHelper = getVersionHelper(pushVersion);
+		Map<String, Object> data = new HashMap<String, Object>();
 
-		return versionHelper.getRegistrationUnregistrationData(context, deviceRegistrationID);
-	}
+		data.put("application", PreferenceUtils.getApplicationId(context));
+		data.put("hwid", GeneralUtils.getDeviceUUID(context));
+		data.put("hash", hash);
 
-	public static Map<String, Object> getSendPushStatData(Context context, String hash, String pushVersion)
-	{
-		VersionHelper versionHelper = getVersionHelper(pushVersion);
-
-		return versionHelper.getSendPushStatData(context, hash);
-	}
-
-	public static Map<String, Object> getSendGoalAchievedData(Context context, String goal, Integer count, String pushVersion)
-	{
-		VersionHelper versionHelper = getVersionHelper(pushVersion);
-
-		return versionHelper.getSendGoalAchievedData(context, goal, count);
+		return data;
 	}
 	
-	public static Map<String, Object> getSendAppOpenData(Context context, String pushVersion)
+	static public Map<String, Object> getSendGoalAchievedData(Context context, String goal, Integer count)
 	{
-		VersionHelper versionHelper = getVersionHelper(pushVersion);
+		Map<String, Object> data = new HashMap<String, Object>();
 
-		return versionHelper.getSendAppOpenData(context);
+		data.put("application", PreferenceUtils.getApplicationId(context));
+		data.put("hwid", GeneralUtils.getDeviceUUID(context));
+		data.put("goal", goal);
+		
+		if(count != null)
+			data.put("count", count);
+
+		return data;		
 	}
 
-	public static Map<String, Object> getSendTagsData(Context context, String pushVersion)
+	static public Map<String, Object> getSendTagsData(Context context)
 	{
-		VersionHelper versionHelper = sVersionHelpers.get(pushVersion);
+		Map<String, Object> data = new HashMap<String, Object>();
 
-		return versionHelper.getSendTagsData(context);
+		data.put("application", PreferenceUtils.getApplicationId(context));
+		data.put("hwid", GeneralUtils.getDeviceUUID(context));
+
+		return data;
 	}
 
-	public static Map<String, Object> getNearestZoneData(Context context, Location location, String pushVersion)
+	static public Map<String, Object> getNearestZoneData(Context context, Location location)
 	{
-		VersionHelper versionHelper = sVersionHelpers.get(pushVersion);
+		Map<String, Object> data = new HashMap<String, Object>();
 
-		return versionHelper.getNearestZoneData(context, location);
+		data.put("application", PreferenceUtils.getApplicationId(context));
+		data.put("hwid", GeneralUtils.getDeviceUUID(context));
+		data.put("lat", location.getLatitude());
+		data.put("lng", location.getLongitude());
+
+		return data;
 	}
 
-	public static PushZoneLocation getPushZoneLocationFromData(JSONObject resultData, String pushVersion)
-			throws Exception
+	static public PushZoneLocation getPushZoneLocationFromData(JSONObject resultData) throws JSONException
 	{
-		VersionHelper versionHelper = sVersionHelpers.get(pushVersion);
+		JSONObject response = resultData.getJSONObject("response");
 
-		return versionHelper.getPushZoneLocationFromData(resultData);
+		PushZoneLocation location = new PushZoneLocation();
+
+		location.setName(response.getString("name"));
+		location.setLat(response.getDouble("lat"));
+		location.setLng(response.getDouble("lng"));
+		location.setDistanceTo(response.getLong("distance"));
+
+		return location;
 	}
 
-	private static VersionHelper getVersionHelper(String pushVersion)
-	{
-		VersionHelper versionHelper = sVersionHelpers.get(pushVersion);
+	static public Map<String, Object> getSendAppOpenData(Context context) {
+		Map<String, Object> data = new HashMap<String, Object>();
 
-		if (null == versionHelper)
-		{
-			throw new RuntimeException("No Version Request Helper sent to version №" + pushVersion);
+		data.put("application", PreferenceUtils.getApplicationId(context));
+		data.put("hwid", GeneralUtils.getDeviceUUID(context));
+
+		return data;
+	}
+	
+	static public Map<String, Object> getAppRemovedData(Context context, String packageName) {
+		Map<String, Object> data = new HashMap<String, Object>();
+
+		data.put("application", PreferenceUtils.getApplicationId(context));
+		data.put("android_package", packageName);
+		data.put("hwid", GeneralUtils.getDeviceUUID(context));
+
+		return data;
+	}
+	
+	static public Map<String, Object> getGetTagsData(Context context) {
+		Map<String, Object> data = new HashMap<String, Object>();
+
+		data.put("application", PreferenceUtils.getApplicationId(context));
+		data.put("hwid", GeneralUtils.getDeviceUUID(context));
+
+		return data;		
+	}
+
+	public static Map<String, Object> getTagsFromData(JSONObject resultData) {
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		try {
+			JSONObject response = resultData.getJSONObject("response");
+			JSONObject jsonResult = response.getJSONObject("result");
+			
+			@SuppressWarnings("unchecked")
+			Iterator<String> keys = jsonResult.keys();
+			while(keys.hasNext()) {
+				String key = keys.next();
+				result.put(key, jsonResult.get(key));
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return new HashMap<String, Object>();
 		}
-		return versionHelper;
-	}
-	
-	public static Map<String, Object> getAppRemovedData(Context context, String packageName, String pushVersion)
-	{
-		VersionHelper versionHelper = sVersionHelpers.get(pushVersion);
 
-		return versionHelper.getAppRemovedData(context, packageName);
+		return result;
 	}
 }

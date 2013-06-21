@@ -95,7 +95,7 @@ public class PushGCMIntentService extends GCMBaseIntentService
 			return;
 		}
 
-		extras.putBoolean("foregroud", GeneralUtils.isAppOnForeground(context));
+		extras.putBoolean("foreground", GeneralUtils.isAppOnForeground(context));
 		extras.putBoolean("onStart", !GeneralUtils.isAppOnForeground(context));
 
 		String message = (String) extras.get("title");

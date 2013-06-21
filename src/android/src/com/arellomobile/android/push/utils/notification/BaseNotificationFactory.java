@@ -62,7 +62,7 @@ public abstract class BaseNotificationFactory
 		//mNotification.defaults |= Notification.DEFAULT_LIGHTS;
 		
 		mNotification.ledARGB = 0xFFFFFFFF;
-		mNotification.flags = Notification.FLAG_SHOW_LIGHTS;
+		mNotification.flags |= Notification.FLAG_SHOW_LIGHTS;
 		mNotification.ledOnMS = 100; 
 		mNotification.ledOffMS = 1000;
 	}

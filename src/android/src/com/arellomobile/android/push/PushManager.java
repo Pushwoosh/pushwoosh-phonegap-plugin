@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 
 import com.arellomobile.android.push.exception.PushWooshException;
 import com.arellomobile.android.push.preference.SoundType;
@@ -216,38 +217,71 @@ public class PushManager
 		});
 	}
 	
-	public static void sendLocation(Context context, final Location location)
+	public interface GetTagsListener {
+		public void onTagsReceived(Map<String, Object> tags);
+		public void onError(Exception e);
+	}
+	
+	public static Map<String, Object> getTagsSync(final Context context)
+	{
+		if (GCMRegistrar.isRegisteredOnServer(context) == false)
+			return null;
+		
+		return DeviceFeature2_5.getTags(context);
+	}
+	
+	public static void getTagsAsync(final Context context, final GetTagsListener listener)
+	{
+		if (GCMRegistrar.isRegisteredOnServer(context) == false)
+			return;
+		
+		Handler handler = new Handler(context.getMainLooper());
+		handler.post(new Runnable() {
+			public void run() {
+				AsyncTask<Void, Void, Void> task = new WorkerTask(context)
+				{
+					@Override
+					protected void doWork(Context context)
+					{
+						Map<String, Object> tags;
+						try {
+							tags = DeviceFeature2_5.getTags(context);
+							listener.onTagsReceived(tags);
+						} catch (Exception e) {
+							listener.onError(e);
+						}
+					}
+				};
+
+				ExecutorHelper.executeAsyncTask(task);
+			}
+		});		
+	}
+	
+	public static void sendLocation(final Context context, final Location location)
 	{
 		if (GCMRegistrar.isRegisteredOnServer(context) == false)
 			return;
 
-		AsyncTask<Void, Void, Void> task;
-		try
-		{
-			task = new WorkerTask(context)
-			{
-				@Override
-				protected void doWork(Context context)
+		Handler handler = new Handler(context.getMainLooper());
+		handler.post(new Runnable() {
+			public void run() {
+				AsyncTask<Void, Void, Void> task = new WorkerTask(context)
 				{
-					try {
-						DeviceFeature2_5.getNearestZone(context, location);
-					} catch (Exception e) {
-//						e.printStackTrace();
+					@Override
+					protected void doWork(Context context)
+					{
+						try {
+							DeviceFeature2_5.getNearestZone(context, location);
+						} catch (Exception e) {
+//								e.printStackTrace();
+						}
 					}
-				}
-			};
-		}
-		catch (Throwable e)
-		{
-			// we are not in UI thread. Simple run our registration
-			try {
-				DeviceFeature2_5.getNearestZone(context, location);
-			} catch (Exception e1) {
-//				e1.printStackTrace();
+				};
+
+				ExecutorHelper.executeAsyncTask(task);
 			}
-			return;
-		}
-		ExecutorHelper.executeAsyncTask(task);
+		});
 	}
 
 	//	------------------- 2.5 Features ENDS -------------------
@@ -406,103 +440,88 @@ public class PushManager
 		return true;
 	}
 
-	private void registerOnPushWoosh(Context context, String regId)
+	private void registerOnPushWoosh(final Context context, final String regId)
 	{
 		cancelPrevRegisterTask();
 
-		// if not register yet or an other id detected
-		mRegistrationAsyncTask = getRegisterAsyncTask(context, regId);
-		ExecutorHelper.executeAsyncTask(mRegistrationAsyncTask);
+		Handler handler = new Handler(context.getMainLooper());
+		handler.post(new Runnable() {
+			public void run() {
+				// if not register yet or an other id detected
+				mRegistrationAsyncTask = getRegisterAsyncTask(context, regId);
+
+				ExecutorHelper.executeAsyncTask(mRegistrationAsyncTask);
+			}
+		});
 	}
 
-	void sendPushStat(Context context, final String hash)
+	void sendPushStat(final Context context, final String hash)
 	{
-		AsyncTask<Void, Void, Void> task;
-		try
-		{
-			task = new WorkerTask(context)
-			{
-				@Override
-				protected void doWork(Context context)
+		Handler handler = new Handler(context.getMainLooper());
+		handler.post(new Runnable() {
+			public void run() {
+				AsyncTask<Void, Void, Void> task = new WorkerTask(context)
 				{
-					DeviceFeature2_5.sendPushStat(context, hash);
-				}
-			};
-		}
-		catch (Throwable e)
-		{
-			// we are not in UI thread. Simple run our registration
-			DeviceFeature2_5.sendPushStat(context, hash);
-			return;
-		}
-		ExecutorHelper.executeAsyncTask(task);
+					@Override
+					protected void doWork(Context context)
+					{
+						DeviceFeature2_5.sendPushStat(context, hash);
+					}
+				};
+
+				ExecutorHelper.executeAsyncTask(task);
+			}
+		});
 	}
 	
-	private void sendAppOpen(Context context)
+	private void sendAppOpen(final Context context)
 	{
-		AsyncTask<Void, Void, Void> task;
-		try
-		{
-			task = new WorkerTask(context)
-			{
-				@Override
-				protected void doWork(Context context)
+		Handler handler = new Handler(context.getMainLooper());
+		handler.post(new Runnable() {
+			public void run() {
+				AsyncTask<Void, Void, Void> task = new WorkerTask(context)
 				{
-					DeviceFeature2_5.sendAppOpen(context);
-				}
-			};
-		}
-		catch (Throwable e)
-		{
-			// we are not in UI thread. Simple run our registration
-			DeviceFeature2_5.sendAppOpen(context);
-			return;
-		}
-		ExecutorHelper.executeAsyncTask(task);
+					@Override
+					protected void doWork(Context context)
+					{
+						DeviceFeature2_5.sendAppOpen(context);
+					}
+				};
+
+				ExecutorHelper.executeAsyncTask(task);
+			}
+		});
 	}
 
-	public static void sendGoalAchieved(Context context, final String goal, final Integer count)
+	public static void sendGoalAchieved(final Context context, final String goal, final Integer count)
 	{
-		AsyncTask<Void, Void, Void> task;
-		try
-		{
-			task = new WorkerTask(context)
-			{
-				@Override
-				protected void doWork(Context context)
+		Handler handler = new Handler(context.getMainLooper());
+		handler.post(new Runnable() {
+			public void run() {
+				AsyncTask<Void, Void, Void> task = new WorkerTask(context)
 				{
-					DeviceFeature2_5.sendGoalAchieved(context, goal, count);
-				}
-			};
-		}
-		catch (Throwable e)
-		{
-			// we are not in UI thread. Simple run our registration
-			DeviceFeature2_5.sendGoalAchieved(context, goal, count);
-			return;
-		}
-		ExecutorHelper.executeAsyncTask(task);
+					@Override
+					protected void doWork(Context context)
+					{
+						DeviceFeature2_5.sendGoalAchieved(context, goal, count);
+					}
+				};
+
+				ExecutorHelper.executeAsyncTask(task);
+			}
+		});
 	}
 	
 	private AsyncTask<Void, Void, Void> getRegisterAsyncTask(final Context context, final String regId)
 	{
-		try
+		return new WorkerTask(context)
 		{
-			return new WorkerTask(context)
+			@Override
+			protected void doWork(Context context)
 			{
-				@Override
-				protected void doWork(Context context)
-				{
-					DeviceRegistrar.registerWithServer(mContext, regId);
-				}
-			};
-		}
-		catch (Throwable e)
-		{
-			// we are not in UI thread. Simple run our registration
-			DeviceRegistrar.registerWithServer(context, regId);
-			return null;
-		}
+				DeviceRegistrar.registerWithServer(mContext, regId);
+			}
+		};
 	}
 
 	private void cancelPrevRegisterTask()
@@ -536,5 +555,13 @@ public class PushManager
 
 	static public void clearLocalNotifications(Context context) {
 		AlarmReceiver.clearAlarm(context);
+	}
+	
+	static public Map<String, Object> incrementalTag(Integer value) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("operation", "increment");
+		result.put("value", value);
+		
+		return result;
 	}
 }

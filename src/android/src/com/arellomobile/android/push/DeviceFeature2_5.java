@@ -14,9 +14,11 @@ import com.arellomobile.android.push.data.PushZoneLocation;
 import com.arellomobile.android.push.request.RequestHelper;
 import com.arellomobile.android.push.utils.NetworkUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +39,7 @@ public class DeviceFeature2_5
 	private static final String MSG_DELIVERED = "messageDeliveryEvent";
 	private static final String PACKAGE_REMOVED = "androidPackageRemoved";
 	private static final String GOAL_ACHIEVED = "applicationEvent";
+	private static final String GET_TAGS = "getTags";
 
 	public static void sendPushStat(Context context, String hash)
 	{
@@ -45,7 +48,7 @@ public class DeviceFeature2_5
 		
 		final Map<String, Object> data = new HashMap<String, Object>();
 
-		data.putAll(RequestHelper.getSendPushStatData(context, hash, NetworkUtils.PUSH_VERSION));
+		data.putAll(RequestHelper.getSendPushStatData(context, hash));
 
 		Log.w(TAG, "Try To sent PushStat");
 
@@ -76,7 +79,7 @@ public class DeviceFeature2_5
 	{
 		final Map<String, Object> data = new HashMap<String, Object>();
 
-		data.putAll(RequestHelper.getSendGoalAchievedData(context, goal, count, NetworkUtils.PUSH_VERSION));
+		data.putAll(RequestHelper.getSendGoalAchievedData(context, goal, count));
 
 		Log.w(TAG, "Try To sent Goal");
 
@@ -110,7 +113,7 @@ public class DeviceFeature2_5
 	{
 		final Map<String, Object> data = new HashMap<String, Object>();
 
-		data.putAll(RequestHelper.getSendAppOpenData(context, NetworkUtils.PUSH_VERSION));
+		data.putAll(RequestHelper.getSendAppOpenData(context));
 
 		Log.w(TAG, "Try To sent AppOpen");
 
@@ -139,18 +142,29 @@ public class DeviceFeature2_5
 		Log.e(TAG, "ERROR: Try To sent AppOpen " + exception.getMessage() + ". Response = " + res.getResultData(),
 				exception);
 	}
-
-	public static JSONArray sendTags(Context context, Map<String, Object> tags) throws Exception
+	
+	@SuppressWarnings("unchecked")
+	private static JSONObject jsonObjectFromTagMap(Map<String, Object> tags) throws JSONException
 	{
-		final Map<String, Object> data = new HashMap<String, Object>();
-
-		data.putAll(RequestHelper.getSendTagsData(context, NetworkUtils.PUSH_VERSION));
-
 		JSONObject tagsObject = new JSONObject();
 		for (String key : tags.keySet())
 		{
 			Object value = tags.get(key);
-			if (value instanceof String || value instanceof Integer)
+			if (value instanceof String)
+			{
+				String valString = (String)value;
+				if(valString.startsWith("#pwinc#"))
+				{
+					valString = valString.substring(7);
+					Integer intValue = Integer.parseInt(valString);
+					tagsObject.put(key, jsonObjectFromTagMap(PushManager.incrementalTag(intValue)));
+				}
+				else
+				{
+					tagsObject.put(key, value);
+				}
+			}
+			else if(value instanceof Integer)
 			{
 				tagsObject.put(key, value);
 			}
@@ -175,12 +189,26 @@ public class DeviceFeature2_5
 				JSONArray values = (JSONArray)value;
 				tagsObject.put(key, values);
 			}
+			else if (value instanceof Map<?, ?>)
+			{
+				tagsObject.put(key, jsonObjectFromTagMap((Map<String, Object>)value));
+			}
 			else
 			{
 				throw new RuntimeException("wrong type for tag: " + key);
 			}
 		}
+	
+		return tagsObject;
+	}
 
+	public static JSONArray sendTags(Context context, Map<String, Object> tags) throws Exception
+	{
+		final Map<String, Object> data = new HashMap<String, Object>();
+
+		data.putAll(RequestHelper.getSendTagsData(context));
+
+		JSONObject tagsObject = jsonObjectFromTagMap(tags);
 		data.put("tags", tagsObject);
 
 		Log.w(TAG, "Try To sent Tags");
@@ -219,7 +247,7 @@ public class DeviceFeature2_5
 	{
 		final Map<String, Object> data = new HashMap<String, Object>();
 
-		data.putAll(RequestHelper.getNearestZoneData(context, location, NetworkUtils.PUSH_VERSION));
+		data.putAll(RequestHelper.getNearestZoneData(context, location));
 
 		Log.w(TAG, "Try To Sent Nearest Zone");
 
@@ -238,7 +266,7 @@ public class DeviceFeature2_5
 
 				Log.w(TAG, "Send Nearest Zone success");
 
-				return RequestHelper.getPushZoneLocationFromData(res.getResultData(), NetworkUtils.PUSH_VERSION);
+				return RequestHelper.getPushZoneLocationFromData(res.getResultData());
 			}
 			catch (Exception e)
 			{
@@ -257,7 +285,7 @@ public class DeviceFeature2_5
 		
 		final Map<String, Object> data = new HashMap<String, Object>();
 
-		data.putAll(RequestHelper.getSendPushStatData(context, hash, NetworkUtils.PUSH_VERSION));
+		data.putAll(RequestHelper.getSendPushStatData(context, hash));
 
 		Log.w(TAG, "Try To sent MsgDelivered");
 
@@ -291,7 +319,7 @@ public class DeviceFeature2_5
 	{
 		final Map<String, Object> data = new HashMap<String, Object>();
 
-		data.putAll(RequestHelper.getAppRemovedData(context, packageName, NetworkUtils.PUSH_VERSION));
+		data.putAll(RequestHelper.getAppRemovedData(context, packageName));
 
 		Log.w(TAG, "Try To sent AppRemoved");
 
@@ -320,4 +348,40 @@ public class DeviceFeature2_5
 		Log.e(TAG, "ERROR: Try To sent AppRemoved " + exception.getMessage() + ". Response = " + res.getResultData(),
 				exception);
 	}
+
+	public static Map<String, Object> getTags(Context context) {
+		final Map<String, Object> data = new HashMap<String, Object>();
+
+		data.putAll(RequestHelper.getGetTagsData(context));
+
+		Log.w(TAG, "Try To sent AppRemoved");
+
+		NetworkUtils.NetworkResult res = new NetworkUtils.NetworkResult(500, 0, null);
+		Exception exception = new Exception();
+		for (int i = 0; i < NetworkUtils.MAX_TRIES; ++i)
+		{
+			try
+			{
+				res = NetworkUtils.makeRequest(data, GET_TAGS);
+				if (200 != res.getResultCode())
+					continue;
+				
+				if (200 != res.getPushwooshCode())
+					break;
+
+				Log.w(TAG, "Send getTags success");
+				
+				return RequestHelper.getTagsFromData(res.getResultData());
+			}
+			catch (Exception e)
+			{
+				exception = e;
+			}
+		}
+
+		Log.e(TAG, "ERROR: Try To sent getTags " + exception.getMessage() + ". Response = " + res.getResultData(),
+				exception);
+		
+		return null;
+		}
 }
