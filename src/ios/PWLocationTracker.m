@@ -6,6 +6,9 @@
 #import "PWLocationTracker.h"
 #import <UIKit/UIKit.h>
 
+//comment this line to disable location tracking for geo-push notifications and dependency on CoreLocation.framework
+#define USE_LOCATION
+
 static CGFloat const kMinUpdateDistance = 10.f;
 static NSTimeInterval const kMinUpdateTime = 10.f;
 
@@ -25,8 +28,10 @@ static NSTimeInterval const kMinUpdateTime = 10.f;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidEnterBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
 
+#ifdef USE_LOCATION
         self.locationManager = [[CLLocationManager alloc] init];
         self.locationManager.delegate = self;
+#endif
 		//[self.locationManager setDesiredAccuracy:kCLLocationAccuracyHundredMeters];
 
 		self.enabled = false;
@@ -106,8 +111,9 @@ static NSTimeInterval const kMinUpdateTime = 10.f;
         if (self.locationUpdatedInBackground) {
 			dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0ul);
 			dispatch_async(queue, ^{
-				UIBackgroundTaskIdentifier bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler: ^{
+				UIBackgroundTaskIdentifier __block bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler: ^{
 					[[UIApplication sharedApplication] endBackgroundTask:bgTask];
+					bgTask = UIBackgroundTaskInvalid;
 				}];
 
 				self.locationUpdatedInBackground(newLocation);

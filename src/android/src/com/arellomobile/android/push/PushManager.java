@@ -381,6 +381,14 @@ public class PushManager
 			activity.startActivity(intent);
 		}
 		
+		String customPageUrl = (String) pushBundle.get("r");
+		if(customPageUrl != null) {
+			// show browser
+			Intent intent = new Intent(activity, PushWebview.class);
+			intent.putExtra("url", customPageUrl);
+			activity.startActivity(intent);
+		}
+		
 		//temporary disable this code until the server supports it
 		String packageName = (String) pushBundle.get("l");
 		if(false && packageName != null)

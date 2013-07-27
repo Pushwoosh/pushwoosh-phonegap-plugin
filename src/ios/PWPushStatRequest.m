@@ -17,7 +17,7 @@
 	NSMutableDictionary *dict = [self baseDictionary];
 	
 	if(hash != nil)
-		[dict setObject:[self encodeString:hash] forKey:@"hash"];
+		[dict setObject:hash forKey:@"hash"];
 	
 	return dict;
 }

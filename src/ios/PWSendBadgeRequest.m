@@ -16,7 +16,7 @@
 - (NSDictionary *) requestDictionary {
 	NSMutableDictionary *dict = [self baseDictionary];
 	
-	[dict setObject:[self encodeInt:self.badge] forKey:@"badge"];
+	[dict setObject:[NSNumber numberWithInt:badge] forKey:@"badge"];
 	
 	return dict;
 }

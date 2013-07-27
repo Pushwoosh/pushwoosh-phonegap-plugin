@@ -16,8 +16,8 @@
 - (NSDictionary *) requestDictionary {
 	NSMutableDictionary *dict = [self baseDictionary];
 	
-	[dict setObject:[self encodeDouble:coordinate.latitude] forKey:@"lat"];
-	[dict setObject:[self encodeDouble:coordinate.longitude] forKey:@"lng"];
+	[dict setObject:[NSNumber numberWithDouble:coordinate.latitude] forKey:@"lat"];
+	[dict setObject:[NSNumber numberWithDouble:coordinate.longitude] forKey:@"lng"];
 	
 	return dict;
 }

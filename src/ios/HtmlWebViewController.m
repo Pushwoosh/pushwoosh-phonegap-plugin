@@ -40,7 +40,7 @@
 	[closeButton addTarget:self action:@selector(closeButtonAction) forControlEvents:UIControlEventTouchUpInside];
 	closeButton.titleLabel.font = [UIFont fontWithName:@"AppleColorEmoji" size:22.0f];
 	[closeButton setTitle:@"❎" forState:UIControlStateNormal];
-	[self.view addSubview:closeButton];
+	[webview.scrollView addSubview:closeButton];
 	
 	webview.opaque = YES;
 	webview.scalesPageToFit = NO;

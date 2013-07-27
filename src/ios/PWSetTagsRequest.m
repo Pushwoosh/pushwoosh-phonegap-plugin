@@ -5,6 +5,7 @@
 //
 
 #import "PWSetTagsRequest.h"
+#import "PW_SBJsonWriter.h"
 
 @implementation PWSetTagsRequest
 @synthesize tags;
@@ -15,38 +16,26 @@
 
 - (NSDictionary *) requestDictionary {
 	NSMutableDictionary *dict = [self baseDictionary];
-	NSMutableArray *encodedTagsBuilder = [NSMutableArray new];
+	NSMutableDictionary *mutableTags = [tags mutableCopy];
 	
-	for (NSString *key in [tags allKeys]) {
+	for (NSString *key in [mutableTags allKeys]) {
 		NSString *valueString = @"";
-		NSObject *value = [tags objectForKey:key];
+		NSObject *value = [mutableTags objectForKey:key];
 		
 		if ([value isKindOfClass:[NSString class]]) {
-			valueString = [self encodeString:(NSString *) value];
-		} else
-		if ([value isKindOfClass:[NSArray class]]) {
-			BOOL first = YES;
-			for(NSString *val in (NSArray *)value) {
-				if(!first) {
-					valueString = [valueString stringByAppendingFormat:@",%@",[self encodeString:(NSString *) val]];
-				} else {
-					valueString = [valueString stringByAppendingString:[self encodeString:(NSString *) val]];
-					first = NO;
-				}
+			valueString = (NSString *)value;
+			
+			if([valueString hasPrefix:@"#pwinc#"]) {
+				NSString * noPrefixString = [valueString substringFromIndex:7];
+				NSNumber * valueNumber = [NSNumber numberWithDouble:[noPrefixString doubleValue]];
+				
+				NSMutableDictionary *opTag = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"increment", @"operation", valueNumber, @"value", nil];
+				[mutableTags setObject:opTag forKey:key];
 			}
-			valueString = [NSString stringWithFormat:@"[%@]", valueString];
-		} else {
-			valueString = [self encodeObject:value];
 		}
-		
-		[encodedTagsBuilder addObject:[NSString stringWithFormat:@"%@:%@", [self encodeString: key], valueString]];
 	}
 
-	
-	NSString *encodedTags = [NSString stringWithFormat:@"{%@}", [encodedTagsBuilder componentsJoinedByString:@", "]];
-	[dict setObject:encodedTags forKey:@"tags"];
-	
-	[encodedTagsBuilder release]; encodedTagsBuilder = nil;
+	[dict setObject:mutableTags forKey:@"tags"];
 	return dict;
 }
 - (void) dealloc {

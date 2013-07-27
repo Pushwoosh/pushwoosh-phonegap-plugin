@@ -27,6 +27,7 @@ public class PushWebview extends Activity
 
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.setWebViewClient(new HelloWebViewClient());
+		webView.reload();
 
 		webView.loadUrl(url);
 

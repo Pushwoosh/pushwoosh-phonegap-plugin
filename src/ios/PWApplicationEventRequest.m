@@ -16,10 +16,10 @@
 - (NSDictionary *) requestDictionary {
 	NSMutableDictionary *dict = [self baseDictionary];
 	
-	[dict setObject:[self encodeString:goal] forKey:@"goal"];
+	[dict setObject:goal forKey:@"goal"];
 	
 	if(count != nil)
-		[dict setObject:[self encodeInt:[count intValue]] forKey:@"count"];
+		[dict setObject:count forKey:@"count"];
 	
 	return dict;
 }

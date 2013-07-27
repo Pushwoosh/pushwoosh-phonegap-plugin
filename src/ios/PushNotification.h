@@ -24,19 +24,19 @@
 @property (nonatomic, retain) PushNotificationManager *pushManager;
 @property (nonatomic, copy) NSString *startPushData;
 
-- (void)registerDevice:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
-- (void)setTags:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
-- (void)sendLocation:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
-- (void)startLocationTracking:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
-- (void)stopLocationTracking:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
+- (void)registerDevice:(CDVInvokedUrlCommand*)command;
+- (void)setTags:(CDVInvokedUrlCommand*)command;
+- (void)sendLocation:(CDVInvokedUrlCommand*)command;
+- (void)startLocationTracking:(CDVInvokedUrlCommand*)command;
+- (void)stopLocationTracking:(CDVInvokedUrlCommand*)command;
 
-- (void)onDeviceReady:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
+- (void)onDeviceReady:(CDVInvokedUrlCommand*)command;
 - (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString*)deviceToken;
 - (void)onDidFailToRegisterForRemoteNotificationsWithError:(NSError*)error;
 + (NSMutableDictionary*)getRemoteNotificationStatus;
-- (void)getRemoteNotificationStatus:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
-- (void)setApplicationIconBadgeNumber:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
-- (void)cancelAllLocalNotifications:(NSMutableArray *)arguments withDict:(NSMutableDictionary*)options;
+- (void)getRemoteNotificationStatus:(CDVInvokedUrlCommand*)command;
+- (void)setApplicationIconBadgeNumber:(CDVInvokedUrlCommand*)command;
+- (void)cancelAllLocalNotifications:(CDVInvokedUrlCommand*)command;
 
 @end
 

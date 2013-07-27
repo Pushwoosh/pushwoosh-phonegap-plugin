@@ -31,6 +31,11 @@
 	PushNotification.prototype.onDeviceReady = function() {
 		cordova.exec(null, null, "PushNotification", "onDeviceReady", []);
 	};
+	
+	// Call this to get tags for the device
+	PushNotification.prototype.getTags = function(success, fail) {
+		cordova.exec(success, fail, "PushNotification", "getTags", []);
+	};
 
 	//Android Only----
 	PushNotification.prototype.unregisterDevice = function(success, fail) {

@@ -5,6 +5,8 @@
 //
 
 #import "PWRequestManager.h"
+#import "PW_SBJsonWriter.h"
+#import "PW_SBJsonParser.h"
 
 @implementation PWRequestManager
 
@@ -24,15 +26,13 @@
 }
 
 - (BOOL) sendRequest: (PWRequest *) request error:(NSError **)retError {
-	NSMutableArray *requestStringBuilder = [NSMutableArray new];
 	NSDictionary *requestDict = [request requestDictionary];
 	
-	for (NSString *key in [requestDict allKeys]) {
-		[requestStringBuilder addObject:[NSString stringWithFormat:@"\"%@\":%@", key, [requestDict objectForKey:key]]];
-	}
-	NSString *requestString = [requestStringBuilder componentsJoinedByString:@", "];
-	NSString *jsonRequestData = [NSString stringWithFormat:@"{\"request\":{%@}}", requestString];
-	[requestStringBuilder release];
+	PW_SBJsonWriter * json = [[PW_SBJsonWriter alloc] init];
+	NSString *requestString = [json stringWithObject:requestDict];
+	[json release]; json = nil;
+
+	NSString *jsonRequestData = [NSString stringWithFormat:@"{\"request\":%@}", requestString];
 	
 #ifdef NOSSL
 	NSString *requestUrl = [kServiceAddressNoSSL stringByAppendingString:[request methodName]];
@@ -59,10 +59,23 @@
 	
 	NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
 	NSLog(@"Response \"%d %@\": string: %@", [response statusCode], [NSHTTPURLResponse localizedStringForStatusCode:[response statusCode]], responseString);
-	
+
+	PW_SBJsonParser * jsonReader = [[PW_SBJsonParser alloc] init];
+	NSDictionary *jsonResult = [jsonReader objectWithString:responseString];
+	[jsonReader release]; jsonReader = nil;
 	[responseString release]; responseString = nil;
-	if (response.statusCode != 200) 
+	
+	NSInteger pushwooshResult = [[jsonResult objectForKey:@"status_code"] intValue];
+
+	if (response.statusCode != 200 || pushwooshResult != 200)
+	{
+		if(retError && !error)
+			*retError = [NSError errorWithDomain:@"com.pushwoosh" code:response.statusCode userInfo:jsonResult];
+
 		return NO;
+	}
+	
+	[request parseResponse:jsonResult];
 	
 	return YES;
 }

@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
-    xmlns="http://www.phonegap.com/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="com.pushwoosh.plugins.pushwoosh"
     version="3.0.0">
 
     <name>Pushwoosh</name>
 
+    <description>
+    This plugin allows you to send and receive push notifications.
+    </description>
+
     <asset src="www/PushNotification.js" target="PushNotification.js" />
+
+    <license>MIT</license>
 
     <!-- android -->
     <platform name="android">
@@ -96,7 +101,7 @@
 			value="com.pushwoosh.plugin.pushnotifications.PushNotifications" onload="true"/>
         </config-file>
 
-		<config-file target="res/xml/cordova.xml" parent="/cordova">
+		<config-file target="res/xml/config.xml" parent="/cordova">
             <access origin="https://cp.pushwoosh.com" subdomains="true" />
         </config-file>
 		
@@ -178,16 +183,6 @@
 		<source-file src="src/android/src/com/arellomobile/android/push/request/RequestHelper.java"
 		        target-dir="src/com/arellomobile/android/push/request" />
 
-		<source-file src="src/android/src/com/arellomobile/android/push/request/versions/Version__1_2.java"
-		        target-dir="src/com/arellomobile/android/push/request/versions" />
-
-		<source-file src="src/android/src/com/arellomobile/android/push/request/versions/Version__1_3.java"
-		        target-dir="src/com/arellomobile/android/push/request/versions" />
-
-		<source-file src="src/android/src/com/arellomobile/android/push/request/versions/VersionHelper.java"
-		        target-dir="src/com/arellomobile/android/push/request/versions" />
-
-
 		<source-file src="src/android/src/com/arellomobile/android/push/tags/SendPushTagsAbstractAsyncTask.java"
 		        target-dir="src/com/arellomobile/android/push/tags" />
 
@@ -234,8 +229,10 @@
     </platform>
     <!-- ios -->
     <platform name="ios">
-        <plugins-plist key="PushNotification"
-                    string="PushNotification" />
+        <config-file target="config.xml" parent="plugins">
+            <plugin name="PushNotification"
+            value="PushNotification" onload="true"/>
+        </config-file>
 
         <access origin="*.pushwoosh.com" />
 
@@ -265,6 +262,9 @@
 
         <header-file src="PWRequestManager.h" />
         <source-file src="PWRequestManager.m" />
+
+        <header-file src="PWGetTagsRequest.h" />
+        <source-file src="PWGetTagsRequest.m" />
 
         <header-file src="PWSetTagsRequest.h" />
         <source-file src="PWSetTagsRequest.m" />

@@ -18,16 +18,19 @@
 - (NSDictionary *) requestDictionary {
 	NSMutableDictionary *dict = [self baseDictionary];
 	
-	[dict setObject:[self encodeInt:1] forKey:@"device_type"];
-	[dict setObject:[self encodeString:pushToken] forKey:@"push_token"];
-	[dict setObject:[self encodeString:language] forKey:@"language"];
-	[dict setObject:[self encodeString:timeZone] forKey:@"timezone"];
+	[dict setObject:[NSNumber numberWithInt:1] forKey:@"device_type"];
+	[dict setObject:pushToken forKey:@"push_token"];
+	[dict setObject:language forKey:@"language"];
+	[dict setObject:timeZone forKey:@"timezone"];
 
 	BOOL sandbox = ![PushNotificationManager getAPSProductionStatus];
-	[dict setObject:[self encodeString:sandbox ? @"sandbox" : @"production"] forKey:@"gateway"];
+	if(sandbox)
+		[dict setObject:@"sandbox" forKey:@"gateway"];
+	else
+		[dict setObject:@"production" forKey:@"gateway"];
 
 	NSString * package = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"];
-	[dict setObject:[self encodeString:package] forKey:@"package"];
+	[dict setObject:package forKey:@"package"];
 	
 	return dict;
 }

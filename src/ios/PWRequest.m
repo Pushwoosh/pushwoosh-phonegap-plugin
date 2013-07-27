@@ -18,35 +18,14 @@
 	return nil;
 }
 
-- (NSString *) encodeString: (NSString *) str { 
-	return [NSString stringWithFormat:@"\"%@\"", [str stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""]];
-}
-
-- (NSString *) encodeNumber: (NSNumber *) number {
-	return [number stringValue];
-}
-
-- (NSString *) encodeObject: (NSObject *) object {
-	return [NSString stringWithFormat:@"%@", object];
-}
-
-- (NSString *) encodeInt: (int) number {
-	return [NSString stringWithFormat:@"%d", number];
-}
-
-- (NSString *) encodeDouble: (double) number {
-	return [NSString stringWithFormat:@"%f", number];
-}
-
-- (NSString *) encodeFloat: (float) number {
-	return [NSString stringWithFormat:@"%f", number];
-}
-
 - (NSMutableDictionary *) baseDictionary {
 	NSMutableDictionary *dict = [NSMutableDictionary new];
-	[dict setObject:[self encodeString:appId] forKey:@"application"];
-	[dict setObject:[self encodeString:hwid] forKey:@"hwid"];
+	[dict setObject:appId forKey:@"application"];
+	[dict setObject:hwid forKey:@"hwid"];
 	return [dict autorelease];
+}
+
+- (void) parseResponse: (NSDictionary *) response {
 }
 
 - (void) dealloc {
