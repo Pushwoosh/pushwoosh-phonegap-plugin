@@ -150,7 +150,7 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
 	UIWindow *richPushWindow;
 	NSInteger internalIndex;
 	NSMutableDictionary *pushNotifications;
-	NSObject<PushNotificationDelegate> *delegate;
+	NSObject<PushNotificationDelegate> *__unsafe_unretained delegate;
 }
 
 /**

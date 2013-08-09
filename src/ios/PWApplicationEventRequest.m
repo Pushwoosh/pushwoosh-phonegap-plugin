@@ -24,10 +24,4 @@
 	return dict;
 }
 
-- (void) dealloc {
-	self.goal = nil;
-	self.count = nil;
-	[super dealloc];
-}
-
 @end

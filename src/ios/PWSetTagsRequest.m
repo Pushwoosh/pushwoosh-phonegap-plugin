@@ -38,9 +38,5 @@
 	[dict setObject:mutableTags forKey:@"tags"];
 	return dict;
 }
-- (void) dealloc {
-	self.tags = nil;
-	[super dealloc];
-}
 
 @end

@@ -229,10 +229,12 @@
     </platform>
     <!-- ios -->
     <platform name="ios">
-		<config-file target="config.xml" parent="plugins">
-            <plugin name="PushNotification"
-            value="PushNotification" onload="true"/>
-        </config-file>
+		<config-file target="config.xml" parent="/*">
+			<feature name="PushNotification"
+>
+				<param name="ios-package" value="PushNotification"/>
+			</feature>
+		</config-file>
 
         <access origin="*.pushwoosh.com" />
 

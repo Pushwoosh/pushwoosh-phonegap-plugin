@@ -35,12 +35,5 @@
 	return dict;
 }
 
-- (void) dealloc {
-	self.pushToken = nil;
-	self.language = nil;
-	self.timeZone = nil;
-
-	[super dealloc];
-}
 
 @end
