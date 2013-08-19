@@ -1,4 +1,4 @@
-Cordova Android Pushwoosh Push Notifications plugin
+Cordova Pushwoosh Push Notifications plugin
 ===================================================
 
 cross-platform PushWoosh for Cordova / PhoneGap

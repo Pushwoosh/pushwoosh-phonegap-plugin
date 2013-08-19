@@ -96,14 +96,12 @@
 			
 		</config-file>
 		
-		<config-file target="res/xml/config.xml" parent="/cordova/plugins">
+		<config-file target="res/xml/config.xml" parent="plugins">
             <plugin name="PushNotification"
 			value="com.pushwoosh.plugin.pushnotifications.PushNotifications" onload="true"/>
         </config-file>
 
-		<config-file target="res/xml/config.xml" parent="/cordova">
-            <access origin="https://cp.pushwoosh.com" subdomains="true" />
-        </config-file>
+		<access origin="*.pushwoosh.com" />
 		
 		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PushNotifications.java"
 		        target-dir="src/com/pushwoosh/plugin/pushnotifications" />
