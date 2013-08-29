@@ -70,7 +70,7 @@
 			if (u) {
 				PW_SBJsonParser * json = [[PW_SBJsonParser alloc] init];
 				NSDictionary *dict = [json objectWithString:u];
-				[json release]; json = nil;
+				json = nil;
 				
 				if (dict) {
 					[pn setObject:dict forKey:@"u"];
@@ -81,7 +81,7 @@
 			
 			PW_SBJsonWriter * json = [[PW_SBJsonWriter alloc] init];
 			NSString *jsonString = [json stringWithObject:pn];
-			[json release]; json = nil;
+			json = nil;
 			
 			//the webview is not loaded yet, keep it for the callback
 			pushHandler.startPushData = jsonString;

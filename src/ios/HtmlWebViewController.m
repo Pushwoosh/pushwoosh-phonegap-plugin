@@ -16,7 +16,7 @@
 
 - (id)initWithURLString:(NSString *)url {
 	if(self = [super init]) {
-		urlToLoad = [url retain];
+		urlToLoad = url;
 		webViewLoads = 0;
 	}
 	
@@ -57,10 +57,6 @@
 - (void)dealloc {
 	self.delegate = nil;
 	webview.delegate = nil;
-	[webview release];
-	[urlToLoad release];
-	
-    [super dealloc];
 }
 
 - (void) closeButtonAction {

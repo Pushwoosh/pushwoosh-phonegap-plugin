@@ -45,8 +45,6 @@ static NSTimeInterval const kMinUpdateTime = 10.f;
 	
 	self.locationManager.delegate = nil;
 	self.locationManager = nil;
-	
-	[super dealloc];
 }
 
 #pragma mark - Notification handlers

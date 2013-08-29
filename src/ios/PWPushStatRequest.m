@@ -22,9 +22,5 @@
 	return dict;
 }
 
-- (void) dealloc {
-	self.hash = nil;
-	[super dealloc];
-}
 
 @end

@@ -96,9 +96,10 @@
 			
 		</config-file>
 		
-		<config-file target="res/xml/config.xml" parent="plugins">
-            <plugin name="PushNotification"
-			value="com.pushwoosh.plugin.pushnotifications.PushNotifications" onload="true"/>
+		<config-file target="res/xml/config.xml" parent="/*">
+            <feature name="PushNotification">
+				<param name="android-package" value="com.pushwoosh.plugin.pushnotifications.PushNotifications" onload="true" />
+			</feature>
         </config-file>
 
 		<access origin="*.pushwoosh.com" />
@@ -227,10 +228,12 @@
     </platform>
     <!-- ios -->
     <platform name="ios">
-		<config-file target="config.xml" parent="plugins">
-            <plugin name="PushNotification"
-            value="PushNotification" onload="true"/>
-        </config-file>
+		<config-file target="config.xml" parent="/*">
+			<feature name="PushNotification"
+>
+				<param name="ios-package" value="PushNotification"/>
+			</feature>
+		</config-file>
 
         <access origin="*.pushwoosh.com" />
 

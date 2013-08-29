@@ -22,17 +22,10 @@
 	NSMutableDictionary *dict = [NSMutableDictionary new];
 	[dict setObject:appId forKey:@"application"];
 	[dict setObject:hwid forKey:@"hwid"];
-	return [dict autorelease];
+	return dict;
 }
 
 - (void) parseResponse: (NSDictionary *) response {
-}
-
-- (void) dealloc {
-	self.appId = nil;
-	self.hwid = nil;
-	
-	[super dealloc];
 }
 
 @end

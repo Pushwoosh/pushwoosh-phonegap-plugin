@@ -131,7 +131,6 @@
 	NSNumber * lon = [[command.arguments objectAtIndex:0] objectForKey:@"lon"];
 	CLLocation * location = [[CLLocation alloc] initWithLatitude:[lat doubleValue] longitude:[lon doubleValue]];
 	[[PushNotificationManager pushManager] sendLocation:location];
-	[location release];
 	
 	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
 	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"sendLocation"]]];
@@ -195,7 +194,7 @@
 	if (u) {
 		PW_SBJsonParser * json = [[PW_SBJsonParser alloc] init];
 		NSDictionary *dict =[json objectWithString:u];
-		[json release]; json = nil;
+		json = nil;
 		
 		if (dict) {
 			[pn setObject:dict forKey:@"u"];
@@ -206,7 +205,7 @@
 	
 	PW_SBJsonWriter * json = [[PW_SBJsonWriter alloc] init];
 	NSString *jsonString =[json stringWithObject:pn];
-	[json release]; json = nil;
+	json = nil;
 	
 	NSString *jsStatement = [NSString stringWithFormat:@"window.plugins.pushNotification.notificationCallback(%@);", jsonString];
 	[self writeJavascript:[NSString stringWithFormat:@"setTimeout(function() { %@; }, 0);", jsStatement]];
@@ -312,9 +311,6 @@
 - (void) dealloc {
 	self.pushManager = nil;
 	self.startPushData = nil;
-
-	[_callbackIds dealloc];
-	[super dealloc];
 }
 
 @end
