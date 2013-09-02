@@ -26,8 +26,8 @@ import com.arellomobile.android.push.preference.VibrateType;
 import com.arellomobile.android.push.utils.RegisterBroadcastReceiver;
 import com.google.android.gcm.GCMRegistrar;
 
-import org.apache.cordova.api.CallbackContext;
-import org.apache.cordova.api.CordovaPlugin;
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
