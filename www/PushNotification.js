@@ -37,11 +37,11 @@
 		cordova.exec(success, fail, "PushNotification", "getTags", []);
 	};
 
-	//Android Only----
 	PushNotification.prototype.unregisterDevice = function(success, fail) {
 		cordova.exec(success, fail, "PushNotification", "unregisterDevice", []);
 	};
 
+ 	//Android Only----
 	//config params: {msg:"message", seconds:30, userData:"optional"}
 	PushNotification.prototype.createLocalNotification = function(config, success, fail) {
 		cordova.exec(success, fail, "PushNotification", "createLocalNotification", config ? [config] : []);

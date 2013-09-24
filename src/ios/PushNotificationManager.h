@@ -337,6 +337,8 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
 - (NSString *) getPushToken;
 
 //internal
+- (void) unregisterDevice;
+
 - (void) handlePushRegistration:(NSData *)devToken;
 - (void) handlePushRegistrationString:(NSString *)deviceID;
 

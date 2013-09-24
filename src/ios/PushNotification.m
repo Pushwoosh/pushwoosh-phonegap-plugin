@@ -15,6 +15,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import "AppDelegate.h"
 #import "PW_SBJsonParser.h"
+#import "PWUnregisterDeviceRequest.h"
 
 @implementation PushNotification
 
@@ -91,6 +92,16 @@
 	
 	[[UIApplication sharedApplication] registerForRemoteNotificationTypes:notificationTypes];
 
+}
+
+- (void)unregisterDevice:(CDVInvokedUrlCommand*)command {
+	[self.callbackIds setValue:command.callbackId forKey:@"unregisterDevice"];
+	
+	[[UIApplication sharedApplication] unregisterForRemoteNotifications];
+	[pushManager unregisterDevice];
+	
+	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
+	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"unregisterDevice"]]];
 }
 
 - (void)setTags:(CDVInvokedUrlCommand*)command {

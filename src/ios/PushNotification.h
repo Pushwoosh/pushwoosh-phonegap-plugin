@@ -25,6 +25,7 @@
 @property (nonatomic, copy) NSString *startPushData;
 
 - (void)registerDevice:(CDVInvokedUrlCommand*)command;
+- (void)unregisterDevice:(CDVInvokedUrlCommand*)command;
 - (void)setTags:(CDVInvokedUrlCommand*)command;
 - (void)sendLocation:(CDVInvokedUrlCommand*)command;
 - (void)startLocationTracking:(CDVInvokedUrlCommand*)command;

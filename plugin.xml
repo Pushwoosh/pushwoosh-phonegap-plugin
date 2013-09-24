@@ -288,6 +288,9 @@
         <header-file src="src/ios/PW_SBJsonWriter.h" />
         <source-file src="src/ios/PW_SBJsonWriter.m" />
 
+		<header-file src="src/ios/PWUnregisterDeviceRequest.h" />
+		<source-file src="src/ios/PWUnregisterDeviceRequest.m" />
+
         <header-file src="src/ios/PushRuntime.h" />
         <source-file src="src/ios/PushRuntime.m" />
     </platform>
