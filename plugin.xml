@@ -10,6 +10,10 @@
     This plugin allows you to send and receive push notifications.
     </description>
 
+    <engines>
+        <engine name="cordova" version=">=3.0.0" />
+    </engines>  
+
     <asset src="www/PushNotification.js" target="PushNotification.js" />
 
     <license>MIT</license>
