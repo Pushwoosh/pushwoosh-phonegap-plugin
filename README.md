@@ -7,7 +7,7 @@ follows the Cordova Plugin spec http://cordova.apache.org/docs/en/3.0.0/plugin_r
 
 so that it works with Plugman https://https://github.com/apache/cordova-plugman
 
-*Recent Changes:* Plugman support by @platogo
+*Recent Changes:* Plugman support by Platogo
 
 ## LICENSE
 
