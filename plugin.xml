@@ -9,11 +9,230 @@
     This plugin allows you to send and receive push notifications.
     </description>
 
-    <engines>
+    <!-- <engines>
         <engine name="cordova" version=">=3.1.0" />
-    </engines>
+    </engines> -->
 
     <license>MIT</license>
+
+    <!-- android -->
+    <platform name="android">
+
+      <js-module src="www/PushNotification.js" name="PushNotification">
+          <clobbers target="plugins.pushNotification" />
+      </js-module>
+
+      <config-file>
+        <access origin="*.pushwoosh.com" />
+      </config-file>
+
+      <config-file target="AndroidManifest.xml" parent="/manifest">
+        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+        <!--library-->
+        <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
+        <!-- GCM connects to Google Services. -->
+        <uses-permission android:name="android.permission.INTERNET"/>
+
+        <!-- GCM requires a Google account. -->
+        <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+
+        <!-- Keeps the processor from sleeping when a message is received. -->
+        <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+        <!--
+         Creates a custom permission so only this app can receive its messages.
+
+         NOTE: the permission *must* be called PACKAGE.permission.C2D_MESSAGE,
+         where PACKAGE is the application's package name.
+         -->
+        <permission
+        android:name="$PACKAGE_NAME.permission.C2D_MESSAGE"
+        android:protectionLevel="signature"/>
+        <uses-permission
+        android:name="$PACKAGE_NAME.permission.C2D_MESSAGE"/>
+
+        <!-- This app has permission to register and receive data message. -->
+        <uses-permission
+        android:name="com.google.android.c2dm.permission.RECEIVE"/>
+      </config-file>
+
+      <config-file target="AndroidManifest.xml" parent="/manifest/application/activity">
+        <intent-filter>
+          <action android:name="$PACKAGE_NAME.MESSAGE"/>
+          <category android:name="android.intent.category.DEFAULT"/>
+        </intent-filter>
+      </config-file>
+
+      <config-file target="AndroidManifest.xml" parent="/manifest/application">
+        <activity android:name="com.arellomobile.android.push.PushWebview"/>
+
+        <activity android:name="com.arellomobile.android.push.MessageActivity"/>
+
+        <activity android:name="com.arellomobile.android.push.PushHandlerActivity"/>
+
+        <!--
+         BroadcastReceiver that will receive intents from GCM
+         services and handle them to the custom IntentService.
+
+         The com.google.android.c2dm.permission.SEND permission is necessary
+         so only GCM services can send data messages for the app.
+         -->
+        <receiver
+          android:name="com.google.android.gcm.GCMBroadcastReceiver"
+          android:permission="com.google.android.c2dm.permission.SEND">
+          <intent-filter>
+            <!-- Receives the actual messages. -->
+            <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+            <!-- Receives the registration id. -->
+            <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
+            <category android:name="$PACKAGE_NAME"/>
+          </intent-filter>
+        </receiver>
+
+        <!--
+         Application-specific subclass of PushGCMIntentService that will
+         handle received messages.
+         -->
+        <service android:name="com.arellomobile.android.push.PushGCMIntentService"/>
+
+            <!--
+              Service for sending location updates
+            -->
+            <service android:name="com.arellomobile.android.push.GeoLocationService"/>
+
+            <receiver android:name="com.arellomobile.android.push.AlarmReceiver"></receiver>
+
+      </config-file>
+
+      <config-file target="res/xml/config.xml" parent="/*">
+        <feature name="PushNotification">
+          <param name="android-package" value="com.pushwoosh.plugin.pushnotifications.PushNotifications" onload="true" />
+        </feature>
+      </config-file>
+
+      <source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PushNotifications.java"
+              target-dir="src/com/pushwoosh/plugin/pushnotifications" />
+
+      <source-file src="src/android/src/com/pushwoosh/support/v4/app/NotificationCompat.java"
+              target-dir="src/com/pushwoosh/support/v4/app/" />
+
+      <source-file src="src/android/src/com/pushwoosh/support/v4/app/NotificationCompatHoneycomb.java"
+              target-dir="src/com/pushwoosh/support/v4/app/" />
+
+      <source-file src="src/android/src/com/pushwoosh/support/v4/app/NotificationCompatIceCreamSandwich.java"
+              target-dir="src/com/pushwoosh/support/v4/app/" />
+
+      <source-file src="src/android/src/com/pushwoosh/support/v4/app/NotificationCompatJellybean.java"
+              target-dir="src/com/pushwoosh/support/v4/app/" />
+
+      <source-file src="src/android/src/com/google/android/gcm/GCMBaseIntentService.java"
+              target-dir="src/com/google/android/gcm" />
+
+      <source-file src="src/android/src/com/google/android/gcm/GCMBroadcastReceiver.java"
+              target-dir="src/com/google/android/gcm" />
+
+      <source-file src="src/android/src/com/google/android/gcm/GCMConstants.java"
+              target-dir="src/com/google/android/gcm" />
+
+      <source-file src="src/android/src/com/google/android/gcm/GCMRegistrar.java"
+              target-dir="src/com/google/android/gcm" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/AlarmReceiver.java"
+              target-dir="src/com/arellomobile/android/push" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/BasePushMessageReceiver.java"
+              target-dir="src/com/arellomobile/android/push" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/DeviceFeature2_5.java"
+              target-dir="src/com/arellomobile/android/push" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/DeviceRegistrar.java"
+              target-dir="src/com/arellomobile/android/push" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/GeoLocationService.java"
+              target-dir="src/com/arellomobile/android/push" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/MessageActivity.java"
+              target-dir="src/com/arellomobile/android/push" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/PushEventsTransmitter.java"
+              target-dir="src/com/arellomobile/android/push" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/PushGCMIntentService.java"
+              target-dir="src/com/arellomobile/android/push" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/PushHandlerActivity.java"
+              target-dir="src/com/arellomobile/android/push" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/PushManager.java"
+              target-dir="src/com/arellomobile/android/push" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/PushWebview.java"
+              target-dir="src/com/arellomobile/android/push" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/PackageRemoveReceiver.java"
+              target-dir="src/com/arellomobile/android/push" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/data/PushZoneLocation.java"
+              target-dir="src/com/arellomobile/android/push/data" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/exception/PushWooshException.java"
+              target-dir="src/com/arellomobile/android/push/exception" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/preference/SoundType.java"
+              target-dir="src/com/arellomobile/android/push/preference" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/preference/VibrateType.java"
+              target-dir="src/com/arellomobile/android/push/preference" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/request/RequestHelper.java"
+              target-dir="src/com/arellomobile/android/push/request" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/tags/SendPushTagsAbstractAsyncTask.java"
+              target-dir="src/com/arellomobile/android/push/tags" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/tags/SendPushTagsAsyncTask.java"
+              target-dir="src/com/arellomobile/android/push/tags" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/tags/SendPushTagsCallBack.java"
+              target-dir="src/com/arellomobile/android/push/tags" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/utils/executor/ExecutorHelper.java"
+              target-dir="src/com/arellomobile/android/push/utils/executor" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/utils/GeneralUtils.java"
+              target-dir="src/com/arellomobile/android/push/utils" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/utils/NetworkUtils.java"
+              target-dir="src/com/arellomobile/android/push/utils" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/utils/PreferenceUtils.java"
+              target-dir="src/com/arellomobile/android/push/utils" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/utils/executor/V11ExecutorHelper.java"
+              target-dir="src/com/arellomobile/android/push/utils/executor" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/utils/WorkerTask.java"
+              target-dir="src/com/arellomobile/android/push/utils" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/utils/RegisterBroadcastReceiver.java"
+              target-dir="src/com/arellomobile/android/push/utils" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/utils/notification/BannerNotificationFactory.java"
+              target-dir="src/com/arellomobile/android/push/utils/notification" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/utils/notification/BaseNotificationFactory.java"
+              target-dir="src/com/arellomobile/android/push/utils/notification" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/utils/notification/Helper.java"
+              target-dir="src/com/arellomobile/android/push/utils/notification" />
+
+      <source-file src="src/android/src/com/arellomobile/android/push/utils/notification/SimpleNotificationFactory.java"
+              target-dir="src/com/arellomobile/android/push/utils/notification" />
+
+    </platform>
 
     <!-- ios -->
     <platform name="ios">

@@ -3,9 +3,6 @@ Cordova Pushwoosh Push Notifications plugin
 
 cross-platform PushWoosh for Cordova / PhoneGap
 
-- [x] Support for iOS
-- [ ] Support for Android (coming soon - hopefully ;-))
-
 follows the Cordova Plugin spec https://github.com/alunny/cordova-plugin-spec
 
 so that it works with Plugman https://https://github.com/apache/cordova-plugman
@@ -35,14 +32,172 @@ so that it works with Plugman https://https://github.com/apache/cordova-plugman
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 	THE SOFTWARE.
 
+## Manual Installation for Android
+
+  Set up the following permissions in the AndroidManifest.xml
+      <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+      
+      <!--library-->
+      <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+      
+      <!-- GCM connects to Google Services. -->
+      <uses-permission android:name="android.permission.INTERNET"/>
+      
+      <!-- GCM requires a Google account. -->
+      <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+      
+      <!-- Keeps the processor from sleeping when a message is received. -->
+      <uses-permission android:name="android.permission.WAKE_LOCK"/>
+      
+      <!--
+       Creates a custom permission so only this app can receive its messages.
+       
+       NOTE: the permission *must* be called PACKAGE.permission.C2D_MESSAGE,
+       where PACKAGE is the application's package name.
+       -->
+      <permission
+      android:name="$PACKAGE_NAME.permission.C2D_MESSAGE"
+      android:protectionLevel="signature"/>
+      <uses-permission
+      android:name="$PACKAGE_NAME.permission.C2D_MESSAGE"/>
+      
+      <!-- This app has permission to register and receive data message. -->
+      <uses-permission
+      android:name="com.google.android.c2dm.permission.RECEIVE"/>
+
+      <intent-filter>
+        <action android:name="$PACKAGE_NAME.MESSAGE"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+
+      <activity android:name="com.arellomobile.android.push.PushWebview"/>
+      
+      <activity android:name="com.arellomobile.android.push.MessageActivity"/>
+      
+      <activity android:name="com.arellomobile.android.push.PushHandlerActivity"/>
+      
+      <!--
+       BroadcastReceiver that will receive intents from GCM
+       services and handle them to the custom IntentService.
+       
+       The com.google.android.c2dm.permission.SEND permission is necessary
+       so only GCM services can send data messages for the app.
+       -->
+      <receiver
+        android:name="com.google.android.gcm.GCMBroadcastReceiver"
+        android:permission="com.google.android.c2dm.permission.SEND">
+        <intent-filter>
+          <!-- Receives the actual messages. -->
+          <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+          <!-- Receives the registration id. -->
+          <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
+          <category android:name="$PACKAGE_NAME"/>
+        </intent-filter>
+      </receiver>
+      
+      <!--
+       Application-specific subclass of PushGCMIntentService that will
+       handle received messages.
+       -->
+      <service android:name="com.arellomobile.android.push.PushGCMIntentService"/>
+      
+          <!--
+            Service for sending location updates
+          -->
+          <service android:name="com.arellomobile.android.push.GeoLocationService"/>
+        
+          <receiver android:name="com.arellomobile.android.push.AlarmReceiver"></receiver>
+      
+  Add the following entries to the config.xml file:
+    
+            <plugin name="PushNotification"
+      value="com.pushwoosh.plugin.pushnotifications.PushNotifications" onload="true"/>
+
+            <access origin="https://cp.pushwoosh.com" subdomains="true" />
+
+    Copy the following files into your plugin folder for the project:
+
+    com/pushwoosh/plugin/pushnotifications/PushNotifications.java
+    com/google/android/gcm/GCMBaseIntentService.java
+    com/google/android/gcm/GCMBroadcastReceiver.java
+    com/google/android/gcm/GCMConstants.java
+    com/google/android/gcm/GCMRegistrar.java
+    com/arellomobile/android/push/AlarmReceiver.java
+    com/arellomobile/android/push/BasePushMessageReceiver.java
+    com/arellomobile/android/push/DeviceFeature2_5.java
+    com/arellomobile/android/push/DeviceRegistrar.java
+    com/arellomobile/android/push/GeoLocationService.java
+    com/arellomobile/android/push/MessageActivity.java
+    com/arellomobile/android/push/PushEventsTransmitter.java
+    com/arellomobile/android/push/PushGCMIntentService.java
+    com/arellomobile/android/push/PushHandlerActivity.java
+    com/arellomobile/android/push/PushManager.java
+    com/arellomobile/android/push/PushWebview.java
+    com/arellomobile/android/push/data/PushZoneLocation.java
+    com/arellomobile/android/push/exception/PushWooshException.java
+    com/arellomobile/android/push/preference/SoundType.java
+    com/arellomobile/android/push/preference/VibrateType.java
+    com/arellomobile/android/push/request/RequestHelper.java
+    com/arellomobile/android/push/tags/SendPushTagsAbstractAsyncTask.java
+    com/arellomobile/android/push/tags/SendPushTagsAsyncTask.java
+    com/arellomobile/android/push/tags/SendPushTagsCallBack.java
+    com/arellomobile/android/push/utils/executor/ExecutorHelper.java
+    com/arellomobile/android/push/utils/GeneralUtils.java
+    com/arellomobile/android/push/utils/NetworkUtils.java
+    com/arellomobile/android/push/utils/PreferenceUtils.java
+    com/arellomobile/android/push/utils/executor/V11ExecutorHelper.java
+    com/arellomobile/android/push/utils/WorkerTask.java
+    com/arellomobile/android/push/utils/notification/BannerNotificationFactory.java
+    com/arellomobile/android/push/utils/notification/BaseNotificationFactory.java
+    com/arellomobile/android/push/utils/notification/Helper.java
+    com/arellomobile/android/push/utils/notification/NotificationCreator.java
+    com/arellomobile/android/push/utils/notification/NotificationFactory.java
+    com/arellomobile/android/push/utils/notification/SimpleNotificationFactory.java
+    com/arellomobile/android/push/utils/notification/V11NotificationCreator.java
+
+ 
+## Manual Installation for iOS
+
+Copy the following files to your project's Plugins folder:
+
+  HtmlWebViewController.h 
+  HtmlWebViewController.m 
+  PWGetNearestZoneRequest.h 
+  PWGetNearestZoneRequest.m 
+  PWPushStatRequest.h 
+  PWPushStatRequest.m 
+  PWRegisterDeviceRequest.h 
+  PWRegisterDeviceRequest.m 
+  PWRequest.h 
+  PWRequest.m 
+  PWRequestManager.h 
+  PWRequestManager.m 
+  PWSendBadgeRequest.h 
+  PWSendBadgeRequest.m 
+  PWGetTagsRequest.h 
+  PWGetTagsRequest.m 
+  PWSetTagsRequest.h 
+  PWSetTagsRequest.m 
+  PushNotificationManager.h 
+  PushNotificationManager.m
+
+Add a reference for this plugin to the plugins dictionary in **Cordova.plist**:
+
+  <key>PushNotification</key>
+  <string>PushNotification</string>
+
+Add the **PushNotification.js** script to your assets/www folder (or within a javascripts folder within your www folder) and reference it in your main index.html file.
+
+    <script type="text/javascript" charset="utf-8" src="PushNotification.js"></script>
+
 ## Automatic Installation
 This plugin is based on [plugman](https://https://github.com/apache/cordova-plugman). to install it to your app,
-simply execute pluginstall as follows;
+simply execute plugman as follows;
 
-	pluginstall [PLATFORM] [TARGET-PATH] [PLUGIN-PATH]
+	plugman install --platform [PLATFORM] --project [TARGET-PATH] --plugin [PLUGIN-PATH]
 	
 	where
-		[PLATFORM] = ios
+		[PLATFORM] = ios or android
 		[TARGET-PATH] = path to folder containing your phonegap project
 		[PLUGIN-PATH] = path to folder containing this plugin
 
