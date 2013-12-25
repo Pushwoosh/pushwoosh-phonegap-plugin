@@ -40,6 +40,8 @@ public class RequestHelper
 		data.put("hwid", GeneralUtils.getDeviceUUID(context));
 		data.put("device_name", GeneralUtils.isTablet(context) ? "Tablet" : "Phone");
 		data.put("device_type", "3");
+		
+		data.put("v", "2.1");
 		data.put("language", Locale.getDefault().getLanguage());
 		data.put("timezone", Calendar.getInstance().getTimeZone().getRawOffset() / 1000); // converting from milliseconds to seconds
 

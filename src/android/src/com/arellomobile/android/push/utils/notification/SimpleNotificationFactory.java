@@ -38,8 +38,8 @@ public class SimpleNotificationFactory extends BaseNotificationFactory
 		}
 		
 		NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
-		notificationBuilder.setContentTitle(header);
-		notificationBuilder.setContentText(message);
+		notificationBuilder.setContentTitle(Html.fromHtml(header));
+		notificationBuilder.setContentText(Html.fromHtml(message));
 		notificationBuilder.setTicker(tickerTitle);
 		notificationBuilder.setWhen(System.currentTimeMillis());
 		

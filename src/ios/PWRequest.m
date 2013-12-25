@@ -6,6 +6,8 @@
 
 #import "PWRequest.h"
 
+#define kSDKVersion @"2.0"
+
 @implementation PWRequest
 @synthesize appId, hwid;
 
@@ -22,6 +24,7 @@
 	NSMutableDictionary *dict = [NSMutableDictionary new];
 	[dict setObject:appId forKey:@"application"];
 	[dict setObject:hwid forKey:@"hwid"];
+	[dict setObject:kSDKVersion forKey:@"v"];
 	return dict;
 }
 
