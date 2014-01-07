@@ -1,6 +1,6 @@
 //
 //  PushRuntime.m
-//  Pushwoosh Phonegap SDK
+//  Pushwoosh SDK
 //  (c) Pushwoosh 2012
 //
 
@@ -8,139 +8,142 @@
 #import "PushNotificationManager.h"
 #import <objc/runtime.h>
 
-#import "PushNotification.h"
-#import "PW_SBJsonParser.h"
-#import "PW_SBJsonWriter.h"
+#if ! __has_feature(objc_arc)
+#error "ARC is required to compile Pushwoosh SDK"
+#endif
 
-@implementation AppDelegate(Pushwoosh)
+@interface UIApplication(InternalPushRuntime)
+- (NSObject<PushNotificationDelegate> *)getPushwooshDelegate;
+- (BOOL) pushwooshDontAutoRegister;
+@end
 
-- (void)application:(UIApplication *)application internalDidRegisterForRemoteNotificationsWithDeviceToken:(NSData *)devToken {
-	PushNotification *pushHandler = [self.viewController getCommandInstance:@"PushNotification"];
-	[pushHandler.pushManager handlePushRegistration:devToken];
+static void swizze(Class class, SEL fromChange, SEL toChange, IMP impl, const char * signature)
+{
+	Method method = nil;
+	method = class_getInstanceMethod(class, fromChange);
 	
-    //you might want to send it to your backend if you use remote integration
-	NSString *token = [pushHandler.pushManager getPushToken];
-	NSLog(@"Push token: %@", token);
+	if (method) {
+		//method exists add a new method and swap with original
+		class_addMethod(class, toChange, impl, signature);
+		method_exchangeImplementations(class_getInstanceMethod(class, fromChange), class_getInstanceMethod(class, toChange));
+	} else {
+		//just add as orignal method
+		class_addMethod(class, fromChange, impl, signature);
+	}
 }
 
-- (void)application:(UIApplication *)application newDidRegisterForRemoteNotificationsWithDeviceToken:(NSData *)devToken {
-	[self application:application newDidRegisterForRemoteNotificationsWithDeviceToken:devToken];
-	[self application:application internalDidRegisterForRemoteNotificationsWithDeviceToken:devToken];
-}
-
-- (void)application:(UIApplication *)application internalDidFailToRegisterForRemoteNotificationsWithError:(NSError *)err {
-	PushNotification* pushHandler = [self.viewController getCommandInstance:@"PushNotification"];
-	[pushHandler onDidFailToRegisterForRemoteNotificationsWithError:err];
-}
-
-- (void)application:(UIApplication *)application newDidFailToRegisterForRemoteNotificationsWithError:(NSError *)err {
-	[self application:application newDidFailToRegisterForRemoteNotificationsWithError:err];
-	[self application:application internalDidFailToRegisterForRemoteNotificationsWithError:err];
-}
-
-- (void)application:(UIApplication *)application internalDidReceiveRemoteNotification:(NSDictionary *)userInfo {
-	PushNotification *pushHandler = [self.viewController getCommandInstance:@"PushNotification"];
-	[pushHandler.pushManager handlePushReceived:userInfo];
-}
-
-- (void)application:(UIApplication *)application newDidReceiveRemoteNotification:(NSDictionary *)userInfo {
-	[self application:application newDidReceiveRemoteNotification:userInfo];
-	[self application:application internalDidReceiveRemoteNotification:userInfo];
-}
-
-
-- (BOOL)application:(UIApplication *)application newDidFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-	BOOL result = [self application:application newDidFinishLaunchingWithOptions:launchOptions];
+int getPushNotificationMode() {
+	//default push modes
+	int modes = UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert;
 	
-	PushNotification *pushHandler = [self.viewController getCommandInstance:@"PushNotification"];
-	if(!pushHandler || !pushHandler.pushManager)
-		return result;
-	
-	[pushHandler.pushManager sendAppOpen];
-	
-	if(result) {
-		NSDictionary * userInfo = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
-		[pushHandler.pushManager handlePushReceived:userInfo];
-
-		if(userInfo) {
-			NSMutableDictionary *pn = [NSMutableDictionary dictionaryWithDictionary:userInfo];
-
-			//convert userdata from JSON string to JSON Object
-			NSString* u = [userInfo objectForKey:@"u"];
-			if (u) {
-				PW_SBJsonParser * json = [[PW_SBJsonParser alloc] init];
-				NSDictionary *dict = [json objectWithString:u];
-				json = nil;
-				
-				if (dict) {
-					[pn setObject:dict forKey:@"u"];
-				}
-			}
-		
-			[pn setValue:[NSNumber numberWithBool:YES] forKey:@"onStart"];
-			
-			PW_SBJsonWriter * json = [[PW_SBJsonWriter alloc] init];
-			NSString *jsonString = [json stringWithObject:pn];
-			json = nil;
-			
-			//the webview is not loaded yet, keep it for the callback
-			pushHandler.startPushData = jsonString;
+	//add newsstand mode if info.plist supports it
+	NSArray * backgroundModes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIBackgroundModes"];
+	for(NSString *mode in backgroundModes) {
+		if([mode isEqualToString:@"newsstand-content"]) {
+			modes |= UIRemoteNotificationTypeNewsstandContentAvailability;
+			break;
 		}
 	}
+
+	return modes;
+}
+
+@implementation UIApplication(Pushwoosh)
+
+BOOL dynamicDidFinishLaunching(id self, SEL _cmd, id application, id launchOptions) {
+	BOOL result = YES;
+	
+	if ([self respondsToSelector:@selector(application:pw_didFinishLaunchingWithOptions:)]) {
+		result = (BOOL) [self application:application pw_didFinishLaunchingWithOptions:launchOptions];
+	} else {
+		[self applicationDidFinishLaunching:application];
+		result = YES;
+	}
+	
+	int modes = getPushNotificationMode();
+
+	if(![[UIApplication sharedApplication] respondsToSelector:@selector(pushwooshDontAutoRegister)]) {
+		BOOL autoRegisterMode = ![[[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_NOAUTOREGISTER"] boolValue];
+		if (autoRegisterMode) {
+			[[UIApplication sharedApplication] registerForRemoteNotificationTypes:modes];
+		}
+	}
+	
+	if(![PushNotificationManager pushManager].delegate) {
+		if([[UIApplication sharedApplication] respondsToSelector:@selector(getPushwooshDelegate)])
+		{
+			[PushNotificationManager pushManager].delegate = [[UIApplication sharedApplication] getPushwooshDelegate];
+		}
+		else
+		{
+			[PushNotificationManager pushManager].delegate = (NSObject<PushNotificationDelegate> *)self;
+		}
+	}
+	
+    if ([launchOptions objectForKey:UIApplicationLaunchOptionsLocationKey]) {
+        [[PushNotificationManager pushManager] startLocationTracking];
+    }
+    
+	[[PushNotificationManager pushManager] handlePushReceived:launchOptions];
+	[[PushNotificationManager pushManager] sendAppOpen];
 	
 	return result;
 }
 
-void dynamicMethodIMP(id self, SEL _cmd, id application, id param) {
-	if (_cmd == @selector(application:didRegisterForRemoteNotificationsWithDeviceToken:)) {
-		[self application:application internalDidRegisterForRemoteNotificationsWithDeviceToken:param];
-		return;
-    }
+void dynamicDidRegisterForRemoteNotificationsWithDeviceToken(id self, SEL _cmd, id application, id devToken) {
+	if ([self respondsToSelector:@selector(application:pw_didRegisterForRemoteNotificationsWithDeviceToken:)]) {
+		[self application:application pw_didRegisterForRemoteNotificationsWithDeviceToken:devToken];
+	}
 	
-	if (_cmd == @selector(application:didFailToRegisterForRemoteNotificationsWithError:)) {
-		[self application:application internalDidFailToRegisterForRemoteNotificationsWithError:param];
-		return;
-    }
-	
-	if (_cmd == @selector(application:didReceiveRemoteNotification:)) {
-		[self application:application internalDidReceiveRemoteNotification:param];
-		return;
-    }
+	[[PushNotificationManager pushManager] handlePushRegistration:devToken];
 }
 
-+ (void)load {
-	method_exchangeImplementations(class_getInstanceMethod(self, @selector(application:didFinishLaunchingWithOptions:)), class_getInstanceMethod(self, @selector(application:newDidFinishLaunchingWithOptions:)));
-	
-	//if methods does not exist - provide default implementation, otherwise swap the implementation
-	Method method = nil;
-	method = class_getInstanceMethod(self, @selector(application:didRegisterForRemoteNotificationsWithDeviceToken:));
-	if(method) {
-		method_exchangeImplementations(method, class_getInstanceMethod(self, @selector(application:newDidRegisterForRemoteNotificationsWithDeviceToken:)));
-	}
-	else {
-		class_addMethod(self, @selector(application:didRegisterForRemoteNotificationsWithDeviceToken:), (IMP)dynamicMethodIMP, "v@:::");
+void dynamicDidFailToRegisterForRemoteNotificationsWithError(id self, SEL _cmd, id application, id error) {
+	if ([self respondsToSelector:@selector(application:pw_didFailToRegisterForRemoteNotificationsWithError:)]) {
+		[self application:application pw_didFailToRegisterForRemoteNotificationsWithError:error];
 	}
 	
-	method = class_getInstanceMethod(self, @selector(application:didFailToRegisterForRemoteNotificationsWithError:));
-	if(method) {
-		method_exchangeImplementations(class_getInstanceMethod(self, @selector(application:didFailToRegisterForRemoteNotificationsWithError:)), class_getInstanceMethod(self, @selector(application:newDidFailToRegisterForRemoteNotificationsWithError:)));
-	}
-	else {
-		class_addMethod(self, @selector(application:didFailToRegisterForRemoteNotificationsWithError:), (IMP)dynamicMethodIMP, "v@:::");
-	}
+	NSLog(@"Error registering for push notifications. Error: %@", error);
 	
-	method = class_getInstanceMethod(self, @selector(application:didReceiveRemoteNotification:));
-	if(method) {
-		method_exchangeImplementations(class_getInstanceMethod(self, @selector(application:didReceiveRemoteNotification:)), class_getInstanceMethod(self, @selector(application:newDidReceiveRemoteNotification:)));
-	}
-	else {
-		class_addMethod(self, @selector(application:didReceiveRemoteNotification:), (IMP)dynamicMethodIMP, "v@:::");
-	}
+	[[PushNotificationManager pushManager] handlePushRegistrationFailure:error];
 }
 
-@end
+void dynamicDidReceiveRemoteNotification(id self, SEL _cmd, id application, id userInfo) {
+	if ([self respondsToSelector:@selector(application:pw_didReceiveRemoteNotification:)]) {
+		[self application:application pw_didReceiveRemoteNotification:userInfo];
+	}
+	
+	[[PushNotificationManager pushManager] handlePushReceived:userInfo];
+}
 
-@implementation UIApplication(Pushwoosh)
+
+- (void) pw_setDelegate:(id<UIApplicationDelegate>)delegate {
+
+	static Class delegateClass = nil;
+	
+	//do not swizzle the same class twice
+	if(delegateClass == [delegate class])
+	{
+		[self pw_setDelegate:delegate];
+		return;
+	}
+	
+	delegateClass = [delegate class];
+	
+	swizze([delegate class], @selector(application:didFinishLaunchingWithOptions:),
+		   @selector(application:pw_didFinishLaunchingWithOptions:), (IMP)dynamicDidFinishLaunching, "v@:::");
+
+	swizze([delegate class], @selector(application:didRegisterForRemoteNotificationsWithDeviceToken:),
+		   @selector(application:pw_didRegisterForRemoteNotificationsWithDeviceToken:), (IMP)dynamicDidRegisterForRemoteNotificationsWithDeviceToken, "v@:::");
+
+	swizze([delegate class], @selector(application:didFailToRegisterForRemoteNotificationsWithError:),
+		   @selector(application:pw_didFailToRegisterForRemoteNotificationsWithError:), (IMP)dynamicDidFailToRegisterForRemoteNotificationsWithError, "v@:::");
+
+	swizze([delegate class], @selector(application:didReceiveRemoteNotification:),
+		   @selector(application:pw_didReceiveRemoteNotification:), (IMP)dynamicDidReceiveRemoteNotification, "v@:::");
+	
+	[self pw_setDelegate:delegate];
+}
 
 - (void) pw_setApplicationIconBadgeNumber:(NSInteger) badgeNumber {
 	[self pw_setApplicationIconBadgeNumber:badgeNumber];
@@ -150,6 +153,7 @@ void dynamicMethodIMP(id self, SEL _cmd, id application, id param) {
 
 + (void) load {
 	method_exchangeImplementations(class_getInstanceMethod(self, @selector(setApplicationIconBadgeNumber:)), class_getInstanceMethod(self, @selector(pw_setApplicationIconBadgeNumber:)));
+	method_exchangeImplementations(class_getInstanceMethod(self, @selector(setDelegate:)), class_getInstanceMethod(self, @selector(pw_setDelegate:)));
 	
 	UIApplication *app = [UIApplication sharedApplication];
 	NSLog(@"Initializing application: %@, %@", app, app.delegate);

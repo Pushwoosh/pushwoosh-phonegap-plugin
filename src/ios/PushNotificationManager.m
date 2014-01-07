@@ -28,6 +28,10 @@
 
 #import <AdSupport/AdSupport.h>
 
+#if ! __has_feature(objc_arc)
+#error "ARC is required to compile Pushwoosh SDK"
+#endif
+
 #define kServiceHtmlContentFormatUrl @"http://cp.pushwoosh.com/content/%@"
 
 @interface UIApplication(Pushwoosh)
@@ -169,8 +173,8 @@ static PushNotificationManager * instance = nil;
 		showPushnotificationAlert = YES;
 
 		NSNumber * showAlertObj = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_SHOW_ALERT"];
-		if(showAlertObj)
-		{
+        
+		if(showAlertObj && [showAlertObj isKindOfClass:[NSNumber class]]) {
 			showPushnotificationAlert = [showAlertObj boolValue];
 			NSLog(@"Will show push notifications alert: %d", showPushnotificationAlert);
 		}
@@ -329,16 +333,18 @@ static PushNotificationManager * instance = nil;
 	[vc view];
 }
 
-- (void)htmlWebViewControllerDidClose:(HtmlWebViewController *)viewController {
-	
-	self.richPushWindow.transform = CGAffineTransformIdentity;
+- (void) hidePushWindow {
+    self.richPushWindow.transform = CGAffineTransformIdentity;
 	[UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
 		self.richPushWindow.transform = CGAffineTransformMakeScale(0.01, 0.01);
 		self.richPushWindow.alpha = 0.0f;
 	} completion:^(BOOL finished) {
 		self.richPushWindow.hidden = YES;
-
 	}];
+}
+
+- (void)htmlWebViewControllerDidClose:(HtmlWebViewController *)viewController {
+	[self hidePushWindow];
 }
 
 - (void) sendDevTokenToServer:(NSString *)deviceID {
@@ -486,21 +492,9 @@ static PushNotificationManager * instance = nil;
 	}
 	
 	NSDictionary *lastPushDict = [pushNotifications objectForKey:[NSNumber numberWithInt:alertView.tag]];
-	NSString *htmlPageId = [lastPushDict objectForKey:@"h"];
-	if(htmlPageId) {
-		[self showPushPage:htmlPageId];
-	}
-
-	NSString *customHtmlPageId = [lastPushDict objectForKey:@"r"];
-	if(customHtmlPageId) {
-		[self showCustomPushPage:customHtmlPageId];
-	}
     
-	NSString *linkUrl = [lastPushDict objectForKey:@"l"];
-	if(linkUrl) {
-		[self openUrl:[NSURL URLWithString:linkUrl]];
-	}
-	
+    [self processUserInfo:lastPushDict];
+    
 	if([delegate respondsToSelector:@selector(onPushAccepted: withNotification:)] ) {
 		[delegate onPushAccepted:self withNotification:lastPushDict];
 	}
@@ -510,6 +504,38 @@ static PushNotificationManager * instance = nil;
 		}
 	
 	[pushNotifications removeObjectForKey:[NSNumber numberWithInt:alertView.tag]];
+}
+
+- (BOOL)isJailBroken {
+    FILE *f = fopen("/bin/bash", "r");
+    BOOL isbash = NO;
+    
+    if (f != NULL) {
+        isbash = YES;
+    }
+    
+    fclose(f);
+    
+    return isbash;
+}
+
+- (void)processUserInfo:(NSDictionary *)userInfo {
+    NSString *htmlPageId = [userInfo objectForKey:@"h"];
+	NSString *linkUrl = [userInfo objectForKey:@"l"];
+	NSString *customHtmlPageId = [userInfo objectForKey:@"r"];
+    NSString *smsNumber = [userInfo objectForKey:@"s"];
+    NSString *callNumber = [userInfo objectForKey:@"c"];
+    
+    if(htmlPageId) {
+		[self showPushPage:htmlPageId];
+	}
+	else if(customHtmlPageId) {
+		[self showCustomPushPage:customHtmlPageId];
+	}
+    
+	if (linkUrl) {
+		[self openUrl:[NSURL URLWithString:linkUrl]];
+	}
 }
 
 - (BOOL) handlePushReceived:(NSDictionary *)userInfo {
@@ -546,13 +572,6 @@ static PushNotificationManager * instance = nil;
 	if(![alertMsg isKindOfClass:[NSString class]])
 		msgIsString = NO;
 	
-//	NSString *badge = [pushDict objectForKey:@"badge"];
-//	NSString *sound = [pushDict objectForKey:@"sound"];
-	NSString *htmlPageId = [userInfo objectForKey:@"h"];
-//	NSString *customData = [userInfo objectForKey:@"u"];
-	NSString *linkUrl = [userInfo objectForKey:@"l"];
-	NSString *customHtmlPageId = [userInfo objectForKey:@"r"];
-	
 	//the app is running, display alert only
 	if(!isPushOnStart && showPushnotificationAlert && msgIsString) {
 		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:self.appName message:alertMsg delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
@@ -562,18 +581,8 @@ static PushNotificationManager * instance = nil;
 		return YES;
 	}
 	
-	if(htmlPageId) {
-		[self showPushPage:htmlPageId];
-	}
-
-	if(customHtmlPageId) {
-		[self showCustomPushPage:customHtmlPageId];
-	}
+	[self processUserInfo:userInfo];
     
-	if(linkUrl) {
-		[self openUrl:[NSURL URLWithString:linkUrl]];
-	}
-	
 	if([delegate respondsToSelector:@selector(onPushAccepted: withNotification:)] ) {
 		[delegate onPushAccepted:self withNotification:userInfo];
 	}
@@ -612,7 +621,6 @@ static PushNotificationManager * instance = nil;
 - (void) sendTagsBackground: (NSDictionary *) tags {
 
 	@autoreleasepool {
-
 		PWSetTagsRequest *request = [[PWSetTagsRequest alloc] init];
 		request.appId = appCode;
 		request.hwid = [self uniqueGlobalDeviceIdentifier];
@@ -635,9 +643,10 @@ static PushNotificationManager * instance = nil;
 		request.appId = appCode;
 		request.hwid = [self uniqueGlobalDeviceIdentifier];
 		request.coordinate = location.coordinate;
-	
+
 		if ([[PWRequestManager sharedManager] sendRequest:request]) {
 			NSLog(@"getNearestZone completed");
+            self.locationTracker.distanceToNearestGeoZone = request.distance;
 		} else {
 			NSLog(@"getNearestZone failed");
 		}
@@ -776,13 +785,7 @@ static PushNotificationManager * instance = nil;
 
 //start location tracking. this is battery efficient and uses network triangulation in background
 - (void)startLocationTracking {
-	NSString *modeString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_BGMODE"];
-	[self startLocationTracking:modeString];
-}
-
-- (void) startLocationTracking:(NSString *)mode {
-	self.locationTracker.backgroundMode = mode;
-	self.locationTracker.enabled = YES;
+    self.locationTracker.enabled = YES;
 }
 
 //stops location tracking

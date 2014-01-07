@@ -10,4 +10,6 @@
 
 @property CLLocationCoordinate2D coordinate;
 
+@property (nonatomic, assign) CLLocationDistance distance;
+
 @end

@@ -18,6 +18,7 @@
 	NSMutableDictionary* callbackIds;
 	PushNotificationManager *pushManager;
 	NSString *startPushData;
+	BOOL deviceReady;
 }
 
 @property (nonatomic, retain) NSMutableDictionary* callbackIds;

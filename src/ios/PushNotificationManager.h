@@ -218,29 +218,9 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
 - (void) showWebView;
 
 /**
- Start location tracking. Mode can be specified in `Info.plist` file with the `Pushwoosh_BGMODE` key.
- 
- Available modes are:
- 
- - `PWTrackingDisabled` - no tracking in background (default)
- - `PWTrackSignificantLocationChanges` - this mode is battery-efficient and uses network triangulation in background and GPS in foreground
- - `PWTrackAccurateLocationChanges` - uses GPS in background and drains the battery. You have to specify "location" background mode in Info.plist as per iOS requirements
- 
+ Start location tracking.
  */
 - (void) startLocationTracking;
-
-/**
- Start location tracking. Mode can be specified as a string parameter.
-
- Available modes are:
- 
- - `PWTrackingDisabled` - no tracking in background (default)
- - `PWTrackSignificantLocationChanges` - this is battery-efficient and uses network triangulation in background and GPS in foreground
- - `PWTrackAccurateLocationChanges` - uses GPS in background and drains the battery. You have to specify "location" background mode in Info.plist as per iOS requirements
- 
- @param mode Location tracking mode.
- */
-- (void) startLocationTracking:(NSString *)mode;
 
 /**
  Stops location tracking

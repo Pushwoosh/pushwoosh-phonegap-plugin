@@ -6,6 +6,10 @@
 
 #import "PWApplicationEventRequest.h"
 
+#if ! __has_feature(objc_arc)
+#error "ARC is required to compile Pushwoosh SDK"
+#endif
+
 @implementation PWApplicationEventRequest
 @synthesize goal, count;
 

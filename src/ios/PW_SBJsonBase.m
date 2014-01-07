@@ -30,6 +30,9 @@
 #import "PW_SBJsonBase.h"
 NSString * PW_SBJSONErrorDomain = @"org.brautaset.JSON.ErrorDomain";
 
+#if ! __has_feature(objc_arc)
+#error "ARC is required to compile Pushwoosh SDK"
+#endif
 
 @implementation PW_SBJsonBase
 

@@ -97,8 +97,8 @@ PushNotification.prototype.sendGoalAchieved = function(config, success, fail) {
 //Android End----
 
 //iOS only----
-PushNotification.prototype.startLocationTracking = function(backgroundMode, success, fail) {
-	exec(success, fail, "PushNotification", "startLocationTracking", backgroundMode ? [{mode : backgroundMode}] : []);
+PushNotification.prototype.startLocationTracking = function(success, fail) {
+	exec(success, fail, "PushNotification", "startLocationTracking", []);
 };
 
 PushNotification.prototype.stopLocationTracking = function(success, fail) {

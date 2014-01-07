@@ -8,6 +8,10 @@
 #import "PW_SBJsonWriter.h"
 #import "PW_SBJsonParser.h"
 
+#if ! __has_feature(objc_arc)
+#error "ARC is required to compile Pushwoosh SDK"
+#endif
+
 @implementation PWRequestManager
 
 //we really do not transfer any sensitive data here, but you may uncomment this line out to enable plain version of the API
