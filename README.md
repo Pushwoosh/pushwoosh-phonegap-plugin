@@ -3,14 +3,14 @@ Cordova Pushwoosh Push Notifications plugin
 
 Cross-Platform push notifications by Pushwoosh for Cordova / PhoneGap
 
-follows the Cordova Plugin spec http://cordova.apache.org/docs/en/3.0.0/plugin_ref_spec.md
+follows the Cordova Plugin spec http://cordova.apache.org/docs/en/3.0.0/plugin_ref_spec.md  
 so that it works with Plugman https://https://github.com/apache/cordova-plugman
 
-Platform integration guides are available on Pushwoosh:
-iOS:
+###Platform integration guides are available on Pushwoosh:  
+####iOS:  
 http://www.pushwoosh.com/programming-push-notification/ios/ios-additional-platforms/push-notification-sdk-integration-for-phonegap/
 
-Android:
+####Android:  
 http://www.pushwoosh.com/programming-push-notification/android/android-additional-platforms/phonegapcordova-sdk-integration/
 
 ## Acknowledgments
@@ -21,7 +21,7 @@ Plugman support by Platogo
 	The MIT License
 	
 	Copyright (c) 2014 Pushwoosh.
-  http://www.pushwoosh.com
+	http://www.pushwoosh.com
 	
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
