@@ -238,6 +238,7 @@
 
     <!-- ios -->
     <platform name="ios">
+      <framework src="AdSupport.framework" />
       <config-file target="config.xml" parent="/*">
         <feature name="PushNotification">
           <param name="ios-package" value="PushNotification"/>
