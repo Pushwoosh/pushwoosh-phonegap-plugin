@@ -10,6 +10,10 @@
 
 package com.pushwoosh.plugin.pushnotifications;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,8 +21,9 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
-import com.arellomobile.android.push.PushManager;
+
 import com.arellomobile.android.push.BasePushMessageReceiver;
+import com.arellomobile.android.push.PushManager;
 import com.arellomobile.android.push.PushManager.GetTagsListener;
 import com.arellomobile.android.push.exception.PushWooshException;
 import com.arellomobile.android.push.preference.SoundType;
@@ -31,10 +36,6 @@ import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 public class PushNotifications extends CordovaPlugin
 {

@@ -11,11 +11,8 @@
 // MIT Licensed
 
 #import "PushNotification.h"
-#import "PW_SBJsonWriter.h"
 #import <CoreLocation/CoreLocation.h>
 #import "AppDelegate.h"
-#import "PW_SBJsonParser.h"
-#import "PWUnregisterDeviceRequest.h"
 
 @implementation PushNotification
 
@@ -202,10 +199,11 @@
 
 	//pase JSON string in custom data to JSON Object
 	NSString* u = [pushNotification objectForKey:@"u"];
+    
 	if (u) {
-		PW_SBJsonParser * json = [[PW_SBJsonParser alloc] init];
-		NSDictionary *dict =[json objectWithString:u];
-		json = nil;
+        NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:[u dataUsingEncoding:NSUTF8StringEncoding]
+                                                             options:NSJSONReadingMutableContainers
+                                                               error:nil];
 		
 		if (dict) {
 			[pn setObject:dict forKey:@"u"];
@@ -214,20 +212,17 @@
 	
 	[pn setValue:[NSNumber numberWithBool:onStart] forKey:@"onStart"];
 	
-	PW_SBJsonWriter * json = [[PW_SBJsonWriter alloc] init];
-	NSString *jsonString =[json stringWithObject:pn];
-	json = nil;
-
-	if(!deviceReady)
-	{
+    NSData *json = [NSJSONSerialization dataWithJSONObject:pn options:NSJSONWritingPrettyPrinted error:nil];
+	NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+    
+	if(!deviceReady){
 		//the webview is not loaded yet, keep it for the callback
 		AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
 		PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
 
 		pushHandler.startPushData = jsonString;
 	}
-	else
-	{
+	else {
 		//send it to the webview
 		NSString *jsStatement = [NSString stringWithFormat:@"window.plugins.pushNotification.notificationCallback(%@);", jsonString];
 		[self writeJavascript:[NSString stringWithFormat:@"setTimeout(function() { %@; }, 0);", jsStatement]];
