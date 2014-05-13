@@ -156,11 +156,7 @@
       <Capability Name="ID_CAP_PUSH_NOTIFICATION"/>
     </config-file>
 
-    <source-file src="src/wp8/PWGeozone.cs" />
-    <source-file src="src/wp8/PWNotification.cs" />
-    <source-file src="src/wp8/PWTags.cs" />
-    <source-file src="src/wp8/PWUserData.cs" />
-    <source-file src="src/wp8/PWUserToken.cs" />
+    <source-file src="src/wp8/PushNotification.cs" />
 
     <framework src="src/wp8/PushSDK/Coding4Fun.Phone.Controls.dll" custom="true" />
     <framework src="src/wp8/PushSDK/Newtonsoft.Json.dll" custom="true" />
