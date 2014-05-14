@@ -47,10 +47,11 @@ public class PushNotifications extends CordovaPlugin
 	public static final String SEND_LOCATION = "sendLocation";
 	public static final String CREATE_LOCAL_NOTIFICATION = "createLocalNotification";
 	public static final String CLEAR_LOCAL_NOTIFICATION = "clearLocalNotification";
-	public static final String ON_DEVICE_READY = "onDeviceReady";
 	public static final String GET_TAGS = "getTags";
+	public static final String ON_DEVICE_READY = "onDeviceReady";
+	public static final String GET_PUSH_TOKEN = "getPushToken";
+	public static final String GET_HWID = "getPushwooshHWID";
 	
-	boolean loggedStart = false;
 	boolean receiversRegistered = false;
 
 	HashMap<String, CallbackContext> callbackIds = new HashMap<String, CallbackContext>();
@@ -140,7 +141,7 @@ public class PushNotifications extends CordovaPlugin
 		super.onDestroy();
 	}
 
-	private boolean internalRegister(JSONArray data, CallbackContext callbackContext)
+	private void initialize(JSONArray data, CallbackContext callbackContext)
 	{
 		JSONObject params = null;
 		try
@@ -150,12 +151,8 @@ public class PushNotifications extends CordovaPlugin
 		catch (JSONException e)
 		{
 			e.printStackTrace();
-			
-			callbackContext.error(e.getMessage());
-			return true;
+			return;
 		}
-
-		callbackIds.put("registerDevice", callbackContext);
 
 		try
 		{
@@ -165,28 +162,23 @@ public class PushNotifications extends CordovaPlugin
 			else
 				appid = params.getString("pw_appid");
 			
-			mPushManager = new PushManager(cordova.getActivity(), appid, params.getString("projectid"));
+			PushManager.initializePushManager(cordova.getActivity(), appid, params.getString("projectid"));
+			mPushManager = PushManager.getInstance(cordova.getActivity());
+			mPushManager.onStartup(cordova.getActivity());
 		}
-		catch (JSONException e)
+		catch (Exception e)
 		{
-			callbackIds.remove("registerDevice");
 			e.printStackTrace();
-			
-			callbackContext.error(e.getMessage());
-			return true;
+			return;
 		}
+	}
 
+	private boolean internalRegister(JSONArray data, CallbackContext callbackContext)
+	{
 		try
 		{
-			if(loggedStart)
-			{
-				mPushManager.onStartup(cordova.getActivity(), false);
-			}
-			else
-			{
-				mPushManager.onStartup(cordova.getActivity(), true);
-				loggedStart = true;
-			}
+			callbackIds.put("registerDevice", callbackContext);
+			mPushManager.registerForPushNotifications();
 		}
 		catch (java.lang.RuntimeException e)
 		{
@@ -349,13 +341,26 @@ public class PushNotifications extends CordovaPlugin
 
 		//make sure the receivers are on
 		registerReceivers();
-		
-		if(ON_DEVICE_READY.equals(action))
+
+		if(GET_PUSH_TOKEN.equals(action))
 		{
-			checkMessage(cordova.getActivity().getIntent());
+			callbackId.success(PushManager.getPushToken(cordova.getActivity()));
 			return true;
 		}
 
+		if(GET_HWID.equals(action))
+		{
+			callbackId.success(PushManager.getPushwooshHWID(cordova.getActivity()));
+			return true;
+		}
+
+		if(ON_DEVICE_READY.equals(action))
+		{
+			initialize(data, callbackId);
+			checkMessage(cordova.getActivity().getIntent());
+			return true;
+		}
+		
 		if (REGISTER.equals(action))
 		{
 			return internalRegister(data, callbackId);
