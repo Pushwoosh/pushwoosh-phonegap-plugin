@@ -35,41 +35,23 @@
 	return pushManager;
 }
 
+- (void)getPushToken:(CDVInvokedUrlCommand*)command {
+	NSString * token = [[PushNotificationManager pushManager] getPushToken];
+	CDVPluginResult * pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:token];
+	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)getPushwooshHWID:(CDVInvokedUrlCommand*)command {
+	NSString * token = [[PushNotificationManager pushManager] getHWID];
+	CDVPluginResult * pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:token];
+	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 - (void)onDeviceReady:(CDVInvokedUrlCommand*)command {
 	deviceReady = YES;
 
-	AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
-	PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
-	if(pushHandler.startPushData) {
-		NSString *jsStatement = [NSString stringWithFormat:@"window.plugins.pushNotification.notificationCallback(%@);", pushHandler.startPushData];
-		[pushHandler writeJavascript:[NSString stringWithFormat:@"setTimeout(function() { %@; }, 0);", jsStatement]];
-		pushHandler.startPushData = nil;
-	}
-}
-
-- (void)registerDevice:(CDVInvokedUrlCommand*)command {
-
 	NSDictionary *options = [command.arguments objectAtIndex:0];
-	// The first argument in the arguments parameter is the callbackID.
-	[self.callbackIds setValue:command.callbackId forKey:@"registerDevice"];
 
-	UIRemoteNotificationType notificationTypes = UIRemoteNotificationTypeNone;
-	if ([options objectForKey:@"badge"]) {
-		notificationTypes |= UIRemoteNotificationTypeBadge;
-	}
-	if ([options objectForKey:@"sound"]) {
-		notificationTypes |= UIRemoteNotificationTypeSound;
-	}
-	if ([options objectForKey:@"alert"]) {
-		notificationTypes |= UIRemoteNotificationTypeAlert;
-	}
-	if ([options objectForKey:@"newsstand"]) {
-		notificationTypes |= UIRemoteNotificationTypeNewsstandContentAvailability;
-	}
-
-	if (notificationTypes == UIRemoteNotificationTypeNone)
-		NSLog(@"PushNotification.registerDevice: Push notification type is set to none");
-	
 	NSString *appid = [options objectForKey:@"pw_appid"];
 	NSString *appname = [options objectForKey:@"appname"];
 	
@@ -91,29 +73,34 @@
 	{
 		self.pushManager.appName = appname;
 	}
-	
-	[[UIApplication sharedApplication] registerForRemoteNotificationTypes:notificationTypes];
+
+	AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
+	PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
+	if(pushHandler.startPushData) {
+		NSString *jsStatement = [NSString stringWithFormat:@"window.plugins.pushNotification.notificationCallback(%@);", pushHandler.startPushData];
+		[pushHandler writeJavascript:[NSString stringWithFormat:@"setTimeout(function() { %@; }, 0);", jsStatement]];
+		pushHandler.startPushData = nil;
+	}
+}
+
+- (void)registerDevice:(CDVInvokedUrlCommand*)command {
+	[self.callbackIds setValue:command.callbackId forKey:@"registerDevice"];
+	[[PushNotificationManager pushManager] registerForPushNotifications];
 
 }
 
 - (void)unregisterDevice:(CDVInvokedUrlCommand*)command {
-	[self.callbackIds setValue:command.callbackId forKey:@"unregisterDevice"];
-	
-	[[UIApplication sharedApplication] unregisterForRemoteNotifications];
-	[pushManager unregisterDevice];
+	[[PushNotificationManager pushManager] unregisterForPushNotifications];
 	
 	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
-	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"unregisterDevice"]]];
+	[self writeJavascript:[pluginResult toSuccessCallbackString:command.callbackId]];
 }
 
 - (void)setTags:(CDVInvokedUrlCommand*)command {
-	// The first argument in the arguments parameter is the callbackID.
-	[self.callbackIds setValue:command.callbackId forKey:@"setTags"];
-	
 	[[PushNotificationManager pushManager] setTags:[command.arguments objectAtIndex:0]];
 	
 	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
-	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"setTags"]]];
+	[self writeJavascript:[pluginResult toSuccessCallbackString:command.callbackId]];
 
 }
 
@@ -137,8 +124,6 @@
 }
 
 - (void)sendLocation:(CDVInvokedUrlCommand*)command {
-	// The first argument in the arguments parameter is the callbackID.
-	[self.callbackIds setValue:command.callbackId forKey:@"sendLocation"];
 	
 	NSNumber * lat = [[command.arguments objectAtIndex:0] objectForKey:@"lat"];
 	NSNumber * lon = [[command.arguments objectAtIndex:0] objectForKey:@"lon"];
@@ -146,29 +131,24 @@
 	[[PushNotificationManager pushManager] sendLocation:location];
 	
 	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
-	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"sendLocation"]]];
+	[self writeJavascript:[pluginResult toSuccessCallbackString:command.callbackId]];
 	
 }
 
 - (void)startLocationTracking:(CDVInvokedUrlCommand*)command {
-	// The first argument in the arguments parameter is the callbackID.
-	[self.callbackIds setValue:command.callbackId forKey:@"startLocationTracking"];
 	
 	[[PushNotificationManager pushManager] startLocationTracking];
 	
 	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
-	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"startLocationTracking"]]];
+	[self writeJavascript:[pluginResult toSuccessCallbackString:command.callbackId]];
 	
 }
 
 - (void)stopLocationTracking:(CDVInvokedUrlCommand*)command {
-	// The first argument in the arguments parameter is the callbackID.
-	[self.callbackIds setValue:command.callbackId forKey:@"stopLocationTracking"];
-	
 	[[PushNotificationManager pushManager] stopLocationTracking];
 	
 	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
-	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"stopLocationTracking"]]];
+	[self writeJavascript:[pluginResult toSuccessCallbackString:command.callbackId]];
 	
 }
 
@@ -290,19 +270,13 @@
 
 - (void)getRemoteNotificationStatus:(CDVInvokedUrlCommand*)command {
 
-	// The first argument in the arguments parameter is the callbackID.
-	[self.callbackIds setValue:command.callbackId forKey:@"getRemoteNotificationStatus"];
-
 	NSMutableDictionary *results = [PushNotification getRemoteNotificationStatus];
 
 	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
-	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"getRemoteNotificationStatus"]]];
+	[self writeJavascript:[pluginResult toSuccessCallbackString:command.callbackId]];
 }
 
 - (void)setApplicationIconBadgeNumber:(CDVInvokedUrlCommand*)command {
-
-	// The first argument in the arguments parameter is the callbackID.
-	[self.callbackIds setValue:command.callbackId forKey:@"setApplicationIconBadgeNumber"];
 
     int badge = [[[command.arguments objectAtIndex:0] objectForKey:@"badge"] intValue] ?: 0;
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:badge];
@@ -312,18 +286,15 @@
     [results setValue:[NSNumber numberWithInt:1] forKey:@"success"];
 
 	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
-	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"setApplicationIconBadgeNumber"]]];
+	[self writeJavascript:[pluginResult toSuccessCallbackString:command.callbackId]];
 }
 
 - (void)cancelAllLocalNotifications:(CDVInvokedUrlCommand*)command {
 
-	// The first argument in the arguments parameter is the callbackID.
-	[self.callbackIds setValue:command.callbackId forKey:@"cancelAllLocalNotifications"];
-	
 	[[UIApplication sharedApplication] cancelAllLocalNotifications];
 	
 	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-	[self writeJavascript:[pluginResult toSuccessCallbackString:[self.callbackIds valueForKey:@"cancelAllLocalNotifications"]]];
+	[self writeJavascript:[pluginResult toSuccessCallbackString:command.callbackId]];
 }
 
 - (void) dealloc {
@@ -334,7 +305,7 @@
 @end
 
 @implementation UIApplication(InternalPushRuntime)
-- (BOOL) pushwooshDontAutoRegister {
+- (BOOL) pushwooshUseRuntimeMagic {
 	return YES;
 }
 

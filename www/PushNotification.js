@@ -13,9 +13,9 @@ var exec = require('cordova/exec');
 
 function PushNotification() {}
 
-// Call this to register for push notifications and retreive a deviceToken
-PushNotification.prototype.registerDevice = function(config, success, fail) {
-	exec(success, fail, "PushNotification", "registerDevice", config ? [config] : []);
+// Call this to register for push notifications and retreive a push Token
+PushNotification.prototype.registerDevice = function(success, fail) {
+	exec(success, fail, "PushNotification", "registerDevice", []);
 };
 
 // Call this to set tags for the device
@@ -23,13 +23,24 @@ PushNotification.prototype.setTags = function(config, success, fail) {
 	exec(success, fail, "PushNotification", "setTags", config ? [config] : []);
 };
 
+// Call this to get push token if it is available
+PushNotification.prototype.getPushToken = function(success) {
+	exec(success, null, "PushNotification", "getPushToken", []);
+};
+
+// Call this to get Pushwoosh HWID used for communications with Pushwoosh API
+PushNotification.prototype.getPushwooshHWID = function(success) {
+	exec(success, null, "PushNotification", "getPushwooshHWID", []);
+};
+
+// Call this first thing with your Pushwoosh App ID (see example)
+PushNotification.prototype.onDeviceReady = function(config) {
+	exec(null, null, "PushNotification", "onDeviceReady", config ? [config] : []);
+};
+
 // Call this to send geo location for the device
 PushNotification.prototype.sendLocation = function(config, success, fail) {
 	exec(success, fail, "PushNotification", "sendLocation", config ? [config] : []);
-};
-
-PushNotification.prototype.onDeviceReady = function() {
-	exec(null, null, "PushNotification", "onDeviceReady", []);
 };
 
 // Call this to get tags for the device
