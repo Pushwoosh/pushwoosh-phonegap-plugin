@@ -123,6 +123,7 @@
     <!-- ios -->
     <platform name="ios">
       <framework src="Security.framework" />
+      <framework src="Storekit.framework" />
       <config-file target="config.xml" parent="/*">
         <feature name="PushNotification">
           <param name="ios-package" value="PushNotification"/>
