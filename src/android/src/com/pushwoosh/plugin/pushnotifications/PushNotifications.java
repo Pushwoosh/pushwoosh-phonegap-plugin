@@ -43,7 +43,9 @@ public class PushNotifications extends CordovaPlugin
 	public static final String UNREGISTER = "unregisterDevice";
 	public static final String SET_TAGS = "setTags";
 	public static final String START_GEO_PUSHES = "startGeoPushes";
+	public static final String START_LOCATION_TRACKING = "startLocationTracking";
 	public static final String STOP_GEO_PUSHES = "stopGeoPushes";
+	public static final String STOP_LOCATION_TRACKING = "stopLocationTracking";
 	public static final String SEND_LOCATION = "sendLocation";
 	public static final String CREATE_LOCAL_NOTIFICATION = "createLocalNotification";
 	public static final String CLEAR_LOCAL_NOTIFICATION = "clearLocalNotification";
@@ -381,7 +383,7 @@ public class PushNotifications extends CordovaPlugin
 			return internalSendLocation(data, callbackId);
 		}
 
-		if (START_GEO_PUSHES.equals(action))
+		if (START_GEO_PUSHES.equals(action) || START_LOCATION_TRACKING.equals(action))
 		{
 			if (mPushManager == null)
 			{
@@ -392,7 +394,7 @@ public class PushNotifications extends CordovaPlugin
 			return true;
 		}
 
-		if (STOP_GEO_PUSHES.equals(action))
+		if (STOP_GEO_PUSHES.equals(action) || STOP_LOCATION_TRACKING.equals(action))
 		{
 			if (mPushManager == null)
 			{

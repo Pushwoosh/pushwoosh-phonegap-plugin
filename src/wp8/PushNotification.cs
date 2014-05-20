@@ -40,14 +40,15 @@ namespace WPCordovaClassLib.Cordova.Commands
             DispatchCommandResult(new PluginResult(PluginResult.Status.OK, service.PushToken));
         }
 
-        public void UnsubscribeFromPushNotification(string options)
+        public void unregisterDevice(string options)
         {
             service.UnsubscribeFromPushes();
+            DispatchCommandResult(new PluginResult(PluginResult.Status.OK, "Unregistered from pushes"));
         }
 
         
         // PWUserToken
-        public void GetUserToken(string options)
+        public void getPushToken(string options)
         {
             if (!string.IsNullOrEmpty(service.PushToken))
             {
@@ -70,7 +71,7 @@ namespace WPCordovaClassLib.Cordova.Commands
 
 
         // PWTags
-        public void SendTags(string options)
+        public void setTags(string options)
         {
             service.Tags.OnSendingComplete += (sender, args) => DispatchCommandResult(new PluginResult(PluginResult.Status.OK, JsonHelper.Serialize(args.Result)));
             service.Tags.SendRequest(options);
@@ -78,16 +79,16 @@ namespace WPCordovaClassLib.Cordova.Commands
 
 
         // PWGeozone
-        public void StartGeozone(string options)
+        public void startLocationTracking(string options)
         {
             service.GeoZone.Start();
-            DispatchCommandResult(new PluginResult(PluginResult.Status.OK, "Geozone service is started"));
+            DispatchCommandResult(new PluginResult(PluginResult.Status.OK, "GeoZone service is started"));
         }
 
-        public void StopGeozone(string options)
+        public void stopLocationTracking(string options)
         {
             service.GeoZone.Stop();
-            DispatchCommandResult(new PluginResult(PluginResult.Status.OK, "Geozone service is stopped"));
+            DispatchCommandResult(new PluginResult(PluginResult.Status.OK, "GeoZone service is stopped"));
         }
 
         [DataContract]
