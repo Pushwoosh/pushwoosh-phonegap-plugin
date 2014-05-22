@@ -1,5 +1,8 @@
 using System;
+using System.Diagnostics;
+using System.Windows;
 using System.Collections.Generic;
+using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 using PushSDK;
 using PushSDK.Classes;
@@ -15,27 +18,23 @@ namespace WPCordovaClassLib.Cordova.Commands
         private NotificationService service = null;
 
 
-        // New onDeviceReady function
         public void onDeviceReady(string options)
         {
             string[] args = JSON.JsonHelper.Deserialize<string[]>(options);
             PushOptions pushOptions = JSON.JsonHelper.Deserialize<PushOptions>(args[0]);
-            this.appid = pushOptions.AppID;         
+            this.appid = pushOptions.AppID;
         }
 
-        // PWNotification
         public void registerDevice(string options)
         {
-            // TODO try without the mainpage.xaml stuff
-            IEnumerable<string> tiles = new string[] { "http://www.pushwoosh.com" };
-            service = NotificationService.GetCurrent(appid, "/HelloCordova;component/MainPage.xaml", tiles);
+            service = NotificationService.GetCurrent(appid, null, null);
             service.SubscribeToPushService();
+            service.OnPushAccepted += (sender, args) => DispatchCommandResult(new PluginResult(PluginResult.Status.OK, args.Result));
 
-            service.OnPushAccepted += 
-                (sender, args) => DispatchCommandResult(new PluginResult(PluginResult.Status.OK, args.Result));
-
-            // TODO: I think this should be passed to the onNotifCallback of the x-platform JS API
-            // DispatchCommandResult(new PluginResult(PluginResult.Status.OK, service.LastPushContent));
+            if (!string.IsNullOrEmpty(service.LastPushContent))
+            {
+                this.ExecuteCallback(service.LastPushContent);
+            }
 
             DispatchCommandResult(new PluginResult(PluginResult.Status.OK, service.PushToken));
         }
@@ -46,8 +45,7 @@ namespace WPCordovaClassLib.Cordova.Commands
             DispatchCommandResult(new PluginResult(PluginResult.Status.OK, "Unregistered from pushes"));
         }
 
-        
-        // PWUserToken
+
         public void getPushToken(string options)
         {
             if (!string.IsNullOrEmpty(service.PushToken))
@@ -62,23 +60,21 @@ namespace WPCordovaClassLib.Cordova.Commands
             DispatchCommandResult(new PluginResult(PluginResult.Status.OK, e.Result.ToString()));
         }
 
-        
-        // PWUserData
+
         public void GetUserData(string options)
         {
             DispatchCommandResult(new PluginResult(PluginResult.Status.OK, service.UserData));
         }
 
 
-        // PWTags
         public void setTags(string options)
         {
+            string[] opts = JSON.JsonHelper.Deserialize<string[]>(options);
             service.Tags.OnSendingComplete += (sender, args) => DispatchCommandResult(new PluginResult(PluginResult.Status.OK, JsonHelper.Serialize(args.Result)));
-            service.Tags.SendRequest(options);
+            service.Tags.SendRequest(opts[0]);
         }
 
 
-        // PWGeozone
         public void startLocationTracking(string options)
         {
             service.GeoZone.Start();
@@ -89,6 +85,39 @@ namespace WPCordovaClassLib.Cordova.Commands
         {
             service.GeoZone.Stop();
             DispatchCommandResult(new PluginResult(PluginResult.Status.OK, "GeoZone service is stopped"));
+        }
+
+        void ExecuteCallback(string callbackResult)
+        {
+            Deployment.Current.Dispatcher.BeginInvoke(() =>
+            {
+                PhoneApplicationFrame frame;
+                PhoneApplicationPage page;
+                CordovaView cView;
+
+                if (TryCast(Application.Current.RootVisual, out frame) &&
+                    TryCast(frame.Content, out page) &&
+                    TryCast(page.FindName("CordovaView"), out cView))
+                {
+                    cView.Browser.Dispatcher.BeginInvoke(() =>
+                    {
+                        try
+                        {
+                            cView.Browser.InvokeScript("execScript", "window.plugins.pushNotification.notificationCallback(" + callbackResult + ")");
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine("ERROR: Exception in InvokeScriptCallback :: " + ex.Message);
+                        }
+                    });
+                }
+            });
+        }
+
+        static bool TryCast<T>(object obj, out T result) where T : class
+        {
+            result = obj as T;
+            return result != null;
         }
 
         [DataContract]

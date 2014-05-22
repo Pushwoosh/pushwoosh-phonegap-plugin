@@ -126,7 +126,6 @@ PushNotification.prototype.cancelAllLocalNotifications = function(callback) {
 
 // Event spawned when a notification is received while the application is active
 PushNotification.prototype.notificationCallback = function(notification) {
-  alert('in JS notificationCallback');
 	var ev = document.createEvent('HTMLEvents');
 	ev.notification = notification;
 	ev.initEvent('push-notification', true, true, arguments);
