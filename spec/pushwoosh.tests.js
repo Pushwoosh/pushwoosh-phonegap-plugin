@@ -28,7 +28,7 @@ describe('cordova.require object should exist', function () {
 	});
 
 	it("Pushwoosh plugin should exist", function() {
-        PushNotification = cordova.require("cordova/plugin/Pushwoosh")
+        PushNotification = cordova.require("cordova/plugin/Pushwoosh");
         expect(PushNotification).toBeDefined();
 		expect(typeof PushNotification == 'object').toBe(true);
 	});
@@ -148,5 +148,4 @@ describe('cordova.require object should exist', function () {
         expect(typeof PushNotification.notificationCallback == 'function').toBe(true);
     });
 
- );
-
+});

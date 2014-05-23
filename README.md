@@ -13,8 +13,15 @@ http://www.pushwoosh.com/programming-push-notification/ios/ios-additional-platfo
 ####Android:
 http://www.pushwoosh.com/programming-push-notification/android/android-additional-platforms/phonegapcordova-sdk-integration/
 
+####WP8:
+http://www.pushwoosh.com/programming-push-notification/windows-phone/wp-additional-platforms/windows-phone-cordova-sdk-integration-guide/
+
 ## Acknowledgments
 Plugman support by Platogo
+
+HUGE thanks to Eddy Verbruggen for all the help with WP8 Phonegap support!!!
+https://github.com/EddyVerbruggen
+
 
 ## LICENSE
 

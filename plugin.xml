@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     id="com.pushwoosh.plugins.pushwoosh"
-    version="3.1.0">
+    version="3.2.0">
 
     <name>Pushwoosh</name>
 
@@ -15,12 +15,12 @@
 
     <license>MIT</license>
 
-    <!-- android -->
-    <platform name="android">
-
-      <js-module src="www/PushNotification.js" name="PushNotification">
+    <js-module src="www/PushNotification.js" name="PushNotification">
           <clobbers target="plugins.pushNotification" />
       </js-module>
+
+      <!-- android -->
+    <platform name="android">
 
       <config-file>
         <access origin="*.pushwoosh.com" />
@@ -130,10 +130,6 @@
         </feature>
       </config-file>
 
-      <js-module src="www/PushNotification.js" name="PushNotification">
-          <clobbers target="plugins.pushNotification" />
-      </js-module>
-
       <config-file>
         <access origin="*.pushwoosh.com" />
       </config-file>
@@ -143,4 +139,30 @@
       <header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PushNotificationManager.h" target-dir="ios"/>
       <source-file src="src/ios/Pushwoosh.framework/Versions/A/Pushwoosh" framework="true"/>
     </platform>
+
+  <!-- wp8 -->
+  <platform name="wp8">
+
+    <config-file target="config.xml" parent="/*">
+      <feature name="PushNotification">
+        <param name="wp-package" value="PushNotification"/>
+      </feature>
+    </config-file>
+
+    <config-file>
+      <access origin="*.pushwoosh.com" />
+    </config-file>
+
+    <config-file target="Properties/WMAppManifest.xml" parent="/Deployment/App/Capabilities">
+      <Capability Name="ID_CAP_PUSH_NOTIFICATION"/>
+      <Capability Name="ID_CAP_IDENTITY_DEVICE"/>
+      <Capability Name="ID_CAP_LOCATION"/>
+    </config-file>
+
+    <source-file src="src/wp8/PushNotification.cs" />
+
+    <framework src="src/wp8/PushSDK/Coding4Fun.Phone.Controls.dll" custom="true" />
+    <framework src="src/wp8/PushSDK/Newtonsoft.Json.dll" custom="true" />
+    <framework src="src/wp8/PushSDK/PushSDK.dll" custom="true" />
+  </platform>
 </plugin>

@@ -52,7 +52,16 @@ PushNotification.prototype.unregisterDevice = function(success, fail) {
 	exec(success, fail, "PushNotification", "unregisterDevice", []);
 };
 
-	//Android Only----
+// Enable Geozones for your Pushwoosh app to be able to use these
+PushNotification.prototype.startLocationTracking = function(success, fail) {
+  exec(success, fail, "PushNotification", "startLocationTracking", []);
+};
+
+PushNotification.prototype.stopLocationTracking = function(success, fail) {
+  exec(success, fail, "PushNotification", "stopLocationTracking", []);
+};
+
+//Android Only----
 //config params: {msg:"message", seconds:30, userData:"optional"}
 PushNotification.prototype.createLocalNotification = function(config, success, fail) {
 	exec(success, fail, "PushNotification", "createLocalNotification", config ? [config] : []);
@@ -63,6 +72,7 @@ PushNotification.prototype.clearLocalNotification = function() {
 };
 
 //advanced background task to track device position and not drain the battery
+//deprecated, use startLocationTracking and stopLocationTracking
 PushNotification.prototype.startGeoPushes = function(success, fail) {
 	exec(success, fail, "PushNotification", "startGeoPushes", []);
 };
@@ -108,14 +118,6 @@ PushNotification.prototype.sendGoalAchieved = function(config, success, fail) {
 //Android End----
 
 //iOS only----
-PushNotification.prototype.startLocationTracking = function(success, fail) {
-	exec(success, fail, "PushNotification", "startLocationTracking", []);
-};
-
-PushNotification.prototype.stopLocationTracking = function(success, fail) {
-	exec(success, fail, "PushNotification", "stopLocationTracking", []);
-};
-
 // Call this to get a detailed status of remoteNotifications
 PushNotification.prototype.getRemoteNotificationStatus = function(callback) {
 	exec(callback, callback, "PushNotification", "getRemoteNotificationStatus", []);
