@@ -1,7 +1,7 @@
 //
 //  PushNotificationManager.h
 //  Pushwoosh SDK
-//  (c) Pushwoosh 2012
+//  (c) Pushwoosh 2014
 //
 
 #import <Foundation/Foundation.h>
@@ -10,7 +10,6 @@
 
 @class PushNotificationManager;
 @class CLLocation;
-@class PWLocationTracker;
 
 typedef NS_ENUM(NSInteger, PWSupportedOrientations) {
 	PWOrientationPortrait = 1 << 0,
@@ -196,7 +195,6 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
 @property (nonatomic, retain) UIWindow *richPushWindow;
 @property (nonatomic, retain) NSDictionary *pushNotifications;
 @property (nonatomic, assign) PWSupportedOrientations supportedOrientations;
-@property (nonatomic, retain) PWLocationTracker *locationTracker;
 
 /**
  Show push notifications alert when push notification is received while the app is running, default is `YES`
@@ -243,6 +241,16 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
  Stops location tracking
  */
 - (void) stopLocationTracking;
+
+/**
+ Start iBeacon tracking.
+ */
+- (void) startBeaconTracking;
+
+/**
+ Stops iBeacon tracking
+ */
+- (void) stopBeaconTracking;
 
 /**
  Send tags to server. Tag names have to be created in the Pushwoosh Control Panel. Possible tag types: Integer, String, Incremental (integer only), List tags (array of values).

@@ -161,7 +161,6 @@
 
     <source-file src="src/wp8/PushNotification.cs" />
 
-    <framework src="src/wp8/PushSDK/Coding4Fun.Phone.Controls.dll" custom="true" />
     <framework src="src/wp8/PushSDK/Newtonsoft.Json.dll" custom="true" />
     <framework src="src/wp8/PushSDK/PushSDK.dll" custom="true" />
   </platform>
