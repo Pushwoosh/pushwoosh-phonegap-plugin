@@ -48,9 +48,9 @@ namespace WPCordovaClassLib.Cordova.Commands
         }
 
         private void OnPushTokenFailed(object sender, string error)
-            {
+        {
             DispatchCommandResult(new PluginResult(PluginResult.Status.ERROR, error));
-            }
+        }
 
         public void registerDevice(string options)
         {
@@ -64,8 +64,8 @@ namespace WPCordovaClassLib.Cordova.Commands
             }
             else
             {
-            DispatchCommandResult(new PluginResult(PluginResult.Status.OK, service.PushToken));
-        }
+                DispatchCommandResult(new PluginResult(PluginResult.Status.OK, service.PushToken));
+            }
         }
 
         public void unregisterDevice(string options)
@@ -99,13 +99,13 @@ namespace WPCordovaClassLib.Cordova.Commands
 
             List<KeyValuePair<string, object>> tags = new List<KeyValuePair<string, object>>();
             foreach (var element in jsonObject)
-        {
+            {
                 tags.Add(new KeyValuePair<string,object>(element.Key, element.Value));
-        }
+            }
 
             service.SendTag(tags,
                 (obj, args) =>
-        {
+                {
                     DispatchCommandResult(new PluginResult(PluginResult.Status.OK, JsonHelper.Serialize(args)));
                 },
                 (obj, args) => 
