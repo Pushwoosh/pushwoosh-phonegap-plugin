@@ -52,27 +52,31 @@
 - (void)onDeviceReady:(CDVInvokedUrlCommand*)command {
 	deviceReady = YES;
 
-	NSDictionary *options = [command.arguments objectAtIndex:0];
+	NSDictionary *options = nil;
+	if(command.arguments.count != 0)
+		options = [command.arguments objectAtIndex:0];
 
 	NSString *appid = [options objectForKey:@"pw_appid"];
 	NSString *appname = [options objectForKey:@"appname"];
 	
 	if(!appid) {
-		NSLog(@"PushNotification.registerDevice: Missing Pushwoosh App ID");
-		return;
+		//no Pushwoosh App Id provided in JS call, let's try Info.plist (SDK default)
+		if(self.pushManager == nil)
+		{
+			NSLog(@"PushNotification.registerDevice: Missing Pushwoosh App ID");
+			return;
+		}
 	}
 	
-	[[NSUserDefaults standardUserDefaults] setObject:appid forKey:@"Pushwoosh_APPID"];
+	if(appid) {
+		[[NSUserDefaults standardUserDefaults] setObject:appid forKey:@"Pushwoosh_APPID"];
+		//we need to re-set APPID if it has been changed (on start we have initialized Push Manager with app id from NSUserDefaults)
+		self.pushManager.appCode = appid;
+	}
+	
 	if(appname) {
 		[[NSUserDefaults standardUserDefaults] setObject:appname forKey:@"Pushwoosh_APPNAME"];
-	}
-	
-	//we need to re-set APPID if it has been changed (on start we have initialized Push Manager with app id from NSUserDefaults)
-	self.pushManager.appCode = appid;
-	
-	//and name if it has been provided
-	if(appname)
-	{
+		//and name if it has been provided
 		self.pushManager.appName = appname;
 	}
 
