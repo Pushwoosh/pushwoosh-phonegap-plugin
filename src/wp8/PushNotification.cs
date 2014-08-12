@@ -10,6 +10,8 @@ using WPCordovaClassLib.Cordova.JSON;
 using System.Runtime.Serialization;
 using System.Threading;
 using Newtonsoft.Json.Linq;
+using PushSDK.Classes;
+using Newtonsoft.Json;
 
 namespace WPCordovaClassLib.Cordova.Commands
 {
@@ -71,8 +73,15 @@ namespace WPCordovaClassLib.Cordova.Commands
         public void unregisterDevice(string options)
         {
             waitDeviceReady();
-            service.UnsubscribeFromPushes();
-            DispatchCommandResult(new PluginResult(PluginResult.Status.OK, "Unregistered from pushes"));
+            service.UnsubscribeFromPushes(
+                (obj, args) =>
+                {
+                    DispatchCommandResult(new PluginResult(PluginResult.Status.OK, JsonHelper.Serialize(args)));
+                },
+                (obj, args) =>
+                {
+                    DispatchCommandResult(new PluginResult(PluginResult.Status.ERROR, JsonHelper.Serialize(args)));
+                });
         }
 
         public void getPushwooshHWID(string options)
@@ -129,7 +138,7 @@ namespace WPCordovaClassLib.Cordova.Commands
             DispatchCommandResult(new PluginResult(PluginResult.Status.OK, "GeoZone service is stopped"));
         }
 
-        void ExecutePushNotificationCallback(object sender, string pushPayload)
+        void ExecutePushNotificationCallback(object sender, ToastPush push)
         {
             Deployment.Current.Dispatcher.BeginInvoke(() =>
             {
@@ -145,6 +154,7 @@ namespace WPCordovaClassLib.Cordova.Commands
                     {
                         try
                         {
+                            string pushPayload = JsonConvert.SerializeObject(push);
                             cView.Browser.InvokeScript("execScript", "window.plugins.pushNotification.notificationCallback(" + pushPayload + ")");
                         }
                         catch (Exception ex)
