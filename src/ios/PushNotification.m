@@ -104,6 +104,20 @@
 	[self writeJavascript:WRITEJS([pluginResult toSuccessCallbackString:command.callbackId])];
 }
 
+- (void)startBeaconPushes:(CDVInvokedUrlCommand*)command {
+	[[PushNotificationManager pushManager] startBeaconTracking];
+	
+	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
+	[self writeJavascript:WRITEJS([pluginResult toSuccessCallbackString:command.callbackId])];
+}
+
+- (void)stopBeaconPushes:(CDVInvokedUrlCommand*)command {
+	[[PushNotificationManager pushManager] stopBeaconTracking];
+	
+	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
+	[self writeJavascript:WRITEJS([pluginResult toSuccessCallbackString:command.callbackId])];
+}
+
 - (void)setTags:(CDVInvokedUrlCommand*)command {
 	[[PushNotificationManager pushManager] setTags:[command.arguments objectAtIndex:0]];
 	

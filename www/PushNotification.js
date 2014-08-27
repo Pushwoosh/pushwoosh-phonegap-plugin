@@ -81,6 +81,20 @@ PushNotification.prototype.stopGeoPushes = function(success, fail) {
 	exec(success, fail, "PushNotification", "stopGeoPushes", []);
 };
 
+//advanced background task to track device position and not drain the battery
+PushNotification.prototype.startBeaconPushes = function(success, fail) {
+	exec(success, fail, "PushNotification", "startBeaconPushes", []);
+};
+
+PushNotification.prototype.stopBeaconPushes = function(success, fail) {
+	exec(success, fail, "PushNotification", "stopBeaconPushes", []);
+};
+
+//Android only, let the plugin know that the app went to background mode (or vise versa)
+PushNotification.prototype.setBeaconBackgroundMode = function(on, success, fail) {
+	exec(success, fail, "PushNotification", "setBeaconBackgroundMode", [on]);
+};
+
 //sets multi notification mode on
 PushNotification.prototype.setMultiNotificationMode = function(success, fail) {
 	exec(success, fail, "PushNotification", "setMultiNotificationMode", []);
