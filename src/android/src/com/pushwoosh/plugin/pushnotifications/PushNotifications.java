@@ -25,7 +25,6 @@ import android.util.Log;
 import com.arellomobile.android.push.BasePushMessageReceiver;
 import com.arellomobile.android.push.PushManager;
 import com.arellomobile.android.push.PushManager.GetTagsListener;
-import com.arellomobile.android.push.exception.PushWooshException;
 import com.arellomobile.android.push.preference.SoundType;
 import com.arellomobile.android.push.preference.VibrateType;
 import com.arellomobile.android.push.utils.RegisterBroadcastReceiver;
@@ -333,7 +332,7 @@ public class PushNotifications extends CordovaPlugin
 			callbackContext.success(skippedTagsObj);
 			return true;
 		}
-		catch (PushWooshException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 			return false;
