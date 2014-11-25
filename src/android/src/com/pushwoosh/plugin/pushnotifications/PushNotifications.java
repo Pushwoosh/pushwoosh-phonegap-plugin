@@ -25,6 +25,7 @@ import android.util.Log;
 
 import com.arellomobile.android.push.BasePushMessageReceiver;
 import com.arellomobile.android.push.PushManager;
+import com.arellomobile.android.push.PushPersistance;
 import com.arellomobile.android.push.PushManager.GetTagsListener;
 import com.arellomobile.android.push.SendPushTagsCallBack;
 import com.arellomobile.android.push.preference.SoundType;
@@ -655,6 +656,19 @@ public class PushNotifications extends CordovaPlugin
 			}
 
 			PushManager.getTagsAsync(cordova.getActivity(), new GetTagsListenerImpl());
+			return true;
+		}
+		
+		if(action.equals("getPushHistory"))
+		{
+			ArrayList<String> pushHistory = PushPersistance.getPushHistory(cordova.getActivity());
+			callbackId.success(new JSONArray(pushHistory));
+			return true;
+		}
+
+		if(action.equals("clearPushHistory"))
+		{
+			PushPersistance.clearPushHistory(cordova.getActivity());
 			return true;
 		}
 
