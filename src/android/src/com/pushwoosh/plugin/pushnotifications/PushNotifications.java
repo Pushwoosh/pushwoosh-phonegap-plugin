@@ -672,6 +672,12 @@ public class PushNotifications extends CordovaPlugin
 			return true;
 		}
 
+		if(action.equals("clearNotificationCenter"))
+		{
+			PushManager.clearNotificationCenter(cordova.getActivity());
+			return true;
+		}
+
 		Log.d("DirectoryListPlugin", "Invalid action : " + action + " passed");
 		return false;
 	}
