@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android"
     id="com.pushwoosh.plugins.pushwoosh"
-    version="3.4.5">
+    version="3.4.6">
 
     <name>Pushwoosh</name>
 
@@ -40,6 +40,9 @@
 
         <!-- Keeps the processor from sleeping when a message is received. -->
         <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+        <!-- So the sounds from assets folder could work for notification sounds. -->
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
         <!--
          Creates a custom permission so only this app can receive its messages.
