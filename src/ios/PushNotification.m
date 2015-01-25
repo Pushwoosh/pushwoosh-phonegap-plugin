@@ -95,9 +95,10 @@
 - (void)registerDevice:(CDVInvokedUrlCommand*)command {
 	[self.callbackIds setValue:command.callbackId forKey:@"registerDevice"];
 
-	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT messageAsDictionary:nil];
-	[pluginResult setKeepCallbackAsBool:YES];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+	//Cordova BUG: https://issues.apache.org/jira/browse/CB-8063
+//	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT messageAsDictionary:nil];
+//	[pluginResult setKeepCallbackAsBool:YES];
+//	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 	
 	[[PushNotificationManager pushManager] registerForPushNotifications];
 
@@ -134,10 +135,11 @@
 - (void)getTags:(CDVInvokedUrlCommand*)command {
 	// The first argument in the arguments parameter is the callbackID.
 	[self.callbackIds setValue:command.callbackId forKey:@"getTags"];
-	
-	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT messageAsDictionary:nil];
-	[pluginResult setKeepCallbackAsBool:YES];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+
+	//Cordova BUG: https://issues.apache.org/jira/browse/CB-8063
+//	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT messageAsDictionary:nil];
+//	[pluginResult setKeepCallbackAsBool:YES];
+//	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 	
 	[[PushNotificationManager pushManager] loadTags:
 		^(NSDictionary *tags) {

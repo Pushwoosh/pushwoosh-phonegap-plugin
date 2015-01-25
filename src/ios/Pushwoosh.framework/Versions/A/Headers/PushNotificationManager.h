@@ -96,6 +96,13 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
 - (void) onPushAccepted:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart;
 
 /**
+ User has tapped on the action button on Rich Push Page.
+ 
+ @param customData Data associated with rich page button in the Rich Push Editor
+ */
+- (void) onRichPageButtonTapped:(NSString *)customData;
+
+/**
  Tells the delegate that the push manager has received tags from the server.
  
  @param tags Dictionary representation of received tags.
@@ -408,5 +415,15 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
  Clears the notifications from the notification center.
  */
 + (void) clearNotificationCenter;
+
+/**
+ Internal function
+ */
+- (NSDictionary *) getPage:(NSString *)pageId;
+
+/**
+ Internal function
+ */
+- (void) onRichPageButtonTapped:(NSString *)customData;
 
 @end
