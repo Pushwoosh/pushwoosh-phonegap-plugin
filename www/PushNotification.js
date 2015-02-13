@@ -127,7 +127,10 @@ PushNotification.prototype.setLightScreenOnNotification = function(on, success, 
 PushNotification.prototype.setEnableLED = function(on, success, fail) {
 	exec(success, fail, "PushNotification", "setEnableLED", [on]);
 };
-
+//set led color
+PushNotification.prototype.setColorLED = function(color, success, fail) {
+	exec(success, fail, "PushNotification", "setColorLED", [color]);
+};
 //{goal:'name', count:3} (count is optional)
 PushNotification.prototype.sendGoalAchieved = function(config, success, fail) {
 	exec(success, fail, "PushNotification", "sendGoalAchieved", config ? [config] : []);

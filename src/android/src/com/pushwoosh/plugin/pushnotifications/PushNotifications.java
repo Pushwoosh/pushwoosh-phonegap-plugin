@@ -30,7 +30,9 @@ import com.arellomobile.android.push.PushManager.GetTagsListener;
 import com.arellomobile.android.push.SendPushTagsCallBack;
 import com.arellomobile.android.push.preference.SoundType;
 import com.arellomobile.android.push.preference.VibrateType;
+import com.arellomobile.android.push.utils.PreferenceUtils;
 import com.arellomobile.android.push.utils.RegisterBroadcastReceiver;
+import com.arellomobile.android.push.utils.rich.RichPushUtils;
 import com.google.android.gcm.GCMRegistrar;
 
 import org.apache.cordova.CallbackContext;
@@ -580,6 +582,26 @@ public class PushNotifications extends CordovaPlugin
 			{
 				boolean type = (boolean) data.getBoolean(0);
 				PushManager.setEnableLED(cordova.getActivity(), type);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+
+			return true;
+		}
+		
+		if ("setColorLED".equals(action))
+		{
+			try
+			{
+				String colorString = (String) data.get(0);
+				if (colorString == null)
+					return false;
+
+				int colorLed = RichPushUtils.parseColor(colorString);
+				PushManager.setColorLED(cordova.getActivity(), colorLed);
 			}
 			catch (Exception e)
 			{
