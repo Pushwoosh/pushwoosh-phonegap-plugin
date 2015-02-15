@@ -217,6 +217,9 @@
 		
 		if (dict) {
 			[pn setObject:dict forKey:@"u"];
+			
+			//Android passes parameter as userdata too, align with Android
+			[pn setObject:dict forKey:@"userdata"];
 		}
 	}
 	
