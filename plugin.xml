@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android"
     id="com.pushwoosh.plugins.pushwoosh"
-    version="3.4.10">
+    version="3.4.11">
 
     <name>Pushwoosh</name>
 
@@ -28,9 +28,6 @@
 
       <config-file target="AndroidManifest.xml" parent="/manifest">
         <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-
-        <!-- Permission to get Device Id -->
-        <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
         <uses-permission android:name="android.permission.VIBRATE" />
 
