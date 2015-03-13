@@ -233,7 +233,7 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
  */
 - (void) unregisterForPushNotifications;
 
-+ (BOOL) getAPSProductionStatus;
++ (BOOL) getAPSProductionStatus:(BOOL)canShowAlert;
 
 - (id) initWithApplicationCode:(NSString *)appCode appName:(NSString *)appName;
 - (id) initWithApplicationCode:(NSString *)appCode navController:(UIViewController *) navController appName:(NSString *)appName __attribute__((deprecated));
@@ -398,7 +398,7 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
 - (NSDictionary *) getApnPayload:(NSDictionary *)pushNotification;
 
 /**
- Gets custom JSON data from push notifications dictionary as specified in Pushwoosh Control Panel.
+ Gets custom JSON string data from push notifications dictionary as specified in Pushwoosh Control Panel.
  
  Example:
  
@@ -410,6 +410,37 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
  @param pushNotification Push notifications dictionary as received in `onPushAccepted: withNotification: onStart:`
  */
 - (NSString *) getCustomPushData:(NSDictionary *)pushNotification;
+
+/**
+ The same as getCustomPushData but returns NSDictionary rather than JSON string (converts JSON string into NSDictionary).
+ */
+- (NSDictionary *) getCustomPushDataAsNSDict:(NSDictionary *)pushNotification;
+
+/**
+ Returns dictionary with enabled remove notificaton types.
+ Example enabled push:
+ {
+	enabled = 1;
+	pushAlert = 1;
+	pushBadge = 1;
+	pushSound = 1;
+	type = 7;
+ }
+ 
+ where "type" field is UIUserNotificationType
+ 
+ Disabled push:
+ {
+	enabled = 1;
+	pushAlert = 0;
+	pushBadge = 0;
+	pushSound = 0;
+	type = 0;
+ }
+ 
+ Note: In the latter example "enabled" field means that device can receive push notification but could not display alerts (ex: silent push)
+ */
++ (NSMutableDictionary *)getRemoteNotificationStatus;
 
 /**
  Clears the notifications from the notification center.
