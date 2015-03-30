@@ -160,8 +160,6 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
 	NSString *appName;
 
 	UIWindow *richPushWindow;
-	NSInteger internalIndex;
-	NSMutableDictionary *pushNotifications;
 	NSObject<PushNotificationDelegate> *__unsafe_unretained delegate;
 }
 
@@ -200,7 +198,6 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
 @property (nonatomic, assign) NSObject<PushNotificationDelegate> *delegate;
 
 @property (nonatomic, retain) UIWindow *richPushWindow;
-@property (nonatomic, retain) NSDictionary *pushNotifications;
 @property (nonatomic, assign) PWSupportedOrientations supportedOrientations;
 
 /**
