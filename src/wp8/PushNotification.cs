@@ -198,7 +198,7 @@ namespace WPCordovaClassLib.Cordova.Commands
                         try
                         {
                             string pushPayload = JsonConvert.SerializeObject(push);
-                            cView.Browser.InvokeScript("execScript", "window.plugins.pushNotification.notificationCallback(" + pushPayload + ")");
+                            cView.Browser.InvokeScript("execScript", "cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(" + pushPayload + ")");
                         }
                         catch (Exception ex)
                         {

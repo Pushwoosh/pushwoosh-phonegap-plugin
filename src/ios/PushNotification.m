@@ -82,7 +82,7 @@
 	AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
 	PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
 	if(pushHandler.startPushData) {
-		NSString *jsStatement = [NSString stringWithFormat:@"window.plugins.pushNotification.notificationCallback(%@);", pushHandler.startPushData];
+		NSString *jsStatement = [NSString stringWithFormat:@"cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(%@);", pushHandler.startPushData];
 		[self.commandDelegate evalJs:WRITEJS(jsStatement)];
 		
 		pushHandler.startPushData = nil;
@@ -236,7 +236,7 @@
 	}
 	else {
 		//send it to the webview
-		NSString *jsStatement = [NSString stringWithFormat:@"window.plugins.pushNotification.notificationCallback(%@);", jsonString];
+		NSString *jsStatement = [NSString stringWithFormat:@"cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(%@);", jsonString];
 		[self.commandDelegate evalJs:WRITEJS(jsStatement)];
 	}
 }

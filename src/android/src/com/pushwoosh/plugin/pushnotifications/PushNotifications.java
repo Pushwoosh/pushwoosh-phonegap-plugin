@@ -747,7 +747,7 @@ public class PushNotifications extends CordovaPlugin
 	private void doOnMessageReceive(String message)
 	{
 		Log.e("doOnMessageReceive", "message is: " + message);
-		final String jsStatement = String.format("window.plugins.pushNotification.notificationCallback(%s);", message);
+		final String jsStatement = String.format("cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(%s);", message);
 		//webView.sendJavascript(jsStatement);
 
 		cordova.getActivity().runOnUiThread(
