@@ -32,6 +32,7 @@
 	if(pushManager == nil) {
 		pushManager = [PushNotificationManager pushManager];
 		pushManager.delegate = self;
+		pushManager.showPushnotificationAlert = FALSE;
 	}
 	return pushManager;
 }
