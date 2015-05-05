@@ -310,14 +310,27 @@
 
 - (void)setApplicationIconBadgeNumber:(CDVInvokedUrlCommand*)command {
 
-    int badge = [[[command.arguments objectAtIndex:0] objectForKey:@"badge"] intValue] ?: 0;
-    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:badge];
+	int badge = [[[command.arguments objectAtIndex:0] objectForKey:@"badge"] intValue];
+	[[UIApplication sharedApplication] setApplicationIconBadgeNumber:badge];
 
-    NSMutableDictionary *results = [NSMutableDictionary dictionary];
-	[results setValue:[NSNumber numberWithInt:badge] forKey:@"badge"];
-    [results setValue:[NSNumber numberWithInt:1] forKey:@"success"];
+	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
 
-	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
+- (void)getApplicationIconBadgeNumber:(CDVInvokedUrlCommand*)command {
+	
+	NSInteger badge = [UIApplication sharedApplication].applicationIconBadgeNumber;
+	
+	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:badge];
+	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)addToApplicationIconBadgeNumber:(CDVInvokedUrlCommand*)command {
+
+	int badge = [[[command.arguments objectAtIndex:0] objectForKey:@"badge"] intValue];
+	[UIApplication sharedApplication].applicationIconBadgeNumber += badge;
+	
+	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 

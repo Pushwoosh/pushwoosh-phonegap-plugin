@@ -155,8 +155,18 @@ PushNotification.prototype.getRemoteNotificationStatus = function(callback) {
 };
 
 // Call this to set the application icon badge
-PushNotification.prototype.setApplicationIconBadgeNumber = function(badgeNumber, callback) {
-	exec(callback, callback, "PushNotification", "setApplicationIconBadgeNumber", [{badge: badgeNumber}]);
+PushNotification.prototype.setApplicationIconBadgeNumber = function(badgeNumber) {
+	exec(null, null, "PushNotification", "setApplicationIconBadgeNumber", [{badge: badgeNumber}]);
+};
+
+// Call this to set the application icon badge
+PushNotification.prototype.getApplicationIconBadgeNumber = function(callback) {
+	exec(callback, callback, "PushNotification", "getApplicationIconBadgeNumber", []);
+};
+
+// Call this to set the application icon badge
+PushNotification.prototype.addToApplicationIconBadgeNumber = function(badgeNumber) {
+	exec(null, null, "PushNotification", "addToApplicationIconBadgeNumber", [{badge: badgeNumber}]);
 };
 
 // Call this to clear all notifications from the notification center
