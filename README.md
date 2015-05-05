@@ -16,6 +16,9 @@ http://www.pushwoosh.com/programming-push-notification/android/android-additiona
 ####WP8:
 http://www.pushwoosh.com/programming-push-notification/windows-phone/wp-additional-platforms/windows-phone-cordova-sdk-integration-guide/
 
+###Plugin documentation:  
+https://rawgit.com/Pushwoosh/pushwoosh-phonegap-3.0-plugin/master/Documentation/files/PushNotification-js.html
+
 ## Acknowledgments
 Plugman support by Platogo
 
