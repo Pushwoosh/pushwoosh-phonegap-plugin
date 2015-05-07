@@ -161,6 +161,7 @@ public class PushNotifications extends CordovaPlugin
 		catch (JSONException e)
 		{
 			e.printStackTrace();
+			Log.e("Pushwoosh", "No parameters has been passed to onDeviceReady function. Did you follow the guide correctly?");
 			return;
 		}
 
@@ -179,6 +180,7 @@ public class PushNotifications extends CordovaPlugin
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			Log.e("Pushwoosh", "Missing pw_appid parameter. Did you follow the guide correctly?");
 			return;
 		}
 	}
@@ -194,6 +196,7 @@ public class PushNotifications extends CordovaPlugin
 		{
 			callbackIds.remove("registerDevice");
 			e.printStackTrace();
+			Log.e("Pushwoosh", "registering for push notifications failed");
 
 			callbackContext.error(e.getMessage());
 			return true;
@@ -270,6 +273,7 @@ public class PushNotifications extends CordovaPlugin
 		}
 		catch (JSONException e)
 		{
+			Log.e("Pushwoosh", "No location information passed (missing parameters)");
 			e.printStackTrace();
 			return false;
 		}
@@ -284,6 +288,7 @@ public class PushNotifications extends CordovaPlugin
 		}
 		catch (JSONException e)
 		{
+			Log.e("Pushwoosh", "No location information passed (lat/lon parameters)");
 			e.printStackTrace();
 			return false;
 		}
@@ -305,6 +310,7 @@ public class PushNotifications extends CordovaPlugin
 		}
 		catch (JSONException e)
 		{
+			Log.e("Pushwoosh", "No tags information passed (missing parameters)");
 			e.printStackTrace();
 			return false;
 		}
@@ -320,6 +326,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (JSONException e)
 			{
+				Log.e("Pushwoosh", "Tag parameter is invalid");
 				e.printStackTrace();
 				return false;
 			}
@@ -459,6 +466,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (Exception e)
 			{
+				Log.e("Pushwoosh", "No parameters passed (missing parameters)");
 				e.printStackTrace();
 				return false;
 			}
@@ -475,6 +483,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (JSONException e)
 			{
+				Log.e("Pushwoosh", "No parameters passed (missing parameters)");
 				e.printStackTrace();
 				return false;
 			}
@@ -497,6 +506,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (JSONException e)
 			{
+				Log.e("Pushwoosh", "Not correct parameters passed (missing parameters)");
 				e.printStackTrace();
 				return false;
 			}
@@ -534,6 +544,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (Exception e)
 			{
+				Log.e("Pushwoosh", "No sound parameters passed (missing parameters)");
 				e.printStackTrace();
 				return false;
 			}
@@ -553,6 +564,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (Exception e)
 			{
+				Log.e("Pushwoosh", "No vibration parameters passed (missing parameters)");
 				e.printStackTrace();
 				return false;
 			}
@@ -570,6 +582,7 @@ public class PushNotifications extends CordovaPlugin
 			catch (Exception e)
 			{
 				e.printStackTrace();
+				Log.e("Pushwoosh", "No parameters passed (missing parameters)");
 				return false;
 			}
 
@@ -585,6 +598,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (Exception e)
 			{
+				Log.e("Pushwoosh", "No parameters passed (missing parameters)");
 				e.printStackTrace();
 				return false;
 			}
@@ -605,6 +619,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (Exception e)
 			{
+				Log.e("Pushwoosh", "No parameters passed (missing parameters)");
 				e.printStackTrace();
 				return false;
 			}
@@ -622,6 +637,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (JSONException e)
 			{
+				Log.e("Pushwoosh", "No parameters passed (missing parameters)");
 				e.printStackTrace();
 				return false;
 			}
@@ -641,6 +657,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (Exception e)
 			{
+				Log.e("Pushwoosh", "No parameters passed (missing parameters)");
 				e.printStackTrace();
 				return false;
 			}
@@ -700,7 +717,7 @@ public class PushNotifications extends CordovaPlugin
 			return true;
 		}
 
-		Log.d("DirectoryListPlugin", "Invalid action : " + action + " passed");
+		Log.d("Pushwoosh", "Invalid action : " + action + " passed");
 		return false;
 	}
 
