@@ -24,6 +24,26 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         private string registerCallbackId = null;
 
+        // returns null value if it fails.
+        private string getCallbackId(string options)
+        {
+            string[] optStings = null;
+            try
+            {
+                optStings = JSON.JsonHelper.Deserialize<string[]>(options);
+            }
+            catch (Exception)
+            {
+                DispatchCommandResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION), CurrentCommandCallbackId);
+            }
+
+            if (optStings == null)
+                return CurrentCommandCallbackId;
+
+            //callback id is the last item
+            return optStings[optStings.Length - 1];
+        }
+
         //Phonegap runs all plugins methods on a separate threads, make sure onDeviceReady goes first
         void waitDeviceReady()
         {
@@ -60,13 +80,13 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         public void registerDevice(string options)
         {
-            string callbackId = this.CurrentCommandCallbackId;
+            string callbackId = getCallbackId(options);
             waitDeviceReady();
 
             service.SubscribeToPushService(authenticatedServiceName);
             if (string.IsNullOrEmpty(service.PushToken))
             {
-                registerCallbackId = this.CurrentCommandCallbackId;
+                registerCallbackId = callbackId;
 
                 PluginResult plugResult = new PluginResult(PluginResult.Status.NO_RESULT);
                 plugResult.KeepCallback = true;
@@ -80,7 +100,8 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         public void unregisterDevice(string options)
         {
-            string callbackId = this.CurrentCommandCallbackId;
+            string callbackId = getCallbackId(options);
+
             PluginResult plugResult = new PluginResult(PluginResult.Status.NO_RESULT);
             plugResult.KeepCallback = true;
             DispatchCommandResult(plugResult);
@@ -101,7 +122,8 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         public void getTags(string options)
         {
-            string callbackId = this.CurrentCommandCallbackId;
+            string callbackId = getCallbackId(options);
+
             PluginResult plugResult = new PluginResult(PluginResult.Status.NO_RESULT);
             plugResult.KeepCallback = true;
             DispatchCommandResult(plugResult);
@@ -137,7 +159,8 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         public void setTags(string options)
         {
-            string callbackId = this.CurrentCommandCallbackId;
+            string callbackId = getCallbackId(options);
+
             PluginResult plugResult = new PluginResult(PluginResult.Status.NO_RESULT);
             plugResult.KeepCallback = true;
             DispatchCommandResult(plugResult);
