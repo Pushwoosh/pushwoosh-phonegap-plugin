@@ -321,6 +321,13 @@ PushNotification.prototype.cancelAllLocalNotifications = function(callback) {
 };
 //iOS End----
 
+//Function: getLaunchNotification
+//Returns push notification payload if the app was started in response to push notification
+//or null otherwise
+PushNotification.prototype.getLaunchNotification = function(callback) {
+    exec(callback, callback, "PushNotification", "getLaunchNotification", []);
+};
+
 // Event spawned when a notification is received while the application is active
 PushNotification.prototype.notificationCallback = function(notification) {
 	var ev = document.createEvent('HTMLEvents');

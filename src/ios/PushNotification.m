@@ -50,8 +50,6 @@
 }
 
 - (void)onDeviceReady:(CDVInvokedUrlCommand*)command {
-	deviceReady = YES;
-
 	NSDictionary *options = nil;
 	if(command.arguments.count != 0)
 		options = [command.arguments objectAtIndex:0];
@@ -82,12 +80,12 @@
 
 	AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
 	PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
-	if(pushHandler.startPushData) {
+	if(pushHandler.startPushData && !deviceReady) {
 		NSString *jsStatement = [NSString stringWithFormat:@"cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(%@);", pushHandler.startPushData];
 		[self.commandDelegate evalJs:WRITEJS(jsStatement)];
-		
-		pushHandler.startPushData = nil;
 	}
+    
+	deviceReady = YES;
 
 	[[NSUserDefaults standardUserDefaults] synchronize];
 }
@@ -225,17 +223,21 @@
 	
 	[pn setValue:[NSNumber numberWithBool:onStart] forKey:@"onStart"];
 	
-    NSData *json = [NSJSONSerialization dataWithJSONObject:pn options:NSJSONWritingPrettyPrinted error:nil];
+	NSData *json = [NSJSONSerialization dataWithJSONObject:pn options:NSJSONWritingPrettyPrinted error:nil];
 	NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+	
+	if(!onStart && !deviceReady) {
+		NSLog(@"PUSHWOOSH WARNING: push notification onStart is false, but onDeviceReady has not been called. Did you forget to call onDeviceReady?");
+	}
     
-	if(!deviceReady){
-		//the webview is not loaded yet, keep it for the callback
+	if(onStart) {
+		//keep the start push
 		AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
 		PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
-
 		pushHandler.startPushData = jsonString;
 	}
-	else {
+	
+	if(deviceReady) {
 		//send it to the webview
 		NSString *jsStatement = [NSString stringWithFormat:@"cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(%@);", jsonString];
 		[self.commandDelegate evalJs:WRITEJS(jsStatement)];
@@ -340,6 +342,12 @@
 	
 	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)getLaunchNotification:(CDVInvokedUrlCommand*)command {
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:self.startPushData];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void) dealloc {

@@ -60,9 +60,10 @@ public class PushNotifications extends CordovaPlugin
 	public static final String ON_DEVICE_READY = "onDeviceReady";
 	public static final String GET_PUSH_TOKEN = "getPushToken";
 	public static final String GET_HWID = "getPushwooshHWID";
+	public static final String GET_LAUNCH_NOTIFICATION = "getLaunchNotification";
 
 	boolean receiversRegistered = false;
-	boolean deviceReady = false;
+	String startPushData = null;
 
 	HashMap<String, CallbackContext> callbackIds = new HashMap<String, CallbackContext>();
 	PushManager mPushManager = null;
@@ -74,6 +75,7 @@ public class PushNotifications extends CordovaPlugin
 	{
 		super.onNewIntent(intent);
 
+		startPushData = getPushFromIntent(intent);
 		checkMessage(intent);
 	}
 
@@ -167,6 +169,8 @@ public class PushNotifications extends CordovaPlugin
 
 		try
 		{
+			startPushData = getPushFromIntent(cordova.getActivity().getIntent());
+
 			String appid = null;
 			if (params.has("appid"))
 				appid = params.getString("appid");
@@ -204,6 +208,17 @@ public class PushNotifications extends CordovaPlugin
 
 		checkMessage(cordova.getActivity().getIntent());
 		return true;
+	}
+
+	private String getPushFromIntent(Intent intent)
+	{
+		if (null == intent)
+			return null;
+
+		if (intent.hasExtra(PushManager.PUSH_RECEIVE_EVENT))
+			return intent.getExtras().getString(PushManager.PUSH_RECEIVE_EVENT);
+
+		return null;
 	}
 
 	private void checkMessage(Intent intent)
@@ -390,7 +405,6 @@ public class PushNotifications extends CordovaPlugin
 		{
 			initialize(data, callbackId);
 			checkMessage(cordova.getActivity().getIntent());
-			deviceReady = true;
 			return true;
 		}
 
@@ -517,6 +531,12 @@ public class PushNotifications extends CordovaPlugin
 		if (CLEAR_LOCAL_NOTIFICATION.equals(action))
 		{
 			PushManager.clearLocalNotifications(cordova.getActivity());
+			return true;
+		}
+
+		if (GET_LAUNCH_NOTIFICATION.equals(action))
+		{
+			callbackId.success(startPushData);
 			return true;
 		}
 
