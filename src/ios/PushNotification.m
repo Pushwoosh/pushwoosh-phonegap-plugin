@@ -81,13 +81,20 @@
 	AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
 	PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
 	if(pushHandler.startPushData && !deviceReady) {
-		NSString *jsStatement = [NSString stringWithFormat:@"cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(%@);", pushHandler.startPushData];
-		[self.commandDelegate evalJs:WRITEJS(jsStatement)];
+		[self dispatchPush:pushHandler.startPushData];
 	}
     
 	deviceReady = YES;
 
 	[[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (void)dispatchPush:(NSDictionary*)pushData {
+	NSData *json = [NSJSONSerialization dataWithJSONObject:pushData options:NSJSONWritingPrettyPrinted error:nil];
+	NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+
+	NSString *jsStatement = [NSString stringWithFormat:@"cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(%@);", jsonString];
+	[self.commandDelegate evalJs:WRITEJS(jsStatement)];
 }
 
 - (void)registerDevice:(CDVInvokedUrlCommand*)command {
@@ -223,9 +230,6 @@
 	
 	[pn setValue:[NSNumber numberWithBool:onStart] forKey:@"onStart"];
 	
-	NSData *json = [NSJSONSerialization dataWithJSONObject:pn options:NSJSONWritingPrettyPrinted error:nil];
-	NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
-	
 	if(!onStart && !deviceReady) {
 		NSLog(@"PUSHWOOSH WARNING: push notification onStart is false, but onDeviceReady has not been called. Did you forget to call onDeviceReady?");
 	}
@@ -234,13 +238,12 @@
 		//keep the start push
 		AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
 		PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
-		pushHandler.startPushData = jsonString;
+		pushHandler.startPushData = pn;
 	}
 	
 	if(deviceReady) {
 		//send it to the webview
-		NSString *jsStatement = [NSString stringWithFormat:@"cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(%@);", jsonString];
-		[self.commandDelegate evalJs:WRITEJS(jsStatement)];
+		[self dispatchPush:pn];
 	}
 }
 
@@ -346,7 +349,7 @@
 
 - (void)getLaunchNotification:(CDVInvokedUrlCommand*)command {
     
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:self.startPushData];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:self.startPushData];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 

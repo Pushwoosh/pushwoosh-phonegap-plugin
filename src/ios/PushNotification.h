@@ -17,13 +17,13 @@
 
 	NSMutableDictionary* callbackIds;
 	PushNotificationManager *pushManager;
-	NSString *startPushData;
+	NSDictionary *startPushData;
 	BOOL deviceReady;
 }
 
 @property (nonatomic, retain) NSMutableDictionary* callbackIds;
 @property (nonatomic, retain) PushNotificationManager *pushManager;
-@property (nonatomic, copy) NSString *startPushData;
+@property (nonatomic, copy) NSDictionary *startPushData;
 
 - (void)registerDevice:(CDVInvokedUrlCommand*)command;
 - (void)unregisterDevice:(CDVInvokedUrlCommand*)command;

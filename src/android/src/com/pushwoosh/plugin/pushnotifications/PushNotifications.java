@@ -63,7 +63,7 @@ public class PushNotifications extends CordovaPlugin
 	public static final String GET_LAUNCH_NOTIFICATION = "getLaunchNotification";
 
 	boolean receiversRegistered = false;
-	String startPushData = null;
+	JSONObject startPushData = null;
 
 	HashMap<String, CallbackContext> callbackIds = new HashMap<String, CallbackContext>();
 	PushManager mPushManager = null;
@@ -210,13 +210,23 @@ public class PushNotifications extends CordovaPlugin
 		return true;
 	}
 
-	private String getPushFromIntent(Intent intent)
+	private JSONObject getPushFromIntent(Intent intent)
 	{
 		if (null == intent)
 			return null;
 
-		if (intent.hasExtra(PushManager.PUSH_RECEIVE_EVENT))
-			return intent.getExtras().getString(PushManager.PUSH_RECEIVE_EVENT);
+		if (intent.hasExtra(PushManager.PUSH_RECEIVE_EVENT)) {
+			String pushString = intent.getExtras().getString(PushManager.PUSH_RECEIVE_EVENT);
+			JSONObject pushObject = null;
+			try {
+				pushObject = new JSONObject(pushString);
+			}
+			catch (JSONException e) {
+				e.printStackTrace();
+			}
+
+			return pushObject;
+		}
 
 		return null;
 	}
@@ -536,7 +546,13 @@ public class PushNotifications extends CordovaPlugin
 
 		if (GET_LAUNCH_NOTIFICATION.equals(action))
 		{
-			callbackId.success(startPushData);
+			// unfortunately null object can only be returned as String
+			if (startPushData != null) {
+				callbackId.success(startPushData);
+			}
+			else {
+				callbackId.success((String)null);
+			}
 			return true;
 		}
 
