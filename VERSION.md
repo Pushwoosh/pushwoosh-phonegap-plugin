@@ -1,3 +1,5 @@
+Current version: 3.5.5\n=========================
+publishing to npm
 Current version: 3.5.4
 =========================
 getLaunchNotification method implemented (iOS, Android)
