@@ -1,4 +1,5 @@
-Current version: 3.5.5\n=========================
+Current version: 3.5.5
+=========================
 publishing to npm
 Current version: 3.5.4
 =========================
