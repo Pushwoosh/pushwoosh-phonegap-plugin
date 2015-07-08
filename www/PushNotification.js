@@ -135,13 +135,13 @@ PushNotification.prototype.unregisterDevice = function(success, fail) {
 //Function: startLocationTracking
 //Starts geolocation based push notifications. You need to configure Geozones in Pushwoosh Control panel.
 PushNotification.prototype.startLocationTracking = function(success, fail) {
-  exec(success, fail, "PushNotification", "startLocationTracking", []);
+	exec(success, fail, "PushNotification", "startLocationTracking", []);
 };
 
 //Function: stopLocationTracking
 //Stops geolocation based push notifications
 PushNotification.prototype.stopLocationTracking = function(success, fail) {
-  exec(success, fail, "PushNotification", "stopLocationTracking", []);
+	exec(success, fail, "PushNotification", "stopLocationTracking", []);
 };
 
 //Function: createLocalNotification
@@ -285,7 +285,9 @@ PushNotification.prototype.getRemoteNotificationStatus = function(callback) {
 //iOS only,
 //Call this to set the application icon badge
 PushNotification.prototype.setApplicationIconBadgeNumber = function(badgeNumber) {
-	exec(null, null, "PushNotification", "setApplicationIconBadgeNumber", [{badge: badgeNumber}]);
+	exec(null, null, "PushNotification", "setApplicationIconBadgeNumber", [{
+		badge: badgeNumber
+	}]);
 };
 
 //Function: getApplicationIconBadgeNumber
@@ -310,7 +312,9 @@ PushNotification.prototype.getApplicationIconBadgeNumber = function(callback) {
 //	pushwoosh.addToApplicationIconBadgeNumber(-5);
 //(end)
 PushNotification.prototype.addToApplicationIconBadgeNumber = function(badgeNumber) {
-	exec(null, null, "PushNotification", "addToApplicationIconBadgeNumber", [{badge: badgeNumber}]);
+	exec(null, null, "PushNotification", "addToApplicationIconBadgeNumber", [{
+		badge: badgeNumber
+	}]);
 };
 
 //Function: cancelAllLocalNotifications
@@ -325,7 +329,7 @@ PushNotification.prototype.cancelAllLocalNotifications = function(callback) {
 //Returns push notification payload if the app was started in response to push notification
 //or null otherwise
 PushNotification.prototype.getLaunchNotification = function(callback) {
-    exec(callback, callback, "PushNotification", "getLaunchNotification", []);
+	exec(callback, callback, "PushNotification", "getLaunchNotification", []);
 };
 
 // Event spawned when a notification is received while the application is active

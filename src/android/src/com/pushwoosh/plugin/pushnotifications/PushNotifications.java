@@ -1,5 +1,5 @@
 //
-//  PushNotifications.java
+// PushNotifications.java
 //
 // Pushwoosh, 01/07/12.
 //
@@ -22,6 +22,8 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 
 import com.arellomobile.android.push.BasePushMessageReceiver;
 import com.arellomobile.android.push.PushManager;
@@ -63,6 +65,7 @@ public class PushNotifications extends CordovaPlugin
 	public static final String GET_LAUNCH_NOTIFICATION = "getLaunchNotification";
 
 	boolean receiversRegistered = false;
+	boolean broadcastPush = true;
 	JSONObject startPushData = null;
 
 	HashMap<String, CallbackContext> callbackIds = new HashMap<String, CallbackContext>();
@@ -97,7 +100,8 @@ public class PushNotifications extends CordovaPlugin
 		IntentFilter intentFilter = new IntentFilter(cordova.getActivity().getPackageName() + ".action.PUSH_MESSAGE_RECEIVE");
 
 		//comment this code out if you would like to receive the notifications in the notifications center when the app is in foreground
-		cordova.getActivity().registerReceiver(mReceiver, intentFilter);
+		if (broadcastPush)
+			cordova.getActivity().registerReceiver(mReceiver, intentFilter);
 
 		//registration receiver
 		cordova.getActivity().registerReceiver(mBroadcastReceiver, new IntentFilter(cordova.getActivity().getPackageName() + "." + PushManager.REGISTER_BROAD_CAST_ACTION));
@@ -169,6 +173,24 @@ public class PushNotifications extends CordovaPlugin
 
 		try
 		{
+			String packageName = cordova.getActivity().getApplicationContext().getPackageName();
+			ApplicationInfo ai = cordova.getActivity().getPackageManager().getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+			
+			if (ai.metaData != null && ai.metaData.containsKey("PW_NO_BROADCAST_PUSH"))
+				broadcastPush = !(ai.metaData.getBoolean("PW_NO_BROADCAST_PUSH"));
+
+			Log.d("Pushwoosh", "broadcastPush = " + broadcastPush);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		try
+		{
+			//make sure the receivers are on
+			registerReceivers();
+
 			startPushData = getPushFromIntent(cordova.getActivity().getIntent());
 
 			String appid = null;
@@ -215,13 +237,16 @@ public class PushNotifications extends CordovaPlugin
 		if (null == intent)
 			return null;
 
-		if (intent.hasExtra(PushManager.PUSH_RECEIVE_EVENT)) {
+		if (intent.hasExtra(PushManager.PUSH_RECEIVE_EVENT))
+		{
 			String pushString = intent.getExtras().getString(PushManager.PUSH_RECEIVE_EVENT);
 			JSONObject pushObject = null;
-			try {
+			try
+			{
 				pushObject = new JSONObject(pushString);
 			}
-			catch (JSONException e) {
+			catch (JSONException e)
+			{
 				e.printStackTrace();
 			}
 
@@ -340,7 +365,8 @@ public class PushNotifications extends CordovaPlugin
 			return false;
 		}
 
-		@SuppressWarnings("unchecked") Iterator<String> nameItr = params.keys();
+		@SuppressWarnings("unchecked")
+		Iterator<String> nameItr = params.keys();
 		Map<String, Object> paramsMap = new HashMap<String, Object>();
 		while (nameItr.hasNext())
 		{
@@ -384,9 +410,11 @@ public class PushNotifications extends CordovaPlugin
 			}
 
 			@Override
-			public void taskStarted() {}
+			public void taskStarted()
+			{
+			}
 		}
-		
+
 		PushManager.sendTags(cordova.getActivity(), paramsMap, new SendTagsListenerImpl());
 		return true;
 	}
@@ -395,9 +423,6 @@ public class PushNotifications extends CordovaPlugin
 	public boolean execute(String action, JSONArray data, CallbackContext callbackId)
 	{
 		Log.d("PushNotifications", "Plugin Called");
-
-		//make sure the receivers are on
-		registerReceivers();
 
 		if (GET_PUSH_TOKEN.equals(action))
 		{
@@ -547,11 +572,13 @@ public class PushNotifications extends CordovaPlugin
 		if (GET_LAUNCH_NOTIFICATION.equals(action))
 		{
 			// unfortunately null object can only be returned as String
-			if (startPushData != null) {
+			if (startPushData != null)
+			{
 				callbackId.success(startPushData);
 			}
-			else {
-				callbackId.success((String)null);
+			else
+			{
+				callbackId.success((String) null);
 			}
 			return true;
 		}
@@ -641,7 +668,7 @@ public class PushNotifications extends CordovaPlugin
 
 			return true;
 		}
-		
+
 		if ("setColorLED".equals(action))
 		{
 			try
@@ -662,7 +689,6 @@ public class PushNotifications extends CordovaPlugin
 
 			return true;
 		}
-
 
 		if ("sendGoalAchieved".equals(action))
 		{
@@ -733,21 +759,21 @@ public class PushNotifications extends CordovaPlugin
 			PushManager.getTagsAsync(cordova.getActivity(), new GetTagsListenerImpl());
 			return true;
 		}
-		
-		if(action.equals("getPushHistory"))
+
+		if (action.equals("getPushHistory"))
 		{
 			ArrayList<String> pushHistory = PushPersistance.getPushHistory(cordova.getActivity());
 			callbackId.success(new JSONArray(pushHistory));
 			return true;
 		}
 
-		if(action.equals("clearPushHistory"))
+		if (action.equals("clearPushHistory"))
 		{
 			PushPersistance.clearPushHistory(cordova.getActivity());
 			return true;
 		}
 
-		if(action.equals("clearNotificationCenter"))
+		if (action.equals("clearNotificationCenter"))
 		{
 			PushManager.clearNotificationCenter(cordova.getActivity());
 			return true;
@@ -803,16 +829,14 @@ public class PushNotifications extends CordovaPlugin
 		final String jsStatement = String.format("cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(%s);", message);
 		//webView.sendJavascript(jsStatement);
 
-		cordova.getActivity().runOnUiThread(
-				new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						webView.loadUrl("javascript:" + jsStatement);
-					}
-				}
-		);
+		cordova.getActivity().runOnUiThread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				webView.loadUrl("javascript:" + jsStatement);
+			}
+		});
 	}
 
 	private BroadcastReceiver mReceiver = new BasePushMessageReceiver()
