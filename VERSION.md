@@ -1,3 +1,7 @@
+Current version: 3.5.7
+=========================
+PW_NO_BROADCAST_PUSH Android Manifest flag
+Code style fixes
 Current version: 3.5.6
 =========================
 Publishing to NPM activated.
