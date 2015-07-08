@@ -690,43 +690,6 @@ public class PushNotifications extends CordovaPlugin
 			return true;
 		}
 
-		if ("sendGoalAchieved".equals(action))
-		{
-			JSONObject params = null;
-			try
-			{
-				params = data.getJSONObject(0);
-			}
-			catch (JSONException e)
-			{
-				Log.e("Pushwoosh", "No parameters passed (missing parameters)");
-				e.printStackTrace();
-				return false;
-			}
-
-			try
-			{
-				//config params: {goal:"goalName", count:30}
-				String goal = params.getString("goal");
-				if (goal == null)
-					return false;
-
-				Integer count = null;
-				if (params.has("count"))
-					count = params.getInt("count");
-
-				PushManager.sendGoalAchieved(cordova.getActivity(), goal, count);
-			}
-			catch (Exception e)
-			{
-				Log.e("Pushwoosh", "No parameters passed (missing parameters)");
-				e.printStackTrace();
-				return false;
-			}
-
-			return true;
-		}
-
 		if (GET_TAGS.equals(action))
 		{
 			callbackIds.put("getTags", callbackId);
