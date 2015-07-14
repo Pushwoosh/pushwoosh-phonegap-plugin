@@ -57,13 +57,6 @@
         android:name="com.google.android.c2dm.permission.RECEIVE"/>
       </config-file>
 
-      <config-file target="AndroidManifest.xml" parent="/manifest/application/activity">
-        <intent-filter>
-          <action android:name="com.cobalt.prod.socialmanager.MESSAGE"/>
-          <category android:name="android.intent.category.DEFAULT"/>
-        </intent-filter>
-      </config-file>
-
       <config-file target="AndroidManifest.xml" parent="/manifest/application">
         <activity android:name="com.arellomobile.android.push.PushWebview"/>
 
@@ -103,6 +96,13 @@
 
             <receiver android:name="com.arellomobile.android.push.AlarmReceiver"></receiver>
 
+      </config-file>
+      
+      <config-file target="AndroidManifest.xml" parent="/manifest/application/activity">
+          <intent-filter>
+              <action android:name="com.cobalt.prod.socialmanager.MESSAGE"/>
+              <category android:name="android.intent.category.DEFAULT"/>
+          </intent-filter>
       </config-file>
 
       <config-file target="res/xml/config.xml" parent="/*">
