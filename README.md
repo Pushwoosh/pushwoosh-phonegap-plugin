@@ -1,6 +1,8 @@
 Cordova Pushwoosh Push Notifications plugin
 ===================================================
 
+**Note:** This is a forked version of the original plugin. The reason for this is [AppGyver/steroids#992](https://github.com/AppGyver/steroids/issues/992). To summarize, all instances of `$PACKAGE_NAME` have been replaced with the actual name of the project. This plugin can be taken down and the original used once the aforementioned issue is fixed.
+
 Cross-Platform push notifications by Pushwoosh for Cordova / PhoneGap
 
 follows the Cordova Plugin spec http://cordova.apache.org/docs/en/3.0.0/plugin_ref_spec.md  
