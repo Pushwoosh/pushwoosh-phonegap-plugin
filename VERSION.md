@@ -1,3 +1,6 @@
+Current version: 3.5.9
+=========================
+Updated to latest SDK
 Current version: 3.5.8
 =========================
 fix: https://github.com/Pushwoosh/pushwoosh-phonegap-3.0-plugin/issues/110

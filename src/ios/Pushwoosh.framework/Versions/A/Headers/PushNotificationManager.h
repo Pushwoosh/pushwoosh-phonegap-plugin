@@ -103,6 +103,11 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
 - (void) onRichPageButtonTapped:(NSString *)customData;
 
 /**
+ User has tapped on the back button on Rich Push Page.
+ */
+- (void) onRichPageBackTapped;
+
+/**
  Tells the delegate that the push manager has received tags from the server.
  
  @param tags Dictionary representation of received tags.
@@ -204,6 +209,11 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
  Show push notifications alert when push notification is received while the app is running, default is `YES`
  */
 @property (nonatomic, assign) BOOL showPushnotificationAlert;
+
+/**
+ Returns push notification payload if the app was started in response to push notification or null otherwise
+ */
+@property (nonatomic, copy, readonly) NSDictionary *launchNotification;
 
 /**
  Initializes PushNotificationManager. Usually called by Pushwoosh Runtime internally.
@@ -452,5 +462,10 @@ typedef void(^pushwooshErrorHandler)(NSError *error);
  Internal function
  */
 - (void) onRichPageButtonTapped:(NSString *)customData;
+
+/**
+ Internal function
+ */
+- (void) onRichPageBackTapped;
 
 @end
