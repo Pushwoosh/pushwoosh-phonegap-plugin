@@ -1,3 +1,9 @@
+Current version: 3.5.9
+=========================
+Updated to latest SDK
+Current version: 3.5.8
+=========================
+fix: https://github.com/Pushwoosh/pushwoosh-phonegap-3.0-plugin/issues/110
 Current version: 3.5.7
 =========================
 PW_NO_BROADCAST_PUSH Android Manifest flag
