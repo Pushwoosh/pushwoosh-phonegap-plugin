@@ -55,7 +55,6 @@ public class PushNotifications extends CordovaPlugin
 	public static final String START_BEACON_PUSHES = "startBeaconPushes";
 	public static final String STOP_BEACON_PUSHES = "stopBeaconPushes";
 	public static final String SET_BEACON_BACKGROUND_MODE = "setBeaconBackgroundMode";
-	public static final String SEND_LOCATION = "sendLocation";
 	public static final String CREATE_LOCAL_NOTIFICATION = "createLocalNotification";
 	public static final String CLEAR_LOCAL_NOTIFICATION = "clearLocalNotification";
 	public static final String GET_TAGS = "getTags";
@@ -309,48 +308,6 @@ public class PushNotifications extends CordovaPlugin
 		return true;
 	}
 
-	private boolean internalSendLocation(JSONArray data, CallbackContext callbackContext)
-	{
-		if (mPushManager == null)
-		{
-			return false;
-		}
-
-		JSONObject params = null;
-		try
-		{
-			params = data.getJSONObject(0);
-		}
-		catch (JSONException e)
-		{
-			Log.e("Pushwoosh", "No location information passed (missing parameters)");
-			e.printStackTrace();
-			return false;
-		}
-
-		double lat = 0;
-		double lon = 0;
-
-		try
-		{
-			lat = params.getDouble("lat");
-			lon = params.getDouble("lon");
-		}
-		catch (JSONException e)
-		{
-			Log.e("Pushwoosh", "No location information passed (lat/lon parameters)");
-			e.printStackTrace();
-			return false;
-		}
-
-		Location location = new Location("");
-		location.setLatitude(lat);
-		location.setLongitude(lon);
-		PushManager.sendLocation(cordova.getActivity(), location);
-
-		return true;
-	}
-
 	private boolean internalSendTags(JSONArray data, final CallbackContext callbackContext)
 	{
 		JSONObject params;
@@ -456,11 +413,6 @@ public class PushNotifications extends CordovaPlugin
 		if (SET_TAGS.equals(action))
 		{
 			return internalSendTags(data, callbackId);
-		}
-
-		if (SEND_LOCATION.equals(action))
-		{
-			return internalSendLocation(data, callbackId);
 		}
 
 		if (START_GEO_PUSHES.equals(action) || START_LOCATION_TRACKING.equals(action))
