@@ -1,3 +1,6 @@
+Current version: 3.6.0
+=========================
+Android push priority, visibility and badges support
 Current version: 3.5.9
 =========================
 Updated to latest SDK
