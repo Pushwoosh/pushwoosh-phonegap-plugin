@@ -1,3 +1,6 @@
+Current version: 3.6.1
+=========================
+Pushwoosh SDK update
 Current version: 3.6.0
 =========================
 Android push priority, visibility and badges support

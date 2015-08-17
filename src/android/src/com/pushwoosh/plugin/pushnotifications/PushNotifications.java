@@ -25,17 +25,14 @@ import android.util.Log;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
-import com.arellomobile.android.push.BasePushMessageReceiver;
-import com.arellomobile.android.push.PushManager;
-import com.arellomobile.android.push.PushPersistance;
-import com.arellomobile.android.push.PushManager.GetTagsListener;
-import com.arellomobile.android.push.SendPushTagsCallBack;
-import com.arellomobile.android.push.preference.SoundType;
-import com.arellomobile.android.push.preference.VibrateType;
-import com.arellomobile.android.push.utils.PreferenceUtils;
-import com.arellomobile.android.push.utils.RegisterBroadcastReceiver;
-import com.arellomobile.android.push.utils.rich.RichPushUtils;
-import com.google.android.gcm.GCMRegistrar;
+import com.pushwoosh.PushManager;
+import com.pushwoosh.notification.SoundType;
+import com.pushwoosh.notification.VibrateType;
+import com.pushwoosh.PushManager.GetTagsListener;
+import com.pushwoosh.BasePushMessageReceiver;
+import com.pushwoosh.BaseRegistrationReceiver;
+import com.pushwoosh.SendPushTagsCallBack;
+import com.pushwoosh.internal.utils.GeneralUtils;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -81,7 +78,7 @@ public class PushNotifications extends CordovaPlugin
 		checkMessage(intent);
 	}
 
-	BroadcastReceiver mBroadcastReceiver = new RegisterBroadcastReceiver()
+	BroadcastReceiver mBroadcastReceiver = new BaseRegistrationReceiver()
 	{
 		@Override
 		public void onRegisterActionReceive(Context context, Intent intent)
@@ -296,7 +293,7 @@ public class PushNotifications extends CordovaPlugin
 
 		try
 		{
-			GCMRegistrar.unregister(cordova.getActivity());
+			mPushManager.unregisterForPushNotifications();
 		}
 		catch (Exception e)
 		{
@@ -629,7 +626,7 @@ public class PushNotifications extends CordovaPlugin
 				if (colorString == null)
 					return false;
 
-				int colorLed = RichPushUtils.parseColor(colorString);
+				int colorLed = GeneralUtils.parseColor(colorString);
 				PushManager.setColorLED(cordova.getActivity(), colorLed);
 			}
 			catch (Exception e)
@@ -677,14 +674,14 @@ public class PushNotifications extends CordovaPlugin
 
 		if (action.equals("getPushHistory"))
 		{
-			ArrayList<String> pushHistory = PushPersistance.getPushHistory(cordova.getActivity());
+			ArrayList<String> pushHistory = mPushManager.getPushHistory();
 			callbackId.success(new JSONArray(pushHistory));
 			return true;
 		}
 
 		if (action.equals("clearPushHistory"))
 		{
-			PushPersistance.clearPushHistory(cordova.getActivity());
+			mPushManager.clearPushHistory();
 			return true;
 		}
 
