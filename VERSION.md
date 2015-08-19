@@ -1,3 +1,6 @@
+Current version: 3.6.2
+=========================
+plugin.xml update
 Current version: 3.6.1
 =========================
 Pushwoosh SDK update
