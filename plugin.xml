@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android"
 		id="com.pushwoosh.plugins.pushwoosh"
-    version="3.6.2">
+    version="3.6.3">
 
 		<name>Pushwoosh</name>
 
@@ -21,7 +21,6 @@
 
 			<!-- android -->
 		<platform name="android">
-
 			<config-file>
 				<access origin="*.pushwoosh.com" />
 			</config-file>
@@ -63,7 +62,7 @@
 				<activity android:name="com.pushwoosh.MessageActivity" />
 				<activity android:name="com.pushwoosh.PushHandlerActivity" />
 
-				<receiver android:name="com.pushwoosh.thirdparty.gms.gcm.GcmReceiver" android:exported="true" android:permission="com.google.android.c2dm.permission.SEND">
+				<receiver android:name="com.google.android.gms.gcm.GcmReceiver" android:exported="true" android:permission="com.google.android.c2dm.permission.SEND">
 					<intent-filter>
 						<action android:name="com.google.android.c2dm.intent.RECEIVE" />
 						<category android:name="PACKAGE_NAME" />
@@ -109,6 +108,8 @@
 							target-dir="src/com/pushwoosh/plugin/pushnotifications" />
 
 			<source-file src="src/android/lib/Pushwoosh.jar" target-dir="libs" />
+			<source-file src="src/android/lib/android-support-v4.jar" target-dir="libs" />
+			<source-file src="src/android/lib/google-play-services.jar" target-dir="libs" />
 		</platform>
 
 		<!-- ios -->
