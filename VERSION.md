@@ -1,3 +1,6 @@
+Current version: 3.6.5
+=========================
+Fixed plugin incompatibility
 Current version: 3.6.4
 =========================
 Pushwoosh library update
