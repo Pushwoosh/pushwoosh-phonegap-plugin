@@ -127,8 +127,22 @@ typedef void(^PushwooshErrorHandler)(NSError *error);
  @param error An NSError object that encapsulates information why receiving tags did not succeed.
  */
 - (void) onTagsFailedToReceive:(NSError *)error;
-@end
 
+/**
+ Tells the delegate that In-App with specified code has been closed
+ 
+ @param code In-App code
+ */
+- (void) onInAppClosed:(NSString*)code;
+
+/**
+ Tells the delegate that In-App with specified code has been displayed
+ 
+ @param code In-App code
+ */
+- (void) onInAppDisplayed:(NSString*)code;
+
+@end
 
 /**
   `PWTags` class encapsulates the methods for creating tags parameters for sending them to the server.

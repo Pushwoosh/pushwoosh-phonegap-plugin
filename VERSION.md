@@ -1,3 +1,6 @@
+Current version: 3.6.6
+=========================
+iOS 9 support
 Current version: 3.6.5
 =========================
 Fixed plugin incompatibility
