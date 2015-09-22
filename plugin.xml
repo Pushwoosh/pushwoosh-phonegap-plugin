@@ -108,8 +108,8 @@
 							target-dir="src/com/pushwoosh/plugin/pushnotifications" />
 
 			<source-file src="src/android/lib/Pushwoosh.jar" target-dir="libs" />
-			<framework src="com.google.android.gms:play-services-gcm:+" />
-			<framework src="com.android.support:support-v4:+" />
+			<source-file src="src/android/lib/google-play-services.jar" target-dir="libs" />
+			<source-file src="src/android/lib/android-support-v4.jar" target-dir="libs" />
 		</platform>
 
 		<!-- ios -->
