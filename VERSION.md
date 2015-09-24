@@ -1,3 +1,6 @@
+Current version: 3.6.7
+=========================
+Remote notification tag identifier for Android
 Current version: 3.6.6
 =========================
 iOS 9 support
