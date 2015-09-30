@@ -1,3 +1,7 @@
+Current version: 3.6.8
+=========================
+Fixed XCode 7 warnings
+iOS log level management
 Current version: 3.6.7
 =========================
 Remote notification tag identifier for Android
