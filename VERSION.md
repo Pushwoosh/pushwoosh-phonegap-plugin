@@ -1,3 +1,16 @@
+Current version: 3.6.11
+=========================
+Application icon badge number for Android
+Current version: 3.6.10
+=========================
+Actual fixes for 3.6.8 and 3.6.9
+Current version: 3.6.9
+=========================
+fixed https://github.com/Pushwoosh/pushwoosh-phonegap-3.0-plugin/issues/129
+Current version: 3.6.8
+=========================
+Fixed XCode 7 warnings
+iOS log level management
 Current version: 3.6.7
 =========================
 Remote notification tag identifier for Android

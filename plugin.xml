@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android"
 		id="com.pushwoosh.plugins.pushwoosh"
-    version="3.6.7">
+    version="3.6.11">
 
 		<name>Pushwoosh</name>
 
@@ -54,6 +54,25 @@
 				<!-- This app has permission to register and receive data message. -->
 				<uses-permission
 				android:name="com.google.android.c2dm.permission.RECEIVE"/>
+
+				<!-- <badges> -->
+					 <!--for Samsung-->
+				    <uses-permission android:name="com.sec.android.provider.badge.permission.READ"/>
+				    <uses-permission android:name="com.sec.android.provider.badge.permission.WRITE"/>
+
+				    <!--for htc-->
+				    <uses-permission android:name="com.htc.launcher.permission.READ_SETTINGS"/>
+				    <uses-permission android:name="com.htc.launcher.permission.UPDATE_SHORTCUT"/>
+
+				    <!--for sony-->
+				    <uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE"/>
+
+				    <!--for apex-->
+				    <uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT"/>
+
+				    <!--for solid-->
+				    <uses-permission android:name="com.majeur.launcher.permission.UPDATE_BADGE"/>
+			    <!-- </badges> -->
 			</config-file>
 
 			<config-file target="AndroidManifest.xml" parent="/manifest/application">
