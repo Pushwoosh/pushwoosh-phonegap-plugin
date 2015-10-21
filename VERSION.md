@@ -1,3 +1,6 @@
+Current version: 3.6.12
+=========================
+Fixed https://github.com/Pushwoosh/pushwoosh-phonegap-3.0-plugin/issues/132
 Current version: 3.6.11
 =========================
 Application icon badge number for Android
