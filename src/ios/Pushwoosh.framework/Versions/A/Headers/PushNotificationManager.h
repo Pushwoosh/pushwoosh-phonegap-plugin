@@ -317,6 +317,11 @@ typedef void(^PushwooshErrorHandler)(NSError *error);
 - (void) loadTags: (PushwooshGetTagsHandler) successHandler error:(PushwooshErrorHandler) errorHandler;
 
 /**
+ Get tags from local cache.
+ */
+- (NSDictionary*) getCachedTags;
+
+/**
  Informs the Pushwoosh about the app being launched. Usually called internally by SDK Runtime.
  */
 - (void) sendAppOpen;
@@ -469,7 +474,17 @@ typedef void(^PushwooshErrorHandler)(NSError *error);
  Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
  This allows data and events to be matched across multiple user devices.
  */
-- (void) setUserId: (NSString*) userId; 
+- (void) setUserId: (NSString*) userId;
+
+/**
+ Move all events from oldUserId to newUserId if doMerge is true. If doMerge is false all events for oldUserId are removed.
+ 
+ @param oldUserId source user
+ @param newUserId destination user
+ @param doMerge if false all events for oldUserId are removed, if true all events for oldUserId are moved to newUserId
+ @param completeion callback
+ */
+- (void) mergeUserId: (NSString*) oldUserId to: (NSString*) newUserId doMerge: (BOOL) doMerge completion: (void(^)(NSError* error)) completion;
 
 /**
  Post events for In-App Messages. This can trigger In-App message display as specified in Pushwoosh Control Panel.
