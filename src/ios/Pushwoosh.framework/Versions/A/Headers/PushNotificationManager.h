@@ -317,11 +317,6 @@ typedef void(^PushwooshErrorHandler)(NSError *error);
 - (void) loadTags: (PushwooshGetTagsHandler) successHandler error:(PushwooshErrorHandler) errorHandler;
 
 /**
- Get tags from local cache.
- */
-- (NSDictionary*) getCachedTags;
-
-/**
  Informs the Pushwoosh about the app being launched. Usually called internally by SDK Runtime.
  */
 - (void) sendAppOpen;

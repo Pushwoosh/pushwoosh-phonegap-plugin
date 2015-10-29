@@ -1,6 +1,6 @@
 {
   "name": "pushwoosh-pgb-plugin",
-  "version": "3.6.13",
+  "version": "3.6.14",
   "description": "\n    This plugin allows you to send and receive push notifications. Powered by Pushwoosh (www.pushwoosh.com).\n    ",
   "cordova": {
     "id": "com.pushwoosh.plugins.pushwoosh",
