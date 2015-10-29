@@ -1,3 +1,6 @@
+Current version: 3.6.14
+=========================
+Fixed double alerts on iOS9
 Current version: 3.6.13
 =========================
 Fixed https://github.com/Pushwoosh/pushwoosh-phonegap-3.0-plugin/issues/133
