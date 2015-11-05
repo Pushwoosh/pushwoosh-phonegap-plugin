@@ -1,3 +1,6 @@
+Current version: 3.6.15
+=========================
+Fixed https://github.com/Pushwoosh/pushwoosh-ios-sdk/issues/25
 Current version: 3.6.14
 =========================
 Fixed double alerts on iOS9
