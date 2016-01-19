@@ -1,3 +1,6 @@
+Current version: 3.6.16
+=========================
+Add armv7s arch for iOS
 Current version: 3.6.15
 =========================
 Fixed https://github.com/Pushwoosh/pushwoosh-ios-sdk/issues/25
