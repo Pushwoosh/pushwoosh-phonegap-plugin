@@ -1,3 +1,6 @@
+Current version: 4.0.0
+=========================
+windows platform support
 Current version: 3.6.16
 =========================
 Add armv7s arch for iOS
