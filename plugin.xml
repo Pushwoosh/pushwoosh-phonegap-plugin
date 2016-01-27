@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android"
 		id="com.pushwoosh.plugins.pushwoosh"
-    version="3.6.16">
+    version="4.1.0">
 
 		<name>Pushwoosh</name>
 
@@ -39,6 +39,13 @@
 				<!-- So the sounds from assets folder could work for notification sounds. -->
 				<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
+				<!-- For local pushes rescheduling and location service restart -->
+				<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+				<!-- For location tracking -->
+				<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    			<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
 				<!--
 				 Creates a custom permission so only this app can receive its messages.
 
@@ -57,26 +64,27 @@
 
 				<!-- <badges> -->
 					 <!--for Samsung-->
-				    <uses-permission android:name="com.sec.android.provider.badge.permission.READ"/>
-				    <uses-permission android:name="com.sec.android.provider.badge.permission.WRITE"/>
+					<uses-permission android:name="com.sec.android.provider.badge.permission.READ"/>
+					<uses-permission android:name="com.sec.android.provider.badge.permission.WRITE"/>
 
-				    <!--for htc-->
-				    <uses-permission android:name="com.htc.launcher.permission.READ_SETTINGS"/>
-				    <uses-permission android:name="com.htc.launcher.permission.UPDATE_SHORTCUT"/>
+					<!--for htc-->
+					<uses-permission android:name="com.htc.launcher.permission.READ_SETTINGS"/>
+					<uses-permission android:name="com.htc.launcher.permission.UPDATE_SHORTCUT"/>
 
-				    <!--for sony-->
-				    <uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE"/>
+					<!--for sony-->
+					<uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE"/>
 
-				    <!--for apex-->
-				    <uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT"/>
+					<!--for apex-->
+					<uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT"/>
 
-				    <!--for solid-->
-				    <uses-permission android:name="com.majeur.launcher.permission.UPDATE_BADGE"/>
-			    <!-- </badges> -->
+					<!--for solid-->
+					<uses-permission android:name="com.majeur.launcher.permission.UPDATE_BADGE"/>
+				<!-- </badges> -->
 			</config-file>
 
 			<config-file target="AndroidManifest.xml" parent="/manifest/application">
-
+				<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+				
 				<!-- Push notification services -->
 				<activity android:name="com.pushwoosh.MessageActivity" />
 				<activity android:name="com.pushwoosh.PushHandlerActivity" />
@@ -127,8 +135,14 @@
 							target-dir="src/com/pushwoosh/plugin/pushnotifications" />
 
 			<source-file src="src/android/lib/Pushwoosh.jar" target-dir="libs" />
+<<<<<<< HEAD
 			<source-file src="src/android/lib/google-play-services.jar" target-dir="libs" />
 			<source-file src="src/android/lib/android-support-v4.jar" target-dir="libs" />
+=======
+			<framework src="com.google.android.gms:play-services-gcm:+" />
+			<framework src="com.google.android.gms:play-services-location:+" />
+			<framework src="com.android.support:support-v4:+" />
+>>>>>>> master
 		</platform>
 
 		<!-- ios -->
@@ -177,5 +191,14 @@
 
 		<framework src="src/wp8/PushSDK/Newtonsoft.Json.dll" custom="true" />
 		<framework src="src/wp8/PushSDK/PushSDK.dll" custom="true" />
+	</platform>
+
+	<!-- windows -->
+	<platform name="windows">
+		<js-module src="src/windows/PushwooshPluginProxy.js" name="PushwooshPluginProxy">
+			<merges target="" />
+		</js-module>
+		<framework src="src/windows/PushSDK/Newtonsoft.Json.dll" custom="true" />
+		<framework src="src/windows/PushSDK/PushSDK.winmd" custom="true" />
 	</platform>
 </plugin>

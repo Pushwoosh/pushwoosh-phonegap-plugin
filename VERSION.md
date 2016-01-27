@@ -1,3 +1,11 @@
+Current version: 4.1.0
+=========================
+Android location tracking and geofencing
+iOS Pushwoosh.framework update
+WP8 plugin update
+Current version: 4.0.0
+=========================
+windows platform support
 Current version: 3.6.16
 =========================
 Add armv7s arch for iOS
