@@ -1,3 +1,8 @@
+Current version: 4.1.0
+=========================
+Android location tracking and geofencing
+iOS Pushwoosh.framework update
+WP8 plugin update
 Current version: 4.0.0
 =========================
 windows platform support
