@@ -1,3 +1,6 @@
+Current version: 4.1.1
+=========================
+Publish: WP8 Newtonsoft.Json.dll update
 Current version: 4.1.0
 =========================
 Android location tracking and geofencing
