@@ -84,7 +84,7 @@
 
 			<config-file target="AndroidManifest.xml" parent="/manifest/application">
 				<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
-				
+
 				<!-- Push notification services -->
 				<activity android:name="com.pushwoosh.MessageActivity" />
 				<activity android:name="com.pushwoosh.PushHandlerActivity" />
@@ -137,6 +137,7 @@
 			<source-file src="src/android/lib/Pushwoosh.jar" target-dir="libs" />
 			<framework src="com.google.android.gms:play-services-gcm:+" />
 			<framework src="com.google.android.gms:play-services-location:+" />
+      <framework src="push.gradle" custom="true" type="gradleReference" />
 			<framework src="com.android.support:support-v4:+" />
 		</platform>
 
