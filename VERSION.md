@@ -1,3 +1,6 @@
+Current version: 4.2.0
+=========================
+Publish: Fix issue 149 with [INSTALL_FAILED_CONFLICTING_PROVIDER]
 Current version: 4.1.1
 =========================
 Publish: WP8 Newtonsoft.Json.dll update
