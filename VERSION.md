@@ -1,3 +1,6 @@
+Current version: 4.2.1
+=========================
+Set cordova id to pushwoosh-cordova-plugin
 Current version: 4.2.0
 =========================
 Publish: Fix issue 149 with [INSTALL_FAILED_CONFLICTING_PROVIDER]
