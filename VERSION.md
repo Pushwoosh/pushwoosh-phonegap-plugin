@@ -1,3 +1,6 @@
+Current version: 4.2.2
+=========================
+New plugin id (same as npm package name) to make it work on ionic. 
 Current version: 4.2.1
 =========================
 Set cordova id to pushwoosh-cordova-plugin
