@@ -16,7 +16,7 @@ var exec = require('cordova/exec');
 //
 //Example:
 //(start code)
-//	    	    var pushwoosh = cordova.require("com.pushwoosh.plugins.pushwoosh.PushNotification");
+//	    	    var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
 //				pushwoosh.onDeviceReady({ projectid: "XXXXXXXXXXXXXXX", pw_appid : "XXXXX-XXXXX" });
 //(end)
 function PushNotification() {}
