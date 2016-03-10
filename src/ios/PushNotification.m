@@ -94,7 +94,7 @@
 
 	NSString *jsStatement = [NSString
 		stringWithFormat:
-			@"cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(%@);",
+			@"cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%@);",
 			jsonString];
 	[self.commandDelegate evalJs:WRITEJS(jsStatement)];
 }
