@@ -1,166 +1,164 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="4.2.2">
+	
+	<name>Pushwoosh</name>
 
-    version="4.2.2">
-
-		<description>
+	<description>
 		This plugin allows you to send and receive push notifications. Powered by Pushwoosh (www.pushwoosh.com).
-		</description>
+	</description>
 
-		<!-- <engines>
-				<engine name="cordova" version=">=3.1.0" />
-		</engines> -->
+	<!-- <engines>
+			<engine name="cordova" version=">=3.1.0" />
+	</engines> -->
 
-		<license>MIT</license>
+	<license>MIT</license>
 
-		<js-module src="www/PushNotification.js" name="PushNotification">
-					<clobbers target="plugins.pushNotification" />
-			</js-module>
+	<js-module src="www/PushNotification.js" name="PushNotification">
+			<clobbers target="plugins.pushNotification" />
+	</js-module>
 
-			<!-- android -->
-		<platform name="android">
-			<config-file>
-				<access origin="*.pushwoosh.com" />
-			</config-file>
+		<!-- android -->
+	<platform name="android">
+		<config-file>
+			<access origin="*.pushwoosh.com" />
+		</config-file>
 
-			<config-file target="AndroidManifest.xml" parent="/manifest">
-				<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+		<config-file target="AndroidManifest.xml" parent="/manifest">
+			<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
-				<uses-permission android:name="android.permission.VIBRATE" />
+			<uses-permission android:name="android.permission.VIBRATE" />
 
-				<!-- GCM connects to Google Services. -->
-				<uses-permission android:name="android.permission.INTERNET"/>
+			<!-- GCM connects to Google Services. -->
+			<uses-permission android:name="android.permission.INTERNET"/>
 
-				<!-- Keeps the processor from sleeping when a message is received. -->
-				<uses-permission android:name="android.permission.WAKE_LOCK"/>
+			<!-- Keeps the processor from sleeping when a message is received. -->
+			<uses-permission android:name="android.permission.WAKE_LOCK"/>
 
-				<!-- So the sounds from assets folder could work for notification sounds. -->
-				<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+			<!-- So the sounds from assets folder could work for notification sounds. -->
+			<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
-				<!-- For local pushes rescheduling and location service restart -->
-				<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+			<!-- For local pushes rescheduling and location service restart -->
+			<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
-				<!-- For location tracking -->
-				<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    			<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+			<!-- For location tracking -->
+			<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+			<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-				<!--
-				 Creates a custom permission so only this app can receive its messages.
+			<!--
+			 Creates a custom permission so only this app can receive its messages.
 
-				 NOTE: the permission *must* be called PACKAGE.permission.C2D_MESSAGE,
-				 where PACKAGE is the application's package name.
-				 -->
-				<permission
+			 NOTE: the permission *must* be called PACKAGE.permission.C2D_MESSAGE,
+			 where PACKAGE is the application's package name.
+			 -->
+			<permission
 				android:name="$PACKAGE_NAME.permission.C2D_MESSAGE"
 				android:protectionLevel="signature"/>
-				<uses-permission
-				android:name="$PACKAGE_NAME.permission.C2D_MESSAGE"/>
+			<uses-permission android:name="$PACKAGE_NAME.permission.C2D_MESSAGE"/>
 
-				<!-- This app has permission to register and receive data message. -->
-				<uses-permission
-				android:name="com.google.android.c2dm.permission.RECEIVE"/>
+			<!-- This app has permission to register and receive data message. -->
+			<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 
-				<!-- <badges> -->
-					 <!--for Samsung-->
-					<uses-permission android:name="com.sec.android.provider.badge.permission.READ"/>
-					<uses-permission android:name="com.sec.android.provider.badge.permission.WRITE"/>
+			<!-- <badges> -->
+				 <!--for Samsung-->
+				<uses-permission android:name="com.sec.android.provider.badge.permission.READ"/>
+				<uses-permission android:name="com.sec.android.provider.badge.permission.WRITE"/>
 
-					<!--for htc-->
-					<uses-permission android:name="com.htc.launcher.permission.READ_SETTINGS"/>
-					<uses-permission android:name="com.htc.launcher.permission.UPDATE_SHORTCUT"/>
+				<!--for htc-->
+				<uses-permission android:name="com.htc.launcher.permission.READ_SETTINGS"/>
+				<uses-permission android:name="com.htc.launcher.permission.UPDATE_SHORTCUT"/>
 
-					<!--for sony-->
-					<uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE"/>
+				<!--for sony-->
+				<uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE"/>
 
-					<!--for apex-->
-					<uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT"/>
+				<!--for apex-->
+				<uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT"/>
 
-					<!--for solid-->
-					<uses-permission android:name="com.majeur.launcher.permission.UPDATE_BADGE"/>
-				<!-- </badges> -->
-			</config-file>
+				<!--for solid-->
+				<uses-permission android:name="com.majeur.launcher.permission.UPDATE_BADGE"/>
+			<!-- </badges> -->
+		</config-file>
 
-			<config-file target="AndroidManifest.xml" parent="/manifest/application">
-				<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+		<config-file target="AndroidManifest.xml" parent="/manifest/application">
+			<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
 
-				<!-- Push notification services -->
-				<activity android:name="com.pushwoosh.MessageActivity" />
-				<activity android:name="com.pushwoosh.PushHandlerActivity" />
+			<!-- Push notification services -->
+			<activity android:name="com.pushwoosh.MessageActivity" />
+			<activity android:name="com.pushwoosh.PushHandlerActivity" />
 
-				<receiver android:name="com.google.android.gms.gcm.GcmReceiver" android:exported="true" android:permission="com.google.android.c2dm.permission.SEND">
-					<intent-filter>
-						<action android:name="com.google.android.c2dm.intent.RECEIVE" />
-						<category android:name="PACKAGE_NAME" />
-					</intent-filter>
-				</receiver>
-				<service android:name="com.pushwoosh.GCMListenerService" android:exported="false">
-					<intent-filter>
-						<action android:name="com.google.android.c2dm.intent.RECEIVE" />
-					</intent-filter>
-				</service>
-				<service android:name="com.pushwoosh.GCMInstanceIDListenerService" android:exported="false">
-					<intent-filter>
-						<action android:name="com.google.android.gms.iid.InstanceID" />
-					</intent-filter>
-				</service>
-				<service android:name="com.pushwoosh.GCMRegistrationService" android:exported="false"></service>
+			<receiver android:name="com.google.android.gms.gcm.GcmReceiver" android:exported="true" android:permission="com.google.android.c2dm.permission.SEND">
+				<intent-filter>
+					<action android:name="com.google.android.c2dm.intent.RECEIVE" />
+					<category android:name="PACKAGE_NAME" />
+				</intent-filter>
+			</receiver>
+			<service android:name="com.pushwoosh.GCMListenerService" android:exported="false">
+				<intent-filter>
+					<action android:name="com.google.android.c2dm.intent.RECEIVE" />
+				</intent-filter>
+			</service>
+			<service android:name="com.pushwoosh.GCMInstanceIDListenerService" android:exported="false">
+				<intent-filter>
+					<action android:name="com.google.android.gms.iid.InstanceID" />
+				</intent-filter>
+			</service>
+			<service android:name="com.pushwoosh.GCMRegistrationService" android:exported="false"></service>
 
-				<!-- Local notification services -->
-				<receiver android:name="com.pushwoosh.local.BootReceiver" android:permission="android.permission.RECEIVE_BOOT_COMPLETED" android:enabled="true">
-					<intent-filter>
-							<action android:name="android.intent.action.BOOT_COMPLETED" />
-							<category android:name="android.intent.category.DEFAULT" />
-					</intent-filter>
-				</receiver>
+			<!-- Local notification services -->
+			<receiver android:name="com.pushwoosh.local.BootReceiver" android:permission="android.permission.RECEIVE_BOOT_COMPLETED" android:enabled="true">
+				<intent-filter>
+					<action android:name="android.intent.action.BOOT_COMPLETED" />
+					<category android:name="android.intent.category.DEFAULT" />
+				</intent-filter>
+			</receiver>
 
-				<receiver android:name="com.pushwoosh.local.AlarmReceiver" />
+			<receiver android:name="com.pushwoosh.local.AlarmReceiver" />
 
-				<!-- Rich page activity -->
-				<activity android:name="com.pushwoosh.richpages.RichPageActivity"/>
+			<!-- Rich page activity -->
+			<activity android:name="com.pushwoosh.richpages.RichPageActivity"/>
 
-				<!-- Service for sending location updates -->
-				<service android:name="com.pushwoosh.location.GeoLocationService" />
+			<!-- Service for sending location updates -->
+			<service android:name="com.pushwoosh.location.GeoLocationService" />
 
-			</config-file>
+		</config-file>
 
-			<config-file target="res/xml/config.xml" parent="/*">
-				<feature name="PushNotification">
-					<param name="android-package" value="com.pushwoosh.plugin.pushnotifications.PushNotifications" onload="true" />
-				</feature>
-			</config-file>
+		<config-file target="res/xml/config.xml" parent="/*">
+			<feature name="PushNotification">
+				<param name="android-package" value="com.pushwoosh.plugin.pushnotifications.PushNotifications" onload="true" />
+			</feature>
+		</config-file>
 
-			<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PushNotifications.java"
-							target-dir="src/com/pushwoosh/plugin/pushnotifications" />
+		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PushNotifications.java"
+						target-dir="src/com/pushwoosh/plugin/pushnotifications" />
 
-			<source-file src="src/android/lib/Pushwoosh.jar" target-dir="libs" />
-			<framework src="com.google.android.gms:play-services-gcm:+" />
-			<framework src="com.google.android.gms:play-services-location:+" />
-      <framework src="push.gradle" custom="true" type="gradleReference" />
-			<framework src="com.android.support:support-v4:+" />
-		</platform>
+		<source-file src="src/android/lib/Pushwoosh.jar" target-dir="libs" />
+		<framework src="com.google.android.gms:play-services-gcm:+" />
+		<framework src="com.google.android.gms:play-services-location:+" />
+		<framework src="push.gradle" custom="true" type="gradleReference" />
+		<framework src="com.android.support:support-v4:+" />
+	</platform>
 
-		<!-- ios -->
-		<platform name="ios">
-			<framework src="Security.framework" />
-			<framework src="Storekit.framework" />
-			<framework src="CoreLocation.framework" />
-			<framework src="libstdc++.dylib"/>
-			<framework src="libz.dylib"/>
-			<config-file target="config.xml" parent="/*">
-				<feature name="PushNotification">
-					<param name="ios-package" value="PushNotification"/>
-				</feature>
-			</config-file>
+	<!-- ios -->
+	<platform name="ios">
+		<framework src="Security.framework" />
+		<framework src="Storekit.framework" />
+		<framework src="CoreLocation.framework" />
+		<framework src="libstdc++.dylib"/>
+		<framework src="libz.dylib"/>
+		<config-file target="config.xml" parent="/*">
+			<feature name="PushNotification">
+				<param name="ios-package" value="PushNotification"/>
+			</feature>
+		</config-file>
 
-			<config-file>
-				<access origin="*.pushwoosh.com" />
-			</config-file>
+		<config-file>
+			<access origin="*.pushwoosh.com" />
+		</config-file>
 
-			<header-file src="src/ios/PushNotification.h" target-dir="ios"/>
-			<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
-			<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PushNotificationManager.h" target-dir="ios"/>
-			<source-file src="src/ios/Pushwoosh.framework/Versions/A/Pushwoosh" framework="true"/>
-		</platform>
+		<header-file src="src/ios/PushNotification.h" target-dir="ios"/>
+		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
+		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PushNotificationManager.h" target-dir="ios"/>
+		<source-file src="src/ios/Pushwoosh.framework/Versions/A/Pushwoosh" framework="true"/>
+	</platform>
 
 	<!-- wp8 -->
 	<platform name="wp8">
