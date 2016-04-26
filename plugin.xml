@@ -119,6 +119,11 @@
 			<!-- Service for sending location updates -->
 			<service android:name="com.pushwoosh.location.GeoLocationService" />
 
+			<!-- Rich Media and In-Apps -->
+			<activity android:name="com.pushwoosh.inapp.WebActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+			<service android:name="com.pushwoosh.inapp.InAppRetrieverService" />
+
 		</config-file>
 
 		<config-file target="res/xml/config.xml" parent="/*">

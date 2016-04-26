@@ -96,18 +96,6 @@ typedef void(^PushwooshErrorHandler)(NSError *error);
 - (void) onPushAccepted:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart;
 
 /**
- User has tapped on the action button on Rich Push Page.
- 
- @param customData Data associated with rich page button in the Rich Push Editor
- */
-- (void) onRichPageButtonTapped:(NSString *)customData;
-
-/**
- User has tapped on the back button on Rich Push Page.
- */
-- (void) onRichPageBackTapped;
-
-/**
  Tells the delegate that the push manager has received tags from the server.
  
  @param tags Dictionary representation of received tags.
@@ -175,39 +163,18 @@ typedef void(^PushwooshErrorHandler)(NSError *error);
   `PushNotificationManager` class offers access to the singletone-instance of the push manager responsible for registering the device with the APS servers, receiving and processing push notifications.
  */
 @interface PushNotificationManager : NSObject <SKPaymentTransactionObserver> {
-	NSString *appCode;
-	NSString *appName;
-
 	NSObject<PushNotificationDelegate> *__unsafe_unretained delegate;
 }
 
 /**
  Pushwoosh Application ID. Usually retrieved automatically from Info.plist parameter `Pushwoosh_APPID`
  */
-@property (nonatomic, copy) NSString *appCode;
+@property (nonatomic, copy, readonly) NSString *appCode;
 
 /**
  Application name. Usually retrieved automatically from Info.plist bundle name (CFBundleDisplayName). Could be used to override bundle name. In addition could be set in Info.plist as `Pushwoosh_APPNAME` parameter.
-
- Example logic from Pushwoosh SDK Runtime:
- 
-	 NSString * appname = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_APPNAME"];
-	 if(!appname)
-	 appname = [[NSUserDefaults standardUserDefaults] objectForKey:@"Pushwoosh_APPNAME"];
-	 
-	 if(!appname)
-	 appname = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
-	 
-	 if(!appname)
-	 appname = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];
-	 
-	 if(!appname) {
-	 appname = @"";
-	 }
-	 
-	 instance = [[PushNotificationManager alloc] initWithApplicationCode:appid appName:appname ];
  */
-@property (nonatomic, copy) NSString *appName;
+@property (nonatomic, copy, readonly) NSString *appName;
 
 /**
  `PushNotificationDelegate` protocol delegate that would receive the information about events for push notification manager such as registering with APS services, receiving push notifications or working with the received notification.
