@@ -1,3 +1,6 @@
+Current version: 5.0.0
+=========================
+Publish: In-App Messages and Rich Media support
 Current version: 4.2.2
 =========================
 New plugin id (same as npm package name) to make it work on ionic. 
