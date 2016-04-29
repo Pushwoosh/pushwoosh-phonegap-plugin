@@ -1,3 +1,6 @@
+Current version: 5.0.1
+=========================
+Publish: Fix missing module cache warnings
 Current version: 5.0.0
 =========================
 Publish: In-App Messages and Rich Media support
