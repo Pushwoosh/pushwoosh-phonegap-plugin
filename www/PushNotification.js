@@ -19,7 +19,9 @@ var exec = require('cordova/exec');
 //	    	    var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
 //				pushwoosh.onDeviceReady({ projectid: "XXXXXXXXXXXXXXX", pw_appid : "XXXXX-XXXXX" });
 //(end)
-function PushNotification() {}
+function PushNotification() {
+	this.customNotificationCallback = null;
+}
 
 //Function: registerDevice
 //Call this to register for push notifications and retreive a push Token
@@ -355,10 +357,26 @@ PushNotification.prototype.postEvent = function(event, attributes) {
 
 // Event spawned when a notification is received while the application is active
 PushNotification.prototype.notificationCallback = function(notification) {
-	var ev = document.createEvent('HTMLEvents');
-	ev.notification = notification;
-	ev.initEvent('push-notification', true, true, arguments);
-	document.dispatchEvent(ev);
+	// check if document is available before using it
+	if (typeof document === 'object') {
+		var ev = document.createEvent('HTMLEvents');
+		ev.notification = notification;
+		ev.initEvent('push-notification', true, true, arguments);
+		document.dispatchEvent(ev);
+	}
+	// call the custom callback if one has been supplied
+	if (typeof this.customNotificationCallback === 'function') {
+		this.customNotificationCallback(notification);
+	}
 };
+
+//Function: setNotificationCallback
+//Call this with a callback function that will be called when a push notification is received.
+//Useful as an alternative to using browser-based events.
+PushNotification.prototype.setNotificationCallback = function(callback) {
+	if (typeof callback === 'function') {
+		this.customNotificationCallback = callback;
+	}
+}
 
 module.exports = new PushNotification();
