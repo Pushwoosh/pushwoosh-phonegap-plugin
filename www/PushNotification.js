@@ -20,8 +20,11 @@ var exec = require('cordova/exec');
 //				pushwoosh.onDeviceReady({ projectid: "XXXXXXXXXXXXXXX", pw_appid : "XXXXX-XXXXX" });
 //(end)
 function PushNotification() {
-	this.customNotificationCallback = null;
 }
+
+// Used to keep track of the set callback for an incoming push notification.
+// Not set as a property of PushNotification in order to preserve usage instructions for this plugin.
+var customNotificationCallback = null;
 
 //Function: registerDevice
 //Call this to register for push notifications and retreive a push Token
@@ -365,8 +368,8 @@ PushNotification.prototype.notificationCallback = function(notification) {
 		document.dispatchEvent(ev);
 	}
 	// call the custom callback if one has been supplied
-	if (typeof this.customNotificationCallback === 'function') {
-		this.customNotificationCallback(notification);
+	if (typeof customNotificationCallback === 'function') {
+		customNotificationCallback(notification);
 	}
 };
 
@@ -375,7 +378,7 @@ PushNotification.prototype.notificationCallback = function(notification) {
 //Useful as an alternative to using browser-based events.
 PushNotification.prototype.setNotificationCallback = function(callback) {
 	if (typeof callback === 'function') {
-		this.customNotificationCallback = callback;
+		customNotificationCallback = callback;
 	}
 }
 

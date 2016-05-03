@@ -148,4 +148,9 @@ describe('cordova.require object should exist', function () {
         expect(typeof PushNotification.notificationCallback == 'function').toBe(true);
     });
 
+    it("should contain an setNotificationCallback function", function() {
+        expect(PushNotification.setNotificationCallback).toBeDefined();
+        expect(typeof PushNotification.setNotificationCallback == 'function').toBe(true);
+    });
+
 });
