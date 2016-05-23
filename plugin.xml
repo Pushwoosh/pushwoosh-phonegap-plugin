@@ -81,48 +81,12 @@
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
 
-			<!-- Push notification services -->
-			<activity android:name="com.pushwoosh.MessageActivity" />
-			<activity android:name="com.pushwoosh.PushHandlerActivity" />
-
 			<receiver android:name="com.google.android.gms.gcm.GcmReceiver" android:exported="true" android:permission="com.google.android.c2dm.permission.SEND">
 				<intent-filter>
 					<action android:name="com.google.android.c2dm.intent.RECEIVE" />
-					<category android:name="PACKAGE_NAME" />
+					<category android:name="$PACKAGE_NAME" />
 				</intent-filter>
 			</receiver>
-			<service android:name="com.pushwoosh.GCMListenerService" android:exported="false">
-				<intent-filter>
-					<action android:name="com.google.android.c2dm.intent.RECEIVE" />
-				</intent-filter>
-			</service>
-			<service android:name="com.pushwoosh.GCMInstanceIDListenerService" android:exported="false">
-				<intent-filter>
-					<action android:name="com.google.android.gms.iid.InstanceID" />
-				</intent-filter>
-			</service>
-			<service android:name="com.pushwoosh.GCMRegistrationService" android:exported="false"></service>
-
-			<!-- Local notification services -->
-			<receiver android:name="com.pushwoosh.local.BootReceiver" android:permission="android.permission.RECEIVE_BOOT_COMPLETED" android:enabled="true">
-				<intent-filter>
-					<action android:name="android.intent.action.BOOT_COMPLETED" />
-					<category android:name="android.intent.category.DEFAULT" />
-				</intent-filter>
-			</receiver>
-
-			<receiver android:name="com.pushwoosh.local.AlarmReceiver" />
-
-			<!-- Rich page activity -->
-			<activity android:name="com.pushwoosh.richpages.RichPageActivity"/>
-
-			<!-- Service for sending location updates -->
-			<service android:name="com.pushwoosh.location.GeoLocationService" />
-
-			<!-- Rich Media and In-Apps -->
-			<activity android:name="com.pushwoosh.inapp.WebActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
-			<service android:name="com.pushwoosh.inapp.InAppRetrieverService" />
 
 		</config-file>
 
@@ -135,9 +99,9 @@
 		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PushNotifications.java"
 						target-dir="src/com/pushwoosh/plugin/pushnotifications" />
 
-		<source-file src="src/android/lib/Pushwoosh.jar" target-dir="libs" />
 		<framework src="com.google.android.gms:play-services-gcm:+" />
 		<framework src="com.google.android.gms:play-services-location:+" />
+		<framework src="com.pushwoosh:pushwoosh:4.1.2" />
 		<framework src="push.gradle" custom="true" type="gradleReference" />
 		<framework src="com.android.support:support-v4:+" />
 	</platform>
