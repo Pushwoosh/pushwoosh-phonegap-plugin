@@ -1,3 +1,6 @@
+Current version: 5.0.2
+=========================
+Publish: Use Pushwoosh.aar as gradle reference
 Current version: 5.0.1
 =========================
 Publish: Fix missing module cache warnings
