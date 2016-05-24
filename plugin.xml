@@ -104,7 +104,6 @@
 		<framework src="com.google.android.gms:play-services-gcm:+" />
 		<framework src="com.google.android.gms:play-services-location:+" />
 		<framework src="com.pushwoosh:pushwoosh:4.1.2" />
-		<framework src="push.gradle" custom="true" type="gradleReference" />
 		<framework src="com.android.support:support-v4:+" />
 	</platform>
 
