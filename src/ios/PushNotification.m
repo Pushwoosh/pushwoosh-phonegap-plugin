@@ -64,18 +64,11 @@
 			return;
 		}
 	}
-
-	if (appid) {
-		[[NSUserDefaults standardUserDefaults] setObject:appid forKey:@"Pushwoosh_APPID"];
-		//we need to re-set APPID if it has been changed (on start we have initialized Push Manager with app id from NSUserDefaults)
-		self.pushManager.appCode = appid;
+	else {
+		[PushNotificationManager initializeWithAppCode:appid appName:appname];
 	}
 
-	if (appname) {
-		[[NSUserDefaults standardUserDefaults] setObject:appname forKey:@"Pushwoosh_APPNAME"];
-		//and name if it has been provided
-		self.pushManager.appName = appname;
-	}
+	[self.pushManager sendAppOpen];
 
 	AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
 	PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
@@ -94,7 +87,7 @@
 
 	NSString *jsStatement = [NSString
 		stringWithFormat:
-			@"cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(%@);",
+			@"cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%@);",
 			jsonString];
 	[self.commandDelegate evalJs:WRITEJS(jsStatement)];
 }
@@ -342,6 +335,17 @@
 	CDVPluginResult *pluginResult =
 		[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:self.startPushData];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)setUserId:(CDVInvokedUrlCommand *)command {
+	NSString *userId = [command.arguments objectAtIndex:0];
+	[self.pushManager setUserId:userId];
+}
+
+- (void) postEvent:(CDVInvokedUrlCommand *)command {
+	NSString *event = [command.arguments objectAtIndex:0];
+	NSDictionary *attributes = [command.arguments objectAtIndex:1];
+	[self.pushManager postEvent:event withAttributes:attributes];
 }
 
 - (void)dealloc {

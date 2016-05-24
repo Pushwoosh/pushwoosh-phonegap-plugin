@@ -33,6 +33,8 @@ import com.pushwoosh.BasePushMessageReceiver;
 import com.pushwoosh.BaseRegistrationReceiver;
 import com.pushwoosh.SendPushTagsCallBack;
 import com.pushwoosh.internal.utils.GeneralUtils;
+import com.pushwoosh.internal.utils.JsonUtils;
+import com.pushwoosh.inapp.InAppFacade;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -737,6 +739,35 @@ public class PushNotifications extends CordovaPlugin
 			return true;
 		}
 
+		if (action.equals("setUserId"))
+		{
+			try
+			{
+				String userId = data.getString(0);
+				mPushManager.setUserId(cordova.getActivity(), userId);
+			}
+			catch (JSONException e)
+			{
+				Log.e(TAG, "No parameters passed (missing parameters)", e);
+			}
+			return true;
+		}
+
+		if (action.equals("postEvent"))
+		{
+			try
+			{
+				String event = data.getString(0);
+				JSONObject attributes = data.getJSONObject(1);
+				InAppFacade.postEvent(cordova.getActivity(), event, JsonUtils.jsonToMap(attributes));
+			}
+			catch (JSONException e)
+			{
+				Log.e(TAG, "No parameters passed (missing parameters)", e);
+			}
+			return true;
+		}
+
 		Log.d(TAG, "Invalid action : " + action + " passed");
 		return false;
 	}
@@ -784,7 +815,7 @@ public class PushNotifications extends CordovaPlugin
 	private void doOnMessageReceive(String message)
 	{
 		Log.e(TAG, "message is: " + message);
-		final String jsStatement = String.format("cordova.require(\"com.pushwoosh.plugins.pushwoosh.PushNotification\").notificationCallback(%s);", message);
+		final String jsStatement = String.format("cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%s);", message);
 		//webView.sendJavascript(jsStatement);
 
 		cordova.getActivity().runOnUiThread(new Runnable()

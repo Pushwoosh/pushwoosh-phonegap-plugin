@@ -16,7 +16,7 @@ var exec = require('cordova/exec');
 //
 //Example:
 //(start code)
-//	    	    var pushwoosh = cordova.require("com.pushwoosh.plugins.pushwoosh.PushNotification");
+//	    	    var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
 //				pushwoosh.onDeviceReady({ projectid: "XXXXXXXXXXXXXXX", pw_appid : "XXXXX-XXXXX" });
 //(end)
 function PushNotification() {}
@@ -330,6 +330,27 @@ PushNotification.prototype.cancelAllLocalNotifications = function(callback) {
 //or null otherwise
 PushNotification.prototype.getLaunchNotification = function(callback) {
 	exec(callback, callback, "PushNotification", "getLaunchNotification", []);
+};
+
+//Function: setUserId
+//iOS, Android
+//Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
+//This allows data and events to be matched across multiple user devices.
+PushNotification.prototype.setUserId = function(userId) {
+	exec(null, null, "PushNotification", "setUserId", [userId]);
+};
+
+//Function: postEvent
+//iOS, Android
+//Post events for In-App Messages. This can trigger In-App message display as specified in Pushwoosh Control Panel.
+//
+// Example:
+//(start code)
+// pushwoosh.setUserId("96da2f590cd7246bbde0051047b0d6f7");
+// pushwoosh.postEvent("buttonPressed", { "buttonNumber" : 4, "buttonLabel" : "banner" });
+//(end)
+PushNotification.prototype.postEvent = function(event, attributes) {
+	exec(null, null, "PushNotification", "postEvent", [event, attributes]);
 };
 
 // Event spawned when a notification is received while the application is active

@@ -1,3 +1,24 @@
+Current version: 5.0.2
+=========================
+Publish: Use Pushwoosh.aar as gradle reference
+Current version: 5.0.1
+=========================
+Publish: Fix missing module cache warnings
+Current version: 5.0.0
+=========================
+Publish: In-App Messages and Rich Media support
+Current version: 4.2.2
+=========================
+New plugin id (same as npm package name) to make it work on ionic. 
+Current version: 4.2.1
+=========================
+Set cordova id to pushwoosh-cordova-plugin
+Current version: 4.2.0
+=========================
+Publish: Fix issue 149 with [INSTALL_FAILED_CONFLICTING_PROVIDER]
+Current version: 4.1.1
+=========================
+Publish: WP8 Newtonsoft.Json.dll update
 Current version: 4.1.0
 =========================
 Android location tracking and geofencing

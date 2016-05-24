@@ -32,7 +32,7 @@ module.exports = {
 		this.service.ononpushtokenfailed = fail;
 
 		this.service.ononpushaccepted = function (args) {
-			setTimeout(function() { cordova.require("com.pushwoosh.plugins.pushwoosh.PushNotification").notificationCallback(args); }, 0);
+			setTimeout(function() { cordova.require("pushwoosh-cordova-plugin.PushNotification").notificationCallback(args); }, 0);
 		}
 
 		this.service.subscribeToPushService();
