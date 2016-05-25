@@ -1,3 +1,6 @@
+Current version: 5.0.3
+=========================
+Publish: Minimum version requirements for play-services-* and support-v4 references
 Current version: 5.0.2
 =========================
 Publish: Use Pushwoosh.aar as gradle reference
