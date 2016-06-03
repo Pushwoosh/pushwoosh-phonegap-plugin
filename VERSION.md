@@ -1,3 +1,6 @@
+Current version: 5.1.0
+=========================
+Publish: getTags, setTags for windows platform
 Current version: 5.0.3
 =========================
 Publish: Minimum version requirements for play-services-* and support-v4 references
