@@ -59,6 +59,31 @@ module.exports = {
 	stopLocationTracking: function(success, fail) {
 		this.service.stopLocationTracking();
 		success();
+	},
+
+	getTags: function (success, fail) {
+	    this.service.getTags(
+            function (sender, tagsString) {
+                var tags = JSON.parse(tagsString);
+                success(tags);
+            },
+            function (sender, error) {
+                fail(error);
+            }
+        );
+	},
+
+	setTags: function (success, fail, tags) {
+	    var keys = [];
+	    var values = [];
+
+	    for (key in tags[0]) {
+	        keys.push(key);
+	        values.push(tags[0][key]);
+	    }
+
+	    this.service.sendTag(keys, values, null, null);
+	    success();
 	}
 };
 
