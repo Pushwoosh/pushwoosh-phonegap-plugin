@@ -99,11 +99,11 @@
 		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PushNotifications.java"
 						target-dir="src/com/pushwoosh/plugin/pushnotifications" />
 
-		<framework src="com.google.android.gms:play-services-gcm:8.4.0" />
-		<framework src="com.google.android.gms:play-services-location:8.4.0" />
+		<framework src="com.google.android.gms:play-services-gcm:+" />
+		<framework src="com.google.android.gms:play-services-location:+" />
+		<framework src="com.android.support:support-v4:+" />
 		<framework src="com.pushwoosh:pushwoosh:4.1.2" />
 		<framework src="push.gradle" custom="true" type="gradleReference" />
-		<framework src="com.android.support:support-v4:23.1.0" />
 	</platform>
 
 	<!-- ios -->
