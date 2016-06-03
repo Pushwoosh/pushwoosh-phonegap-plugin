@@ -1,3 +1,6 @@
+Current version: 5.1.1
+=========================
+Publish: [iOS] stability fixes
 Current version: 5.1.0
 =========================
 Publish: getTags, setTags for windows platform
