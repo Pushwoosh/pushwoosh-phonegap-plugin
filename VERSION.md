@@ -1,3 +1,6 @@
+Current version: 5.1.2
+=========================
+Publish: gradle dependencies fixes
 Current version: 5.1.1
 =========================
 Publish: [iOS] stability fixes
