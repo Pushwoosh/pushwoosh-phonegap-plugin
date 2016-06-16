@@ -12,6 +12,9 @@
 	</engines> -->
 
 	<license>MIT</license>
+	
+	<repo>https://github.com/Pushwoosh/pushwoosh-phonegap-plugin</repo>
+	<issue>https://github.com/Pushwoosh/pushwoosh-phonegap-plugin/issues</issue>
 
 	<js-module src="www/PushNotification.js" name="PushNotification">
 			<clobbers target="plugins.pushNotification" />
