@@ -22,9 +22,9 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.Manifest;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.Manifest;
 
 import com.pushwoosh.PushManager;
 import com.pushwoosh.notification.SoundType;
@@ -38,13 +38,13 @@ import com.pushwoosh.internal.utils.JsonUtils;
 import com.pushwoosh.inapp.InAppFacade;
 
 import org.apache.cordova.CallbackContext;
-import org.apache.cordova.CordovaArgs;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PermissionHelper;
+import org.apache.cordova.CordovaArgs;
 import org.apache.cordova.PluginResult;
-import org.apache.cordova.LOG;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class PushNotifications extends CordovaPlugin
 {
