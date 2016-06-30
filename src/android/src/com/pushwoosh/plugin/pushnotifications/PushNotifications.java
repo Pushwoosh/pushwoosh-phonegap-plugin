@@ -435,11 +435,398 @@ public class PushNotifications extends CordovaPlugin
 		Log.d(TAG, "Plugin Method Called: " + action);
         context = callbackId;
         
+        
         if(hasPermisssion())
             {
                 PluginResult r = new PluginResult(PluginResult.Status.OK);
                 context.sendPluginResult(r);
-                return true;
+            
+                if (GET_PUSH_TOKEN.equals(action))
+                {
+                    callbackId.success(PushManager.getPushToken(cordova.getActivity()));
+                    return true;
+                }
+
+                if (GET_HWID.equals(action))
+                {
+                    callbackId.success(PushManager.getPushwooshHWID(cordova.getActivity()));
+                    return true;
+                }
+
+                if (ON_DEVICE_READY.equals(action))
+                {
+                    initialize(data, callbackId);
+                    checkMessage(cordova.getActivity().getIntent());
+                    return true;
+                }
+
+                if (REGISTER.equals(action))
+                {
+                    return internalRegister(data, callbackId);
+                }
+
+                if (UNREGISTER.equals(action))
+                {
+                    return internalUnregister(data, callbackId);
+                }
+
+                if (SET_TAGS.equals(action))
+                {
+                    return internalSendTags(data, callbackId);
+                }
+
+                if (START_GEO_PUSHES.equals(action) || START_LOCATION_TRACKING.equals(action))
+                {
+                    if (mPushManager == null)
+                    {
+                        return false;
+                    }
+
+                    mPushManager.startTrackingGeoPushes();
+                    return true;
+                }
+
+                if (STOP_GEO_PUSHES.equals(action) || STOP_LOCATION_TRACKING.equals(action))
+                {
+                    if (mPushManager == null)
+                    {
+                        return false;
+                    }
+
+                    mPushManager.stopTrackingGeoPushes();
+                    return true;
+                }
+                if (START_BEACON_PUSHES.equals(action))
+                {
+                    if (mPushManager == null)
+                    {
+                        return false;
+                    }
+
+                    mPushManager.startTrackingBeaconPushes();
+                    return true;
+                }
+
+                if (STOP_BEACON_PUSHES.equals(action))
+                {
+                    if (mPushManager == null)
+                    {
+                        return false;
+                    }
+
+                    mPushManager.stopTrackingBeaconPushes();
+                    return true;
+                }
+
+                if (SET_BEACON_BACKGROUND_MODE.equals(action))
+                {
+                    try
+                    {
+                        boolean type = data.getBoolean(0);
+                        PushManager.setBeaconBackgroundMode(cordova.getActivity(), type);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.e(TAG, "No parameters passed (missing parameters)");
+                        e.printStackTrace();
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                if (CREATE_LOCAL_NOTIFICATION.equals(action))
+                {
+                    JSONObject params = null;
+                    try
+                    {
+                        params = data.getJSONObject(0);
+                    }
+                    catch (JSONException e)
+                    {
+                        Log.e(TAG, "No parameters passed (missing parameters)");
+                        e.printStackTrace();
+                        return false;
+                    }
+
+                    try
+                    {
+                        //config params: {msg:"message", seconds:30, userData:"optional"}
+                        String message = params.getString("msg");
+                        Integer seconds = params.getInt("seconds");
+                        if (message == null || seconds == null)
+                            return false;
+
+                        String userData = params.getString("userData");
+
+                        Bundle extras = new Bundle();
+                        if (userData != null)
+                            extras.putString("u", userData);
+
+                        PushManager.scheduleLocalNotification(cordova.getActivity(), message, extras, seconds);
+                    }
+                    catch (JSONException e)
+                    {
+                        Log.e(TAG, "Not correct parameters passed (missing parameters)");
+                        e.printStackTrace();
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                if (CLEAR_LOCAL_NOTIFICATION.equals(action))
+                {
+                    PushManager.clearLocalNotifications(cordova.getActivity());
+                    return true;
+                }
+
+                if (GET_LAUNCH_NOTIFICATION.equals(action))
+                {
+                    // unfortunately null object can only be returned as String
+                    if (startPushData != null)
+                    {
+                        callbackId.success(startPushData);
+                    }
+                    else
+                    {
+                        callbackId.success((String) null);
+                    }
+                    return true;
+                }
+
+                if ("setMultiNotificationMode".equals(action))
+                {
+                    PushManager.setMultiNotificationMode(cordova.getActivity());
+                    return true;
+                }
+
+                if ("setSingleNotificationMode".equals(action))
+                {
+                    PushManager.setSimpleNotificationMode(cordova.getActivity());
+                    return true;
+                }
+
+                if ("setSoundType".equals(action))
+                {
+                    try
+                    {
+                        Integer type = (Integer) data.get(0);
+                        if (type == null)
+                            return false;
+
+                        PushManager.setSoundNotificationType(cordova.getActivity(), SoundType.fromInt(type));
+                    }
+                    catch (Exception e)
+                    {
+                        Log.e(TAG, "No sound parameters passed (missing parameters)");
+                        e.printStackTrace();
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                if ("setVibrateType".equals(action))
+                {
+                    try
+                    {
+                        Integer type = (Integer) data.get(0);
+                        if (type == null)
+                            return false;
+
+                        PushManager.setVibrateNotificationType(cordova.getActivity(), VibrateType.fromInt(type));
+                    }
+                    catch (Exception e)
+                    {
+                        Log.e(TAG, "No vibration parameters passed (missing parameters)");
+                        e.printStackTrace();
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                if ("setLightScreenOnNotification".equals(action))
+                {
+                    try
+                    {
+                        boolean type = (boolean) data.getBoolean(0);
+                        PushManager.setLightScreenOnNotification(cordova.getActivity(), type);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        Log.e(TAG, "No parameters passed (missing parameters)");
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                if ("setEnableLED".equals(action))
+                {
+                    try
+                    {
+                        boolean type = (boolean) data.getBoolean(0);
+                        PushManager.setEnableLED(cordova.getActivity(), type);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.e(TAG, "No parameters passed (missing parameters)");
+                        e.printStackTrace();
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                if ("setColorLED".equals(action))
+                {
+                    try
+                    {
+                        String colorString = (String) data.get(0);
+                        if (colorString == null)
+                            return false;
+
+                        int colorLed = GeneralUtils.parseColor(colorString);
+                        PushManager.setColorLED(cordova.getActivity(), colorLed);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.e(TAG, "No parameters passed (missing parameters)");
+                        e.printStackTrace();
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                if (GET_TAGS.equals(action))
+                {
+                    callbackIds.put("getTags", callbackId);
+
+                    final class GetTagsListenerImpl implements GetTagsListener
+                    {
+                        @Override
+                        public void onTagsReceived(Map<String, Object> tags)
+                        {
+                            CallbackContext callback = callbackIds.get("getTags");
+                            if (callback == null)
+                                return;
+
+                            callback.success(new JSONObject(tags));
+                            callbackIds.remove("getTags");
+                        }
+
+                        @Override
+                        public void onError(Exception e)
+                        {
+                            CallbackContext callback = callbackIds.get("getTags");
+                            if (callback == null)
+                                return;
+
+                            callback.error(e.getMessage());
+                            callbackIds.remove("getTags");
+                        }
+                    }
+
+                    PushManager.getTagsAsync(cordova.getActivity(), new GetTagsListenerImpl());
+                    return true;
+                }
+
+                if (action.equals("getPushHistory"))
+                {
+                    ArrayList<String> pushHistory = mPushManager.getPushHistory();
+                    callbackId.success(new JSONArray(pushHistory));
+                    return true;
+                }
+
+                if (action.equals("clearPushHistory"))
+                {
+                    mPushManager.clearPushHistory();
+                    return true;
+                }
+
+                if (action.equals("clearNotificationCenter"))
+                {
+                    PushManager.clearNotificationCenter(cordova.getActivity());
+                    return true;
+                }
+
+                if (action.equals("setApplicationIconBadgeNumber"))
+                {
+                    try
+                    {
+                        Integer badgeNumber = data.getJSONObject(0).getInt("badge");
+                        if (badgeNumber == null)
+                            return false;
+
+                        mPushManager.setBadgeNumber(badgeNumber);
+                    }
+                    catch (JSONException e)
+                    {
+                        e.printStackTrace();
+                        Log.e(TAG, "No parameters passed (missing parameters)");
+                        return false;
+                    }
+                    return true;
+                }
+
+                if (action.equals("getApplicationIconBadgeNumber"))
+                {
+                    Integer badgeNumber = new Integer(mPushManager.getBadgeNumber());
+                    callbackId.success(badgeNumber);
+                    return true;
+                }
+
+                if (action.equals("addToApplicationIconBadgeNumber"))
+                {
+                    try
+                    {
+                        Integer badgeNumber = data.getJSONObject(0).getInt("badge");
+                        if (badgeNumber == null)
+                            return false;
+                        mPushManager.addBadgeNumber(badgeNumber);
+                    }
+                    catch (JSONException e)
+                    {
+                        e.printStackTrace();
+                        Log.e(TAG, "No parameters passed (missing parameters)");
+                        return false;
+                    }
+                    return true;
+                }
+
+                if (action.equals("setUserId"))
+                {
+                    try
+                    {
+                        String userId = data.getString(0);
+                        mPushManager.setUserId(cordova.getActivity(), userId);
+                    }
+                    catch (JSONException e)
+                    {
+                        Log.e(TAG, "No parameters passed (missing parameters)", e);
+                    }
+                    return true;
+                }
+
+                if (action.equals("postEvent"))
+                {
+                    try
+                    {
+                        String event = data.getString(0);
+                        JSONObject attributes = data.getJSONObject(1);
+                        InAppFacade.postEvent(cordova.getActivity(), event, JsonUtils.jsonToMap(attributes));
+                    }
+                    catch (JSONException e)
+                    {
+                        Log.e(TAG, "No parameters passed (missing parameters)", e);
+                    }
+                    return true;
+                }
+            
             }
             else {
                 PermissionHelper.requestPermissions(this, 0, permissions);
