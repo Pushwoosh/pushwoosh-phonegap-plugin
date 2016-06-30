@@ -16,6 +16,8 @@
 	<repo>https://github.com/Pushwoosh/pushwoosh-phonegap-plugin</repo>
 	<issue>https://github.com/Pushwoosh/pushwoosh-phonegap-plugin/issues</issue>
 
+    <dependency id="cordova-plugin-compat" version="^1.0.0" />
+    
 	<js-module src="www/PushNotification.js" name="PushNotification">
 			<clobbers target="plugins.pushNotification" />
 	</js-module>

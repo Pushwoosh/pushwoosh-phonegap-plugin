@@ -38,6 +38,7 @@ import com.pushwoosh.inapp.InAppFacade;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.PermissionHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +63,8 @@ public class PushNotifications extends CordovaPlugin
 	public static final String GET_HWID = "getPushwooshHWID";
 	public static final String GET_LAUNCH_NOTIFICATION = "getLaunchNotification";
 
+    String [] permissions = { Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION };
+    
 	boolean receiversRegistered = false;
 	boolean broadcastPush = true;
 	JSONObject startPushData = null;
@@ -439,6 +442,7 @@ public class PushNotifications extends CordovaPlugin
 		}
 		if (START_BEACON_PUSHES.equals(action))
 		{
+            cordova.requestPermissions(this, 0, permissions);
 			if (mPushManager == null)
 			{
 				return false;
