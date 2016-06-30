@@ -67,9 +67,10 @@ public class PushNotifications extends CordovaPlugin
 	public static final String GET_HWID = "getPushwooshHWID";
 	public static final String GET_LAUNCH_NOTIFICATION = "getLaunchNotification";
 
-    String [] permissions = { Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION };
     CallbackContext context;
     
+    String [] permissions = { Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION };
+
 	boolean receiversRegistered = false;
 	boolean broadcastPush = true;
 	JSONObject startPushData = null;
