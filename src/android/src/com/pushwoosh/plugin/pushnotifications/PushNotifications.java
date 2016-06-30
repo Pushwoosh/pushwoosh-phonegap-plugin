@@ -433,7 +433,7 @@ public class PushNotifications extends CordovaPlugin
 	public boolean execute(String action, JSONArray data, CallbackContext callbackId)
 	{
 		Log.d(TAG, "Plugin Method Called: " + action);
-        context = callbackContext;
+        context = callbackId;
         
         if(action.equals("getPermission"))
         {
