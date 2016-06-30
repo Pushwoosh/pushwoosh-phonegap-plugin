@@ -69,7 +69,7 @@ public class PushNotifications extends CordovaPlugin
 
     CallbackContext context;
     
-    String [] permissions = { Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION };
+    String [] permissions = { Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION,  Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.VIBRATE, Manifest.permission.INTERNET, Manifest.permission.WAKE_LOCK, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECEIVE_BOOT_COMPLETED, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION };
 
 	boolean receiversRegistered = false;
 	boolean broadcastPush = true;
