@@ -1,3 +1,6 @@
+Current version: 5.1.3
+=========================
+Publish: [Android] Pushwoosh SDK 4.3.3 update
 Current version: 5.1.2
 =========================
 Publish: gradle dependencies fixes
