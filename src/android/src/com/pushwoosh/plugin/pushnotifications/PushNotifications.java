@@ -19,13 +19,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
 import com.pushwoosh.PushManager;
+import com.pushwoosh.internal.utils.PWLog;
 import com.pushwoosh.notification.SoundType;
 import com.pushwoosh.notification.VibrateType;
 import com.pushwoosh.PushManager.GetTagsListener;
@@ -44,23 +43,38 @@ import org.json.JSONObject;
 
 public class PushNotifications extends CordovaPlugin
 {
-	public static final String REGISTER = "registerDevice";
-	public static final String UNREGISTER = "unregisterDevice";
-	public static final String SET_TAGS = "setTags";
-	public static final String START_GEO_PUSHES = "startGeoPushes";
-	public static final String START_LOCATION_TRACKING = "startLocationTracking";
-	public static final String STOP_GEO_PUSHES = "stopGeoPushes";
-	public static final String STOP_LOCATION_TRACKING = "stopLocationTracking";
-	public static final String START_BEACON_PUSHES = "startBeaconPushes";
-	public static final String STOP_BEACON_PUSHES = "stopBeaconPushes";
-	public static final String SET_BEACON_BACKGROUND_MODE = "setBeaconBackgroundMode";
-	public static final String CREATE_LOCAL_NOTIFICATION = "createLocalNotification";
-	public static final String CLEAR_LOCAL_NOTIFICATION = "clearLocalNotification";
-	public static final String GET_TAGS = "getTags";
-	public static final String ON_DEVICE_READY = "onDeviceReady";
-	public static final String GET_PUSH_TOKEN = "getPushToken";
-	public static final String GET_HWID = "getPushwooshHWID";
-	public static final String GET_LAUNCH_NOTIFICATION = "getLaunchNotification";
+	public static final String ACTION_REGISTER = "registerDevice";
+	public static final String ACTION_UNREGISTER = "unregisterDevice";
+	public static final String ACTION_SET_TAGS = "setTags";
+	public static final String ACTION_START_GEO_PUSHES = "startGeoPushes";
+	public static final String ACTION_START_LOCATION_TRACKING = "startLocationTracking";
+	public static final String ACTION_STOP_GEO_PUSHES = "stopGeoPushes";
+	public static final String ACTION_STOP_LOCATION_TRACKING = "stopLocationTracking";
+	public static final String ACTION_START_BEACON_PUSHES = "startBeaconPushes";
+	public static final String ACTION_STOP_BEACON_PUSHES = "stopBeaconPushes";
+	public static final String ACTION_SET_BEACON_BACKGROUND_MODE = "setBeaconBackgroundMode";
+	public static final String ACTION_CREATE_LOCAL_NOTIFICATION = "createLocalNotification";
+	public static final String ACTION_CLEAR_LOCAL_NOTIFICATION = "clearLocalNotification";
+	public static final String ACTION_GET_TAGS = "getTags";
+	public static final String ACTION_ON_DEVICE_READY = "onDeviceReady";
+	public static final String ACTION_GET_PUSH_TOKEN = "getPushToken";
+	public static final String ACTION_GET_HWID = "getPushwooshHWID";
+	public static final String ACTION_GET_LAUNCH_NOTIFICATION = "getLaunchNotification";
+	public static final String ACTION_SET_MULTI_NOTIFICATION_MODE = "setMultiNotificationMode";
+	public static final String ACTION_SET_SINGLE_NOTIFICATION_MODE = "setSingleNotificationMode";
+	public static final String ACTION_SET_SOUND_TYPE = "setSoundType";
+	public static final String ACTION_SET_VIBRATE_TYPE = "setVibrateType";
+	public static final String ACTION_SET_LIGHTSCREEN_ON_NOTIFICATION = "setLightScreenOnNotification";
+	public static final String ACTION_SET_ENAGLE_LED = "setEnableLED";
+	public static final String ACTION_SET_COLOR_LED = "setColorLED";
+	public static final String ACTION_GET_PUSH_HISTORY = "getPushHistory";
+	public static final String ACTION_CLEAR_PUSH_HISTORY = "clearPushHistory";
+	public static final String ACTION_CLEAR_NOTIFICATION_CENTER = "clearNotificationCenter";
+	public static final String ACTION_SET_APPLICATION_ICON_BADGE_NUMBER = "setApplicationIconBadgeNumber";
+	public static final String ACTION_GET_APPLICATION_ICON_BADGE_NUMBER = "getApplicationIconBadgeNumber";
+	public static final String ACTION_ADD_TO_APPLICATION_ICON_BADGE_NUMBER = "addToApplicationIconBadgeNumber";
+	public static final String ACTION_SET_USER_ID = "setUserId";
+	public static final String ACTION_POST_EVENT = "postEvent";
 
 	boolean receiversRegistered = false;
 	boolean broadcastPush = true;
@@ -69,7 +83,7 @@ public class PushNotifications extends CordovaPlugin
 	HashMap<String, CallbackContext> callbackIds = new HashMap<String, CallbackContext>();
 	PushManager mPushManager = null;
 
-	private String TAG = "PWCordovaPlugin";
+	private String TAG = "CordovaPlugin";
 
 	/**
 	 * Called when the activity receives a new intent.
@@ -82,12 +96,21 @@ public class PushNotifications extends CordovaPlugin
 		checkMessage(intent);
 	}
 
-	BroadcastReceiver mBroadcastReceiver = new BaseRegistrationReceiver()
+	private BroadcastReceiver mRegistrationReceiver = new BaseRegistrationReceiver()
 	{
 		@Override
 		public void onRegisterActionReceive(Context context, Intent intent)
 		{
 			checkMessage(intent);
+		}
+	};
+
+	private BroadcastReceiver mPushReceiver = new BasePushMessageReceiver()
+	{
+		@Override
+		protected void onMessageReceive(Intent intent)
+		{
+			doOnMessageReceive(intent.getStringExtra(JSON_DATA_KEY));
 		}
 	};
 
@@ -101,10 +124,10 @@ public class PushNotifications extends CordovaPlugin
 
 		//comment this code out if you would like to receive the notifications in the notifications center when the app is in foreground
 		if (broadcastPush)
-			cordova.getActivity().registerReceiver(mReceiver, intentFilter);
+			cordova.getActivity().registerReceiver(mPushReceiver, intentFilter);
 
 		//registration receiver
-		cordova.getActivity().registerReceiver(mBroadcastReceiver, new IntentFilter(cordova.getActivity().getPackageName() + "." + PushManager.REGISTER_BROAD_CAST_ACTION));
+		cordova.getActivity().registerReceiver(mRegistrationReceiver, new IntentFilter(cordova.getActivity().getPackageName() + "." + PushManager.REGISTER_BROAD_CAST_ACTION));
 
 		receiversRegistered = true;
 	}
@@ -116,7 +139,7 @@ public class PushNotifications extends CordovaPlugin
 
 		try
 		{
-			cordova.getActivity().unregisterReceiver(mReceiver);
+			cordova.getActivity().unregisterReceiver(mPushReceiver);
 		}
 		catch (Exception e)
 		{
@@ -125,7 +148,7 @@ public class PushNotifications extends CordovaPlugin
 
 		try
 		{
-			cordova.getActivity().unregisterReceiver(mBroadcastReceiver);
+			cordova.getActivity().unregisterReceiver(mRegistrationReceiver);
 		}
 		catch (Exception e)
 		{
@@ -166,8 +189,7 @@ public class PushNotifications extends CordovaPlugin
 		}
 		catch (JSONException e)
 		{
-			e.printStackTrace();
-			Log.e(TAG, "No parameters has been passed to onDeviceReady function. Did you follow the guide correctly?");
+			PWLog.error(TAG, "No parameters has been passed to onDeviceReady function. Did you follow the guide correctly?", e);
 			return;
 		}
 
@@ -179,11 +201,11 @@ public class PushNotifications extends CordovaPlugin
 			if (ai.metaData != null && ai.metaData.containsKey("PW_NO_BROADCAST_PUSH"))
 				broadcastPush = !(ai.metaData.getBoolean("PW_NO_BROADCAST_PUSH"));
 
-			Log.d(TAG, "broadcastPush = " + broadcastPush);
+			PWLog.debug(TAG, "broadcastPush = " + broadcastPush);
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			PWLog.error(TAG, "Failed to read AndroidManifest");
 		}
 
 		try
@@ -205,8 +227,7 @@ public class PushNotifications extends CordovaPlugin
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
-			Log.e("Pushwoosh", "Missing pw_appid parameter. Did you follow the guide correctly?");
+			PWLog.error(TAG, "Missing pw_appid parameter. Did you follow the guide correctly?", e);
 			return;
 		}
 	}
@@ -220,9 +241,8 @@ public class PushNotifications extends CordovaPlugin
 		}
 		catch (java.lang.RuntimeException e)
 		{
-			callbackIds.remove("registerDevice");
-			e.printStackTrace();
-			Log.e("Pushwoosh", "registering for push notifications failed");
+			callbackIds.remove("registerDevice");;
+			PWLog.error(TAG, "registering for push notifications failed", e);
 
 			callbackContext.error(e.getMessage());
 			return true;
@@ -247,7 +267,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (JSONException e)
 			{
-				e.printStackTrace();
+				PWLog.error(TAG, "Failed to parse push notification", e);
 			}
 
 			return pushObject;
@@ -318,8 +338,7 @@ public class PushNotifications extends CordovaPlugin
 		}
 		catch (JSONException e)
 		{
-			Log.e("Pushwoosh", "No tags information passed (missing parameters)");
-			e.printStackTrace();
+			PWLog.error(TAG, "No tags information passed (missing parameters)", e);
 			return false;
 		}
 
@@ -335,8 +354,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (JSONException e)
 			{
-				Log.e("Pushwoosh", "Tag parameter is invalid");
-				e.printStackTrace();
+				PWLog.error(TAG, "Tag parameter is invalid", e);
 				return false;
 			}
 		}
@@ -380,43 +398,43 @@ public class PushNotifications extends CordovaPlugin
 	@Override
 	public boolean execute(String action, JSONArray data, CallbackContext callbackId)
 	{
-		Log.d(TAG, "Plugin Method Called: " + action);
+		PWLog.debug(TAG, "Plugin Method Called: " + action);
 
-		if (GET_PUSH_TOKEN.equals(action))
+		if (ACTION_GET_PUSH_TOKEN.equals(action))
 		{
 			callbackId.success(PushManager.getPushToken(cordova.getActivity()));
 			return true;
 		}
 
-		if (GET_HWID.equals(action))
+		if (ACTION_GET_HWID.equals(action))
 		{
 			callbackId.success(PushManager.getPushwooshHWID(cordova.getActivity()));
 			return true;
 		}
 
-		if (ON_DEVICE_READY.equals(action))
+		if (ACTION_ON_DEVICE_READY.equals(action))
 		{
 			initialize(data, callbackId);
 			checkMessage(cordova.getActivity().getIntent());
 			return true;
 		}
 
-		if (REGISTER.equals(action))
+		if (ACTION_REGISTER.equals(action))
 		{
 			return internalRegister(data, callbackId);
 		}
 
-		if (UNREGISTER.equals(action))
+		if (ACTION_UNREGISTER.equals(action))
 		{
 			return internalUnregister(data, callbackId);
 		}
 
-		if (SET_TAGS.equals(action))
+		if (ACTION_SET_TAGS.equals(action))
 		{
 			return internalSendTags(data, callbackId);
 		}
 
-		if (START_GEO_PUSHES.equals(action) || START_LOCATION_TRACKING.equals(action))
+		if (ACTION_START_GEO_PUSHES.equals(action) || ACTION_START_LOCATION_TRACKING.equals(action))
 		{
 			if (mPushManager == null)
 			{
@@ -427,7 +445,7 @@ public class PushNotifications extends CordovaPlugin
 			return true;
 		}
 
-		if (STOP_GEO_PUSHES.equals(action) || STOP_LOCATION_TRACKING.equals(action))
+		if (ACTION_STOP_GEO_PUSHES.equals(action) || ACTION_STOP_LOCATION_TRACKING.equals(action))
 		{
 			if (mPushManager == null)
 			{
@@ -437,7 +455,7 @@ public class PushNotifications extends CordovaPlugin
 			mPushManager.stopTrackingGeoPushes();
 			return true;
 		}
-		if (START_BEACON_PUSHES.equals(action))
+		if (ACTION_START_BEACON_PUSHES.equals(action))
 		{
 			if (mPushManager == null)
 			{
@@ -448,7 +466,7 @@ public class PushNotifications extends CordovaPlugin
 			return true;
 		}
 
-		if (STOP_BEACON_PUSHES.equals(action))
+		if (ACTION_STOP_BEACON_PUSHES.equals(action))
 		{
 			if (mPushManager == null)
 			{
@@ -459,7 +477,7 @@ public class PushNotifications extends CordovaPlugin
 			return true;
 		}
 
-		if (SET_BEACON_BACKGROUND_MODE.equals(action))
+		if (ACTION_SET_BEACON_BACKGROUND_MODE.equals(action))
 		{
 			try
 			{
@@ -468,15 +486,14 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (Exception e)
 			{
-				Log.e(TAG, "No parameters passed (missing parameters)");
-				e.printStackTrace();
+				PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 				return false;
 			}
 
 			return true;
 		}
 
-		if (CREATE_LOCAL_NOTIFICATION.equals(action))
+		if (ACTION_CREATE_LOCAL_NOTIFICATION.equals(action))
 		{
 			JSONObject params = null;
 			try
@@ -485,8 +502,7 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (JSONException e)
 			{
-				Log.e(TAG, "No parameters passed (missing parameters)");
-				e.printStackTrace();
+				PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 				return false;
 			}
 
@@ -508,21 +524,20 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (JSONException e)
 			{
-				Log.e(TAG, "Not correct parameters passed (missing parameters)");
-				e.printStackTrace();
+				PWLog.error(TAG, "Not correct parameters passed (missing parameters)", e);
 				return false;
 			}
 
 			return true;
 		}
 
-		if (CLEAR_LOCAL_NOTIFICATION.equals(action))
+		if (ACTION_CLEAR_LOCAL_NOTIFICATION.equals(action))
 		{
 			PushManager.clearLocalNotifications(cordova.getActivity());
 			return true;
 		}
 
-		if (GET_LAUNCH_NOTIFICATION.equals(action))
+		if (ACTION_GET_LAUNCH_NOTIFICATION.equals(action))
 		{
 			// unfortunately null object can only be returned as String
 			if (startPushData != null)
@@ -536,19 +551,19 @@ public class PushNotifications extends CordovaPlugin
 			return true;
 		}
 
-		if ("setMultiNotificationMode".equals(action))
+		if (ACTION_SET_MULTI_NOTIFICATION_MODE.equals(action))
 		{
 			PushManager.setMultiNotificationMode(cordova.getActivity());
 			return true;
 		}
 
-		if ("setSingleNotificationMode".equals(action))
+		if (ACTION_SET_SINGLE_NOTIFICATION_MODE.equals(action))
 		{
 			PushManager.setSimpleNotificationMode(cordova.getActivity());
 			return true;
 		}
 
-		if ("setSoundType".equals(action))
+		if (ACTION_SET_SOUND_TYPE.equals(action))
 		{
 			try
 			{
@@ -560,15 +575,14 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (Exception e)
 			{
-				Log.e(TAG, "No sound parameters passed (missing parameters)");
-				e.printStackTrace();
+				PWLog.error(TAG, "No sound parameters passed (missing parameters)", e);
 				return false;
 			}
 
 			return true;
 		}
 
-		if ("setVibrateType".equals(action))
+		if (ACTION_SET_VIBRATE_TYPE.equals(action))
 		{
 			try
 			{
@@ -580,15 +594,14 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (Exception e)
 			{
-				Log.e(TAG, "No vibration parameters passed (missing parameters)");
-				e.printStackTrace();
+				PWLog.error(TAG, "No vibration parameters passed (missing parameters)", e);
 				return false;
 			}
 
 			return true;
 		}
 
-		if ("setLightScreenOnNotification".equals(action))
+		if (ACTION_SET_LIGHTSCREEN_ON_NOTIFICATION.equals(action))
 		{
 			try
 			{
@@ -597,15 +610,14 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
-				Log.e(TAG, "No parameters passed (missing parameters)");
+				PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 				return false;
 			}
 
 			return true;
 		}
 
-		if ("setEnableLED".equals(action))
+		if (ACTION_SET_ENAGLE_LED.equals(action))
 		{
 			try
 			{
@@ -614,15 +626,14 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (Exception e)
 			{
-				Log.e(TAG, "No parameters passed (missing parameters)");
-				e.printStackTrace();
+				PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 				return false;
 			}
 
 			return true;
 		}
 
-		if ("setColorLED".equals(action))
+		if (ACTION_SET_COLOR_LED.equals(action))
 		{
 			try
 			{
@@ -635,15 +646,14 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (Exception e)
 			{
-				Log.e(TAG, "No parameters passed (missing parameters)");
-				e.printStackTrace();
+				PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 				return false;
 			}
 
 			return true;
 		}
 
-		if (GET_TAGS.equals(action))
+		if (ACTION_GET_TAGS.equals(action))
 		{
 			callbackIds.put("getTags", callbackId);
 
@@ -676,26 +686,26 @@ public class PushNotifications extends CordovaPlugin
 			return true;
 		}
 
-		if (action.equals("getPushHistory"))
+		if (ACTION_GET_PUSH_HISTORY.equals(action))
 		{
 			ArrayList<String> pushHistory = mPushManager.getPushHistory();
 			callbackId.success(new JSONArray(pushHistory));
 			return true;
 		}
 
-		if (action.equals("clearPushHistory"))
+		if (ACTION_CLEAR_PUSH_HISTORY.equals(action))
 		{
 			mPushManager.clearPushHistory();
 			return true;
 		}
 
-		if (action.equals("clearNotificationCenter"))
+		if (ACTION_CLEAR_NOTIFICATION_CENTER.equals(action))
 		{
 			PushManager.clearNotificationCenter(cordova.getActivity());
 			return true;
 		}
 
-		if (action.equals("setApplicationIconBadgeNumber"))
+		if (ACTION_SET_APPLICATION_ICON_BADGE_NUMBER.equals(action))
 		{
 			try
 			{
@@ -707,21 +717,20 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (JSONException e)
 			{
-				e.printStackTrace();
-				Log.e(TAG, "No parameters passed (missing parameters)");
+				PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 				return false;
 			}
 			return true;
 		}
 
-		if (action.equals("getApplicationIconBadgeNumber"))
+		if (ACTION_GET_APPLICATION_ICON_BADGE_NUMBER.equals(action))
 		{
 			Integer badgeNumber = new Integer(mPushManager.getBadgeNumber());
 			callbackId.success(badgeNumber);
 			return true;
 		}
 
-		if (action.equals("addToApplicationIconBadgeNumber"))
+		if (ACTION_ADD_TO_APPLICATION_ICON_BADGE_NUMBER.equals(action))
 		{
 			try
 			{
@@ -732,14 +741,13 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (JSONException e)
 			{
-				e.printStackTrace();
-				Log.e(TAG, "No parameters passed (missing parameters)");
+				PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 				return false;
 			}
 			return true;
 		}
 
-		if (action.equals("setUserId"))
+		if (ACTION_SET_USER_ID.equals(action))
 		{
 			try
 			{
@@ -748,12 +756,12 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (JSONException e)
 			{
-				Log.e(TAG, "No parameters passed (missing parameters)", e);
+				PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 			}
 			return true;
 		}
 
-		if (action.equals("postEvent"))
+		if (ACTION_POST_EVENT.equals(action))
 		{
 			try
 			{
@@ -763,12 +771,12 @@ public class PushNotifications extends CordovaPlugin
 			}
 			catch (JSONException e)
 			{
-				Log.e(TAG, "No parameters passed (missing parameters)", e);
+				PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 			}
 			return true;
 		}
 
-		Log.d(TAG, "Invalid action : " + action + " passed");
+		PWLog.debug(TAG, "Invalid action : " + action + " passed");
 		return false;
 	}
 
@@ -814,7 +822,7 @@ public class PushNotifications extends CordovaPlugin
 
 	private void doOnMessageReceive(String message)
 	{
-		Log.e(TAG, "message is: " + message);
+		PWLog.error(TAG, "message is: " + message);
 		final String jsStatement = String.format("cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%s);", message);
 		//webView.sendJavascript(jsStatement);
 
@@ -827,13 +835,4 @@ public class PushNotifications extends CordovaPlugin
 			}
 		});
 	}
-
-	private BroadcastReceiver mReceiver = new BasePushMessageReceiver()
-	{
-		@Override
-		protected void onMessageReceive(Intent intent)
-		{
-			doOnMessageReceive(intent.getStringExtra(JSON_DATA_KEY));
-		}
-	};
 }
