@@ -332,6 +332,13 @@ PushNotification.prototype.getLaunchNotification = function(callback) {
 	exec(callback, callback, "PushNotification", "getLaunchNotification", []);
 };
 
+//Function: clearLaunchNotification
+//Clears launch notifiation, getLaunchNotification() will return null after this call.
+//or null otherwise
+PushNotification.prototype.clearLaunchNotification = function(callback) {
+	exec(callback, callback, "PushNotification", "clearLaunchNotification", []);
+};
+
 //Function: setUserId
 //iOS, Android
 //Set User indentifier. This could be Facebook ID, username or email, or any other user ID.

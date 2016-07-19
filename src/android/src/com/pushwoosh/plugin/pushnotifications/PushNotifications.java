@@ -60,6 +60,7 @@ public class PushNotifications extends CordovaPlugin
 	public static final String ACTION_GET_PUSH_TOKEN = "getPushToken";
 	public static final String ACTION_GET_HWID = "getPushwooshHWID";
 	public static final String ACTION_GET_LAUNCH_NOTIFICATION = "getLaunchNotification";
+	public static final String ACTION_CLEAR_LAUNCH_NOTIFICATION = "clearLaunchNotification";
 	public static final String ACTION_SET_MULTI_NOTIFICATION_MODE = "setMultiNotificationMode";
 	public static final String ACTION_SET_SINGLE_NOTIFICATION_MODE = "setSingleNotificationMode";
 	public static final String ACTION_SET_SOUND_TYPE = "setSoundType";
@@ -549,6 +550,12 @@ public class PushNotifications extends CordovaPlugin
 			{
 				callbackId.success((String) null);
 			}
+			return true;
+		}
+
+		if (ACTION_CLEAR_LAUNCH_NOTIFICATION.equals(action))
+		{
+			mPushManager.clearLaunchNotification();
 			return true;
 		}
 
