@@ -804,7 +804,17 @@ public class PushNotifications extends CordovaPlugin
 		if (callback == null)
 			return;
 
-		callback.success(registrationId);
+		try
+		{
+			JSONObject result = new JSONObject();
+			result.put("pushToken", registrationId);
+			callback.success(result);
+		}
+		catch (Exception e)
+		{
+			callback.error("Internal error");
+		}
+
 		callbackIds.remove("registerDevice");
 	}
 
