@@ -75,6 +75,7 @@ public class PushNotifications extends CordovaPlugin
 	public static final String ACTION_ADD_TO_APPLICATION_ICON_BADGE_NUMBER = "addToApplicationIconBadgeNumber";
 	public static final String ACTION_SET_USER_ID = "setUserId";
 	public static final String ACTION_POST_EVENT = "postEvent";
+	public static final String ACTION_GET_REMOTE_NOTIFICATION_STATUS = "getRemoteNotificationStatus";
 
 	boolean receiversRegistered = false;
 	boolean broadcastPush = true;
@@ -773,6 +774,23 @@ public class PushNotifications extends CordovaPlugin
 			{
 				PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 			}
+			return true;
+		}
+
+		if (ACTION_GET_REMOTE_NOTIFICATION_STATUS.equals(action))
+		{
+			try
+			{
+				String enabled = PushManager.isNotificationEnabled(cordova.getActivity()) ? "1" : "0";
+				JSONObject result = new JSONObject();
+				result.put("enabled", enabled);
+				callbackId.success(result);
+			}
+			catch (Exception e)
+			{
+				callbackId.error(e.getMessage());
+			}
+
 			return true;
 		}
 
