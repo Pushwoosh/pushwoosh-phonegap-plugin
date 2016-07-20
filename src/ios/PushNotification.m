@@ -172,7 +172,7 @@
 
 - (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString *)token {
 	NSMutableDictionary *results = [PushNotificationManager getRemoteNotificationStatus];
-	results[@"deviceToken"] = token;
+	results[@"pushToken"] = token;
 
 	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"registerDevice"]];
