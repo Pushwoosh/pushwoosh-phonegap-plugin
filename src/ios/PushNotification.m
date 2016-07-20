@@ -226,6 +226,7 @@
 		AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
 		PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
 		pushHandler.startPushData = notification;
+		pushHandler.startPushCleared = NO;
 	}
 
 	if (_deviceReady) {
