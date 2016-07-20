@@ -207,13 +207,23 @@
 			  @"forget to call onDeviceReady?");
 	}
 
-	NSMutableDictionary *notification = [NSMutableDictionary dictionaryWithDictionary:pushNotification];
+	NSMutableDictionary *notification = [NSMutableDictionary new];
 	
 	notification[@"onStart"] = @(onStart);
 	
 	BOOL isForegound = [UIApplication sharedApplication].applicationState == UIApplicationStateActive;
 	notification[@"foreground"] = @(isForegound);
+	
+	id alert = pushNotification[@"aps"][@"alert"];
+	NSString *message = alert;
+	if ([alert isKindOfClass:[NSDictionary class]]) {
+		message = alert[@"body"];
+	}
 
+	if (message) {
+		notification[@"message"] = message;
+	}
+	
 	//pase JSON string in custom data to JSON Object
 	NSString *userdata = pushNotification[@"u"];
 
@@ -223,12 +233,11 @@
 															   error:nil];
 
 		if (parsedData) {
-			notification[@"u"] = parsedData;
-
-			//Android passes parameter as userdata too, align with Android
 			notification[@"userdata"] = parsedData;
 		}
 	}
+	
+	notification[@"ios"] = pushNotification;
 
 	PWLogDebug(@"Notification opened: %@", notification);
 
