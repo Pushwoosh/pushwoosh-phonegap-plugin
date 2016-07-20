@@ -272,8 +272,16 @@
 }
 
 - (void)getLaunchNotification:(CDVInvokedUrlCommand *)command {
+	NSDictionary *startPush = self.startPushCleared ? nil : self.startPushData;
 	CDVPluginResult *pluginResult =
-		[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:self.startPushData];
+		[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:startPush];
+	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)clearLaunchNotification:(CDVInvokedUrlCommand *)command {
+	self.startPushCleared = YES;
+	
+	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 

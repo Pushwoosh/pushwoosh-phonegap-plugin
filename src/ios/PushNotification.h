@@ -19,6 +19,7 @@
 @property (nonatomic, retain) NSMutableDictionary *callbackIds;
 @property (nonatomic, retain) PushNotificationManager *pushManager;
 @property (nonatomic, copy) NSDictionary *startPushData;
+@property (nonatomic, assign) BOOL startPushCleared;
 @property (nonatomic, assign) BOOL deviceReady;
 
 - (void)registerDevice:(CDVInvokedUrlCommand *)command;
