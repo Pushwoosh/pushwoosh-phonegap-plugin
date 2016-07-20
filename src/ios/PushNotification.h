@@ -16,24 +16,4 @@
 
 @interface PushNotification : CDVPlugin <PushNotificationDelegate> 
 
-@property (nonatomic, retain) NSMutableDictionary *callbackIds;
-@property (nonatomic, retain) PushNotificationManager *pushManager;
-@property (nonatomic, copy) NSDictionary *startPushData;
-@property (nonatomic, assign) BOOL startPushCleared;
-@property (nonatomic, assign) BOOL deviceReady;
-
-- (void)registerDevice:(CDVInvokedUrlCommand *)command;
-- (void)unregisterDevice:(CDVInvokedUrlCommand *)command;
-- (void)setTags:(CDVInvokedUrlCommand *)command;
-- (void)sendLocation:(CDVInvokedUrlCommand *)command;
-- (void)startLocationTracking:(CDVInvokedUrlCommand *)command;
-- (void)stopLocationTracking:(CDVInvokedUrlCommand *)command;
-
-- (void)onDeviceReady:(CDVInvokedUrlCommand *)command;
-- (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString *)deviceToken;
-- (void)onDidFailToRegisterForRemoteNotificationsWithError:(NSError *)error;
-- (void)getRemoteNotificationStatus:(CDVInvokedUrlCommand *)command;
-- (void)setApplicationIconBadgeNumber:(CDVInvokedUrlCommand *)command;
-- (void)cancelAllLocalNotifications:(CDVInvokedUrlCommand *)command;
-
 @end

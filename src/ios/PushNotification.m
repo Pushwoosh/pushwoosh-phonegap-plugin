@@ -17,6 +17,17 @@
 
 #define WRITEJS(VAL) [NSString stringWithFormat:@"setTimeout(function() { %@; }, 0);", VAL]
 
+@interface PushNotification()
+
+@property (nonatomic, retain) NSMutableDictionary *callbackIds;
+@property (nonatomic, retain) PushNotificationManager *pushManager;
+@property (nonatomic, copy) NSDictionary *startPushData;
+@property (nonatomic, assign) BOOL startPushCleared;
+@property (nonatomic, assign) BOOL deviceReady;
+
+@end
+
+
 @implementation PushNotification
 
 - (NSMutableDictionary *)callbackIds {
