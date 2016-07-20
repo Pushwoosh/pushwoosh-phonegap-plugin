@@ -190,13 +190,18 @@
 - (void)onPushAccepted:(PushNotificationManager *)manager
 	  withNotification:(NSDictionary *)pushNotification
 			   onStart:(BOOL)onStart {
-
+	
 	if (!onStart && !_deviceReady) {
 		PWLogWarn(@"PUSHWOOSH WARNING: push notification onStart is false, but onDeviceReady has not been called. Did you "
 			  @"forget to call onDeviceReady?");
 	}
 
 	NSMutableDictionary *notification = [NSMutableDictionary dictionaryWithDictionary:pushNotification];
+	
+	notification[@"onStart"] = @(onStart);
+	
+	BOOL isForegound = [UIApplication sharedApplication].applicationState == UIApplicationStateActive;
+	notification[@"foreground"] = @(isForegound);
 
 	//pase JSON string in custom data to JSON Object
 	NSString *userdata = pushNotification[@"u"];
@@ -214,8 +219,8 @@
 		}
 	}
 
-	notification[@"onStart"] = @(onStart);
-	
+	PWLogDebug(@"Notification opened: %@", notification);
+
 	if (onStart) {
 		//keep the start push
 		AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
