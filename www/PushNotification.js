@@ -277,8 +277,8 @@ PushNotification.prototype.clearPushHistory = function() {
 //"pushBadge" -  badges permission granted.
 //"pushAlert" -  alert permission granted.
 //"pushSound" -  sound permission granted.
-PushNotification.prototype.getRemoteNotificationStatus = function(callback) {
-	exec(callback, callback, "PushNotification", "getRemoteNotificationStatus", []);
+PushNotification.prototype.getRemoteNotificationStatus = function(callback, error) {
+	exec(callback, error, "PushNotification", "getRemoteNotificationStatus", []);
 };
 
 //Function: setApplicationIconBadgeNumber
