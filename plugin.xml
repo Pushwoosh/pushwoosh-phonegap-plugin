@@ -16,6 +16,8 @@
 	<repo>https://github.com/Pushwoosh/pushwoosh-phonegap-plugin</repo>
 	<issue>https://github.com/Pushwoosh/pushwoosh-phonegap-plugin/issues</issue>
 
+	<preference name="LOG_LEVEL" default="DEBUG" />
+
 	<js-module src="www/PushNotification.js" name="PushNotification">
 			<clobbers target="plugins.pushNotification" />
 	</js-module>
@@ -83,6 +85,7 @@
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+			<meta-data android:name="PW_LOG_LEVEL" android:value="$LOG_LEVEL" />
 
 			<receiver android:name="com.google.android.gms.gcm.GcmReceiver" android:exported="true" android:permission="com.google.android.c2dm.permission.SEND">
 				<intent-filter>
@@ -124,6 +127,10 @@
 
 		<config-file>
 			<access origin="*.pushwoosh.com" />
+		</config-file>
+
+		<config-file target="*-Info.plist" parent="Pushwoosh_LOG_LEVEL">
+			<string>$LOG_LEVEL</string>
 		</config-file>
 
 		<header-file src="src/ios/PushNotification.h" target-dir="ios"/>
