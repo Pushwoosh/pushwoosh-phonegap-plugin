@@ -15,6 +15,8 @@
 #import <CoreLocation/CoreLocation.h>
 #import "AppDelegate.h"
 
+#import <objc/runtime.h>
+
 #define WRITEJS(VAL) [NSString stringWithFormat:@"setTimeout(function() { %@; }, 0);", VAL]
 
 @interface PushNotification()
@@ -25,8 +27,11 @@
 @property (nonatomic, assign) BOOL startPushCleared;
 @property (nonatomic, assign) BOOL deviceReady;
 
+- (BOOL) application:(UIApplication *)application pwplugin_didRegisterUserNotificationSettings:(UIUserNotificationSettings *)settings;
+
 @end
 
+void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, const char * signature);
 
 @implementation PushNotification
 
@@ -97,6 +102,8 @@
 }
 
 - (void)registerDevice:(CDVInvokedUrlCommand *)command {
+	[PushNotification swizzleNotificationSettingsHandler];
+	
 	self.callbackIds[@"registerDevice"] = command.callbackId;
 
 	//Cordova BUG: https://issues.apache.org/jira/browse/CB-8063
@@ -315,6 +322,58 @@
 	NSString *event = command.arguments[0];
 	NSDictionary *attributes = command.arguments[1];
 	[self.pushManager postEvent:event withAttributes:attributes];
+}
+
+BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id application, id notificationSettings) {
+	AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
+	PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
+	
+	UIUserNotificationSettings *settings = notificationSettings;
+	
+	BOOL backgroundPush = NO;
+	NSArray * backgroundModes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIBackgroundModes"];
+	for(NSString *mode in backgroundModes) {
+		if([mode isEqualToString:@"remote-notification"]) {
+			backgroundPush = YES;
+			break;
+		}
+	}
+	
+	if (settings.types == UIUserNotificationTypeNone && !backgroundPush) {
+		NSMutableDictionary *results = [NSMutableDictionary dictionary];
+		results[@"error"] = [NSString stringWithFormat:@"Push Notifications are disabled by user"];
+		
+		CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
+		[pushHandler.commandDelegate sendPluginResult:pluginResult callbackId:pushHandler.callbackIds[@"registerDevice"]];
+	}
+	
+	if([self respondsToSelector:@selector(application: pwplugin_didRegisterUserNotificationSettings:)]) {
+		[self application:application pwplugin_didRegisterUserNotificationSettings:notificationSettings];
+	}
+	
+	return YES;
+}
+
++ (void) swizzleNotificationSettingsHandler {
+	if ([UIApplication sharedApplication].delegate == nil) {
+		return;
+	}
+	
+	if ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.0) {
+		return;
+	}
+	
+	static Class appDelegateClass = nil;
+	
+	//do not swizzle the same class twice
+	id delegate = [UIApplication sharedApplication].delegate;
+	if(appDelegateClass == [delegate class]) {
+		return;
+	}
+	
+	appDelegateClass = [delegate class];
+	
+	pushwoosh_swizzle([delegate class], @selector(application:didRegisterUserNotificationSettings:), @selector(application:pwplugin_didRegisterUserNotificationSettings:), (IMP)pwplugin_didRegisterUserNotificationSettings, "v@:::");
 }
 
 - (void)dealloc {
