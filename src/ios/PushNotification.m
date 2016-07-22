@@ -33,7 +33,12 @@
 
 void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, const char * signature);
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wincomplete-implementation"
+
 @implementation PushNotification
+
+#pragma clang diagnostic pop
 
 - (NSMutableDictionary *)callbackIds {
 	if (_callbackIds == nil) {
