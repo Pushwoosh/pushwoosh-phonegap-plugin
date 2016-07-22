@@ -46,7 +46,6 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	if (_pushManager == nil) {
 		_pushManager = [PushNotificationManager pushManager];
 		_pushManager.delegate = self;
-		_pushManager.showPushnotificationAlert = FALSE;
 	}
 	return _pushManager;
 }
@@ -82,6 +81,11 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 
 	[self.pushManager sendAppOpen];
 
+	NSString * alertTypeString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_ALERT_TYPE"];
+	if([alertTypeString isKindOfClass:[NSString class]] && [alertTypeString isEqualToString:@"NONE"]) {
+		self.pushManager.showPushnotificationAlert = NO;
+	}
+	
 	AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
 	PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
 	if (pushHandler.startPushData && !_deviceReady) {
