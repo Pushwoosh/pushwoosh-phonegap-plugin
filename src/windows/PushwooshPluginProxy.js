@@ -27,12 +27,15 @@ module.exports = {
 			setTimeout(function () { registerDevice(success, fail) }, 1000);
 		}
 
-		this.service.ononpushtokenreceived = success;
+		this.service.ononpushtokenreceived = function (token) {
+		    success({ "pushToken" : token });
+		};
 
 		this.service.ononpushtokenfailed = fail;
 
 		this.service.ononpushaccepted = function (args) {
-			setTimeout(function() { cordova.require("pushwoosh-cordova-plugin.PushNotification").notificationCallback(args); }, 0);
+		    var unifiedPush = { "onStart": args.onStart, "foreground": !args.onStart, "userdata": JSON.parse(args.userData), "windows": args };
+		    setTimeout(function () { cordova.require("pushwoosh-cordova-plugin.PushNotification").notificationCallback(unifiedPush); }, 0);
 		}
 
 		this.service.subscribeToPushService();
