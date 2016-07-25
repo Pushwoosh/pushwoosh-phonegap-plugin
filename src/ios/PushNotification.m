@@ -71,6 +71,10 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	NSDictionary *options = [command.arguments firstObject];
 
 	NSString *appid = options[@"pw_appid"];
+	if (!appid) {
+		appid = options[@"appid"];
+	}
+	
 	NSString *appname = options[@"appname"];
 
 	if (!appid) {
