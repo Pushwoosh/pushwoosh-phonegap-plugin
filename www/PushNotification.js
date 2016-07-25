@@ -168,18 +168,6 @@ PushNotification.prototype.clearNotificationCenter = function() {
 	exec(null, null, "PushNotification", "clearNotificationCenter", []);
 };
 
-//Function: startGeoPushes
-//Android only, Deprecated, use <startLocationTracking> and <stopLocationTracking>
-PushNotification.prototype.startGeoPushes = function(success, fail) {
-	exec(success, fail, "PushNotification", "startGeoPushes", []);
-};
-
-//Function: stopGeoPushes
-//Android only, Deprecated, use <startLocationTracking> and <stopLocationTracking>
-PushNotification.prototype.stopGeoPushes = function(success, fail) {
-	exec(success, fail, "PushNotification", "stopGeoPushes", []);
-};
-
 //Function: startBeaconPushes
 //Android only, iOS available per request, Call this to start beacon tracking
 PushNotification.prototype.startBeaconPushes = function(success, fail) {
