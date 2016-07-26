@@ -1,3 +1,12 @@
+Current version: 6.0.0
+=========================
+Unified registerDevice response
+Unified push-notificaion event data
+getRemoteNotificationStatus for Android
+clearLaunchNotificaion method
+Customizable preferences for foreground pushes and log level
+Call registerDevice error callback if notificaions are disabled on iOS
+Removed location tracking permissions
 Current version: 5.1.3
 =========================
 Publish: [Android] Pushwoosh SDK 4.3.3 update
