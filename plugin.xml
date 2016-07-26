@@ -47,10 +47,6 @@
 			<!-- For local pushes rescheduling and location service restart -->
 			<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
-			<!-- For location tracking -->
-			<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-			<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
 			<!--
 			 Creates a custom permission so only this app can receive its messages.
 
