@@ -159,7 +159,6 @@
 		<config-file target="Properties/WMAppManifest.xml" parent="/Deployment/App/Capabilities">
 			<Capability Name="ID_CAP_PUSH_NOTIFICATION"/>
 			<Capability Name="ID_CAP_IDENTITY_DEVICE"/>
-			<Capability Name="ID_CAP_LOCATION"/>
 		</config-file>
 
 		<source-file src="src/wp8/PushNotification.cs" />
