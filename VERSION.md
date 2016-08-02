@@ -1,3 +1,6 @@
+Current version: 6.0.1
+=========================
+Publish: [Android] Pushwoosh SDK 4.6.3 update
 Current version: 6.0.0
 =========================
 Unified registerDevice response
