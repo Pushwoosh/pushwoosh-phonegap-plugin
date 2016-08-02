@@ -1,3 +1,6 @@
+Current version: 6.0.2
+=========================
+Publish: [Android] Wrap special characters when evaluating url statement
 Current version: 6.0.1
 =========================
 Publish: [Android] Pushwoosh SDK 4.6.3 update
