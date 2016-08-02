@@ -880,15 +880,20 @@ public class PushNotifications extends CordovaPlugin
 			PWLog.error(TAG, "push message parsing failed", e);
 		}
 
-		final String jsStatement = String.format("cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%s);", unifiedNotification.toString());
-		//webView.sendJavascript(jsStatement);
+
+		String jsStatement = String.format("cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%s);", unifiedNotification.toString());
+
+		// wrap special characters
+		jsStatement = jsStatement.replace("%", "%\"+\"");
+
+		final String url = "javascript:" + jsStatement;
 
 		cordova.getActivity().runOnUiThread(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				webView.loadUrl("javascript:" + jsStatement);
+				webView.loadUrl(url);
 			}
 		});
 	}
