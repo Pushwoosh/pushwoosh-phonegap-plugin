@@ -68,8 +68,9 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         private void OnPushTokenReceived(object sender, string token)
         {
+            string result = String.Format("{{ \"pushToken\" : \"{0}\"}}", token);
             if(registerCallbackId != null)
-                DispatchCommandResult(new PluginResult(PluginResult.Status.OK, token), registerCallbackId);
+                DispatchCommandResult(new PluginResult(PluginResult.Status.OK, result), registerCallbackId);
         }
 
         private void OnPushTokenFailed(object sender, string error)
@@ -94,7 +95,8 @@ namespace WPCordovaClassLib.Cordova.Commands
             }
             else
             {
-                DispatchCommandResult(new PluginResult(PluginResult.Status.OK, service.PushToken), callbackId);
+                string result = String.Format("{{ \"pushToken\" : \"{0}\"}}", service.PushToken);
+                DispatchCommandResult(new PluginResult(PluginResult.Status.OK, result), callbackId);
             }
         }
 
@@ -220,8 +222,14 @@ namespace WPCordovaClassLib.Cordova.Commands
                     {
                         try
                         {
+                            string userdata = push.UserData;
+                            if (String.IsNullOrEmpty(userdata))
+                                userdata = "null";
+
                             string pushPayload = JsonConvert.SerializeObject(push);
-                            cView.Browser.InvokeScript("eval", "cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(" + pushPayload + ")");
+                            string unifiedPayload = String.Format("{{ \"message\" : \"{0}\", \"userdata\" : {1}, \"onStart\" : {2}, \"foreground\" : {3}, \"wp8\" : {4} }}", 
+                                push.Content, userdata, JsonConvert.SerializeObject(push.OnStart), JsonConvert.SerializeObject(!push.OnStart), pushPayload);
+                            cView.Browser.InvokeScript("eval", "cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(" + unifiedPayload + ")");
                         }
                         catch (Exception ex)
                         {

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="5.0.0">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="6.0.2">
 	
 	<name>Pushwoosh</name>
 
@@ -13,6 +12,13 @@
 	</engines> -->
 
 	<license>MIT</license>
+	
+	<repo>https://github.com/Pushwoosh/pushwoosh-phonegap-plugin</repo>
+	<issue>https://github.com/Pushwoosh/pushwoosh-phonegap-plugin/issues</issue>
+
+	<preference name="LOG_LEVEL" default="DEBUG" />
+	<preference name="IOS_FOREGROUND_ALERT_TYPE" default="NONE" />
+	<preference name="ANDROID_FOREGROUND_PUSH" default="false" />
 
 	<js-module src="www/PushNotification.js" name="PushNotification">
 			<clobbers target="plugins.pushNotification" />
@@ -40,10 +46,6 @@
 
 			<!-- For local pushes rescheduling and location service restart -->
 			<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-
-			<!-- For location tracking -->
-			<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-			<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 			<!--
 			 Creates a custom permission so only this app can receive its messages.
@@ -82,6 +84,8 @@
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+			<meta-data android:name="PW_LOG_LEVEL" android:value="$LOG_LEVEL" />
+			<meta-data android:name="PW_NO_BROADCAST_PUSH" android:value="$ANDROID_FOREGROUND_PUSH" />
 
 			<receiver android:name="com.google.android.gms.gcm.GcmReceiver" android:exported="true" android:permission="com.google.android.c2dm.permission.SEND">
 				<intent-filter>
@@ -103,8 +107,8 @@
 
 		<framework src="com.google.android.gms:play-services-gcm:+" />
 		<framework src="com.google.android.gms:play-services-location:+" />
-		<framework src="com.pushwoosh:pushwoosh:4.1.2" />
 		<framework src="com.android.support:support-v4:+" />
+		<framework src="com.pushwoosh:pushwoosh:4.6.3" />
 	</platform>
 
 	<!-- ios -->
@@ -124,9 +128,18 @@
 			<access origin="*.pushwoosh.com" />
 		</config-file>
 
+		<config-file target="*-Info.plist" parent="Pushwoosh_LOG_LEVEL">
+			<string>$LOG_LEVEL</string>
+		</config-file>
+
+		<config-file target="*-Info.plist" parent="Pushwoosh_ALERT_TYPE">
+			<string>$IOS_FOREGROUND_ALERT_TYPE</string>
+		</config-file>
+
 		<header-file src="src/ios/PushNotification.h" target-dir="ios"/>
 		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PushNotificationManager.h" target-dir="ios"/>
+		<header-file src="src/ios/PWLog.h" target-dir="ios"/>
 		<source-file src="src/ios/Pushwoosh.framework/Versions/A/Pushwoosh" framework="true"/>
 	</platform>
 
@@ -146,7 +159,6 @@
 		<config-file target="Properties/WMAppManifest.xml" parent="/Deployment/App/Capabilities">
 			<Capability Name="ID_CAP_PUSH_NOTIFICATION"/>
 			<Capability Name="ID_CAP_IDENTITY_DEVICE"/>
-			<Capability Name="ID_CAP_LOCATION"/>
 		</config-file>
 
 		<source-file src="src/wp8/PushNotification.cs" />

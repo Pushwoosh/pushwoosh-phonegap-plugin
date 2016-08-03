@@ -27,12 +27,15 @@ module.exports = {
 			setTimeout(function () { registerDevice(success, fail) }, 1000);
 		}
 
-		this.service.ononpushtokenreceived = success;
+		this.service.ononpushtokenreceived = function (token) {
+		    success({ "pushToken" : token });
+		};
 
 		this.service.ononpushtokenfailed = fail;
 
 		this.service.ononpushaccepted = function (args) {
-			setTimeout(function() { cordova.require("pushwoosh-cordova-plugin.PushNotification").notificationCallback(args); }, 0);
+		    var unifiedPush = { "onStart": args.onStart, "foreground": !args.onStart, "userdata": JSON.parse(args.userData), "windows": args };
+		    setTimeout(function () { cordova.require("pushwoosh-cordova-plugin.PushNotification").notificationCallback(unifiedPush); }, 0);
 		}
 
 		this.service.subscribeToPushService();
@@ -59,6 +62,31 @@ module.exports = {
 	stopLocationTracking: function(success, fail) {
 		this.service.stopLocationTracking();
 		success();
+	},
+
+	getTags: function (success, fail) {
+	    this.service.getTags(
+            function (sender, tagsString) {
+                var tags = JSON.parse(tagsString);
+                success(tags);
+            },
+            function (sender, error) {
+                fail(error);
+            }
+        );
+	},
+
+	setTags: function (success, fail, tags) {
+	    var keys = [];
+	    var values = [];
+
+	    for (key in tags[0]) {
+	        keys.push(key);
+	        values.push(tags[0][key]);
+	    }
+
+	    this.service.sendTag(keys, values, null, null);
+	    success();
 	}
 };
 
