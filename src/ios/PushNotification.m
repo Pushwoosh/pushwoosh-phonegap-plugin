@@ -110,8 +110,19 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	NSData *json = [NSJSONSerialization dataWithJSONObject:pushData options:NSJSONWritingPrettyPrinted error:nil];
 	NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
 
-	NSString *jsStatement = [NSString stringWithFormat: @"cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%@);", jsonString];
-	[self.commandDelegate evalJs:WRITEJS(jsStatement)];
+	NSString *pushOpenJsStatement = [NSString stringWithFormat: @"cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%@);", jsonString];
+	NSString *pushReceiveJsStatement = [NSString stringWithFormat: @"cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").pushReceivedCallback(%@);", jsonString];
+
+	if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateBackground) {
+		[self.commandDelegate evalJs:WRITEJS(pushReceiveJsStatement)];
+	}
+	else if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive) {
+		[self.commandDelegate evalJs:WRITEJS(pushReceiveJsStatement)];
+		[self.commandDelegate evalJs:WRITEJS(pushOpenJsStatement)];
+	}
+	else {
+		[self.commandDelegate evalJs:WRITEJS(pushOpenJsStatement)];
+	}
 }
 
 - (void)registerDevice:(CDVInvokedUrlCommand *)command {

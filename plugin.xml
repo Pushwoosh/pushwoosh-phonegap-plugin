@@ -104,6 +104,9 @@
 		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PushNotifications.java"
 						target-dir="src/com/pushwoosh/plugin/pushnotifications" />
 
+		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/NotificationFactory.java"
+						target-dir="src/com/pushwoosh/plugin/pushnotifications" />
+
 		<framework src="com.google.android.gms:play-services-gcm:+" />
 		<framework src="com.google.android.gms:play-services-location:+" />
 		<framework src="com.android.support:support-v4:+" />

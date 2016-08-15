@@ -104,7 +104,7 @@ public class PushNotifications extends CordovaPlugin
 		@Override
 		protected void onMessageReceive(Intent intent)
 		{
-			doOnMessageReceive(intent.getStringExtra(JSON_DATA_KEY));
+			doOnPushOpened(intent.getStringExtra(JSON_DATA_KEY));
 		}
 	};
 
@@ -204,7 +204,7 @@ public class PushNotifications extends CordovaPlugin
 		{
 			if (intent.hasExtra(PushManager.PUSH_RECEIVE_EVENT))
 			{
-				doOnMessageReceive(intent.getExtras().getString(PushManager.PUSH_RECEIVE_EVENT));
+				doOnPushOpened(intent.getExtras().getString(PushManager.PUSH_RECEIVE_EVENT));
 			}
 			else if (intent.hasExtra(PushManager.REGISTER_EVENT))
 			{
@@ -278,6 +278,10 @@ public class PushNotifications extends CordovaPlugin
 			PushManager.initializePushManager(cordova.getActivity(), appid, params.getString("projectid"));
 			mPushManager = PushManager.getInstance(cordova.getActivity());
 			mPushManager.onStartup(cordova.getActivity());
+
+			NotificationFactory factory = new NotificationFactory();
+			factory.setPlugin(this);
+			mPushManager.setNotificationFactory(factory);
 		}
 		catch (Exception e)
 		{
@@ -855,10 +859,24 @@ public class PushNotifications extends CordovaPlugin
 		callbackIds.remove("unregisterDevice");
 	}
 
-	private void doOnMessageReceive(String notification)
+	private void doOnPushOpened(String notification)
 	{
-		PWLog.debug(TAG, "message is: " + notification);
+		PWLog.debug(TAG, "push opened: " + notification);
 
+		String jsStatement = String.format("cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%s);", convertNotification(notification));
+		evalJs(jsStatement);
+	}
+
+	public void doOnPushReceived(String notification)
+	{
+		PWLog.debug(TAG, "push received: " + notification);
+
+		String jsStatement = String.format("cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").pushReceivedCallback(%s);", convertNotification(notification));
+		evalJs(jsStatement);
+	}
+
+	private String convertNotification(String notification)
+	{
 		JSONObject unifiedNotification = new JSONObject();
 
 		try
@@ -880,13 +898,17 @@ public class PushNotifications extends CordovaPlugin
 			PWLog.error(TAG, "push message parsing failed", e);
 		}
 
-
-		String jsStatement = String.format("cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%s);", unifiedNotification.toString());
+		String result = unifiedNotification.toString();
 
 		// wrap special characters
-		jsStatement = jsStatement.replace("%", "%\"+\"");
+		result.replace("%", "%\"+\"");
 
-		final String url = "javascript:" + jsStatement;
+		return result;
+	}
+
+	private void evalJs(String statement)
+	{
+		final String url = "javascript:" + statement;
 
 		cordova.getActivity().runOnUiThread(new Runnable()
 		{
