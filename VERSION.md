@@ -1,3 +1,6 @@
+Current version: 6.1.0
+=========================
+Publish: Push notification receive event
 Current version: 6.0.2
 =========================
 Publish: [Android] Wrap special characters when evaluating url statement
