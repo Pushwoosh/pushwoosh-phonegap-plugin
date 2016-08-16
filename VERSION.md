@@ -1,3 +1,6 @@
+Current version: 6.2.0
+=========================
+Publish: Set application icon badge number on wp8 and windows
 Current version: 6.1.0
 =========================
 Publish: Push notification receive event
