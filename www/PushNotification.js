@@ -207,7 +207,7 @@ PushNotification.prototype.getRemoteNotificationStatus = function(callback, erro
 };
 
 //Function: setApplicationIconBadgeNumber
-//[android, ios] Set the application icon badge number
+//[android, ios, wp8, windows] Set the application icon badge number
 //
 //Parameters:
 // "badgeNumber" - icon badge number

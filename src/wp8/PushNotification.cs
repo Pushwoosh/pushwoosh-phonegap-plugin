@@ -206,6 +206,20 @@ namespace WPCordovaClassLib.Cordova.Commands
             DispatchCommandResult(new PluginResult(PluginResult.Status.OK, "GeoZone service is stopped"));
         }
 
+        [DataContract]
+        public class BadgeOptions
+        {
+            [DataMember(Name = "badge", IsRequired = true)]
+            public int Badge { get; set; }
+        }
+
+        public void setApplicationIconBadgeNumber(string options)
+        {
+            string[] args = JSON.JsonHelper.Deserialize<string[]>(options);
+            BadgeOptions opts = JSON.JsonHelper.Deserialize<BadgeOptions>(args[0]);
+            service.SetBadgeNumber(opts.Badge);
+        }
+
         void ExecutePushNotificationCallback(object sender, ToastPush push)
         {
             Deployment.Current.Dispatcher.BeginInvoke(() =>

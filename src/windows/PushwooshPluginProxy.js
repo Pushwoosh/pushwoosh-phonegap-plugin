@@ -87,6 +87,11 @@ module.exports = {
 
 	    this.service.sendTag(keys, values, null, null);
 	    success();
+	},
+
+	setApplicationIconBadgeNumber: function(success, fail, config) {
+		var badge = config[0]["badge"];
+		this.service.setBadgeNumber(badge);
 	}
 };
 
