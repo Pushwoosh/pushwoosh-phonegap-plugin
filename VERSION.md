@@ -1,3 +1,6 @@
+Current version: 6.2.1
+=========================
+Fixed referencing non-public errorMessage: selector to pass project validation on iOS
 Current version: 6.2.0
 =========================
 Publish: Set application icon badge number on wp8 and windows
