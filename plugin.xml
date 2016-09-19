@@ -139,13 +139,12 @@
 			<string>$IOS_FOREGROUND_ALERT_TYPE</string>
 		</config-file>
 
-        	<config-file target="Entitlements-Debug.plist" parent="aps-environment">
-            		<string>development</string>
-        	</config-file>
-
-        	<config-file target="Entitlements-Release.plist" parent="aps-environment">
-            		<string>production</string>
-        	</config-file>
+		<config-file parent="aps-environment" target="*/Entitlements-Debug.plist">
+			<string>development</string>
+		</config-file>
+		<config-file parent="aps-environment" target="*/Entitlements-Release.plist">
+			<string>production</string>
+		</config-file>
 
 		<header-file src="src/ios/PushNotification.h" target-dir="ios"/>
 		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
