@@ -155,7 +155,6 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
   `PushNotificationManager` class offers access to the singletone-instance of the push manager responsible for registering the device with the APS servers, receiving and processing push notifications.
  */
 @interface PushNotificationManager : NSObject {
-	NSObject<PushNotificationDelegate> *__unsafe_unretained delegate;
 }
 
 /**
@@ -172,7 +171,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  `PushNotificationDelegate` protocol delegate that would receive the information about events for push notification manager such as registering with APS services, receiving push notifications or working with the received notification.
  Pushwoosh Runtime sets it to ApplicationDelegate by default
  */
-@property (nonatomic, assign) NSObject<PushNotificationDelegate> *delegate;
+@property (nonatomic, weak) NSObject<PushNotificationDelegate> *delegate;
 
 /**
  Show push notifications alert when push notification is received while the app is running, default is `YES`
