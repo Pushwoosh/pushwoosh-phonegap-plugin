@@ -1,3 +1,6 @@
+Current version: 6.2.2
+=========================
+Pushwoosh iOS SDK updated to 4.1.5
 Current version: 6.2.1
 =========================
 Fixed referencing non-public errorMessage: selector to pass project validation on iOS
