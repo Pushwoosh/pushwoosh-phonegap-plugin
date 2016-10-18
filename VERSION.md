@@ -1,3 +1,6 @@
+Current version: 6.2.3
+=========================
+Pushwoosh iOS SDK updated to 4.1.6
 Current version: 6.2.2
 =========================
 Pushwoosh iOS SDK updated to 4.1.5
