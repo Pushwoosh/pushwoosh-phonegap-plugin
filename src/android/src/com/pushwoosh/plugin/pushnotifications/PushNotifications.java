@@ -915,7 +915,14 @@ public class PushNotifications extends CordovaPlugin
 			@Override
 			public void run()
 			{
-				webView.loadUrl(url);
+				try
+				{
+					webView.loadUrl(url);
+				}
+				catch (Exception e)
+				{
+					PWLog.exception(e);
+				}
 			}
 		});
 	}
