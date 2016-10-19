@@ -1,3 +1,9 @@
+Current version: 6.2.5
+=========================
+Pushwoosh Cordova Plugin 6.2.5
+
+Fixed:
+     Possible cordova crash when receiving push in background on Android
 Current version: 6.2.4
 =========================
 Pushwoosh Cordova Plugin 6.2.4
