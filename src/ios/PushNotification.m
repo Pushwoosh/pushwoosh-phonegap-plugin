@@ -221,20 +221,21 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 }
 
 - (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString *)token {
-	NSMutableDictionary *results = [PushNotificationManager getRemoteNotificationStatus];
-	results[@"pushToken"] = token;
-
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"registerDevice"]];
+	if (self.callbackIds[@"registerDevice"]) {
+		NSMutableDictionary *results = [PushNotificationManager getRemoteNotificationStatus];
+		results[@"pushToken"] = token;
+		CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
+		[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"registerDevice"]];
+	}
 }
 
 - (void)onDidFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-	NSMutableDictionary *results = [NSMutableDictionary dictionary];
-	results[@"error"] = [NSString stringWithFormat:@"%@", error];
-
-	CDVPluginResult *pluginResult =
-		[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"registerDevice"]];
+	if (self.callbackIds[@"registerDevice"]) {
+		NSMutableDictionary *results = [NSMutableDictionary dictionary];
+		results[@"error"] = [NSString stringWithFormat:@"%@", error];
+		CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
+		[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"registerDevice"]];
+	}
 }
 
 - (void)onPushAccepted:(PushNotificationManager *)manager
