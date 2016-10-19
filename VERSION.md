@@ -1,3 +1,9 @@
+Current version: 6.2.4
+=========================
+Pushwoosh Cordova Plugin 6.2.4
+
+Fixed:
+    Check "registerDevice" callback id before invoking sendPluginResult
 Current version: 6.2.3
 =========================
 Pushwoosh iOS SDK updated to 4.1.6
