@@ -1,3 +1,9 @@
+Current version: 6.2.6
+=========================
+Pushwoosh Cordova Plugin 6.2.6
+
+Modified:
+     Pushwoosh iOS SDK updated to 4.1.8 (https://github.com/Pushwoosh/pushwoosh-ios-sdk/releases)
 Current version: 6.2.5
 =========================
 Pushwoosh Cordova Plugin 6.2.5
