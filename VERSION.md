@@ -1,3 +1,9 @@
+Current version: 6.3.0
+=========================
+Pushwoosh Cordova Plugin 6.3.0
+
+Added:
+     Application icon badge number support for Sony, HUAWEI, ZUK and OPPO
 Current version: 6.2.6
 =========================
 Pushwoosh Cordova Plugin 6.2.6
