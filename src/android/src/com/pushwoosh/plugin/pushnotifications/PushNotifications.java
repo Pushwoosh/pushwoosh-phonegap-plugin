@@ -901,7 +901,7 @@ public class PushNotifications extends CordovaPlugin
 		String result = unifiedNotification.toString();
 
 		// wrap special characters
-		result.replace("%", "%\"+\"");
+		result = result.replace("%", "%\"+\"");
 
 		return result;
 	}
