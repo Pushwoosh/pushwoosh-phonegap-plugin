@@ -12,10 +12,14 @@
 
 #import "PushNotification.h"
 #import "PWLog.h"
-#import <CoreLocation/CoreLocation.h>
+
 #import "AppDelegate.h"
 
+#import <CoreLocation/CoreLocation.h>
+#import <UserNotifications/UserNotifications.h>
+
 #import <objc/runtime.h>
+
 
 #define WRITEJS(VAL) [NSString stringWithFormat:@"setTimeout(function() { %@; }, 0);", VAL]
 
@@ -100,6 +104,7 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 		[PushNotificationManager initializeWithAppCode:appid appName:appname];
 	}
 
+	[UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
 	[self.pushManager sendAppOpen];
 
 	NSString * alertTypeString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_ALERT_TYPE"];
