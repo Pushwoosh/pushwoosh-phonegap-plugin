@@ -42,8 +42,7 @@ module.exports = {
 	},
 
 	unregisterDevice: function(success, fail) {
-		this.service.unsubscribeFromPushes();
-		success();
+	    this.service.unsubscribeFromPushes(function () { success(); }, fail);
 	},
 
 	getPushwooshHWID: function (success) {
