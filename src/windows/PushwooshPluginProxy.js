@@ -10,11 +10,11 @@ module.exports = {
 		this.service = new PushSDK.NotificationService.getCurrent(config[0].appid);
 
 		var startPushData = null;
-	   
+	
 		if (platform.activationContext && platform.activationContext.args) {
 			startPushData = platform.activationContext.args;
 		}
-	 
+	
 		if (startPushData !== null)
 			PushSDK.NotificationService.handleStartPush(startPushData);
 
@@ -28,14 +28,14 @@ module.exports = {
 		}
 
 		this.service.ononpushtokenreceived = function (token) {
-		    success({ "pushToken" : token });
+			success({ "pushToken" : token });
 		};
 
 		this.service.ononpushtokenfailed = fail;
 
 		this.service.ononpushaccepted = function (args) {
-		    var unifiedPush = { "onStart": args.onStart, "foreground": !args.onStart, "userdata": JSON.parse(args.userData), "windows": args };
-		    setTimeout(function () { cordova.require("pushwoosh-cordova-plugin.PushNotification").notificationCallback(unifiedPush); }, 0);
+			var unifiedPush = { "onStart": args.onStart, "foreground": !args.onStart, "userdata": JSON.parse(args.userData), "windows": args };
+			setTimeout(function () { cordova.require("pushwoosh-cordova-plugin.PushNotification").notificationCallback(unifiedPush); }, 0);
 		}
 
 		this.service.subscribeToPushService();
@@ -65,28 +65,28 @@ module.exports = {
 	},
 
 	getTags: function (success, fail) {
-	    this.service.getTags(
-            function (sender, tagsString) {
-                var tags = JSON.parse(tagsString);
-                success(tags);
-            },
-            function (sender, error) {
-                fail(error);
-            }
-        );
+		this.service.getTags(
+			function (sender, tagsString) {
+				var tags = JSON.parse(tagsString);
+				success(tags);
+			},
+			function (sender, error) {
+				fail(error);
+			}
+		);
 	},
 
 	setTags: function (success, fail, tags) {
-	    var keys = [];
-	    var values = [];
+		var keys = [];
+		var values = [];
 
-	    for (key in tags[0]) {
-	        keys.push(key);
-	        values.push(tags[0][key]);
-	    }
+		for (key in tags[0]) {
+			keys.push(key);
+			values.push(tags[0][key]);
+		}
 
-	    this.service.sendTag(keys, values, null, null);
-	    success();
+		this.service.sendTag(keys, values, null, null);
+		success();
 	},
 
 	setApplicationIconBadgeNumber: function(success, fail, config) {
