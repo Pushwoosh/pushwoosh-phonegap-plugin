@@ -269,17 +269,9 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 		notification[@"message"] = message;
 	}
 	
-	//pase JSON string in custom data to JSON Object
-	NSString *userdata = pushNotification[@"u"];
-
+	NSDictionary *userdata = [[PushNotificationManager pushManager] getCustomPushDataAsNSDict:pushNotification];
 	if (userdata) {
-		id parsedData = [NSJSONSerialization JSONObjectWithData:[userdata dataUsingEncoding:NSUTF8StringEncoding]
-															 options:NSJSONReadingMutableContainers
-															   error:nil];
-
-		if (parsedData) {
-			notification[@"userdata"] = parsedData;
-		}
+		notification[@"userdata"] = userdata;
 	}
 	
 	notification[@"ios"] = pushNotification;
