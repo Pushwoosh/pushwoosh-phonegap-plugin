@@ -9,7 +9,7 @@
 #import <StoreKit/StoreKit.h>
 #import <UserNotifications/UserNotifications.h>
 
-#define PUSHWOOSH_VERSION @"5.0.2"
+#define PUSHWOOSH_VERSION @"5.1.6"
 
 
 @class PushNotificationManager;
@@ -424,8 +424,10 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 /**
  Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
  This allows data and events to be matched across multiple user devices.
+ 
+ Deprecated. Use PWInAppManager setUserId method instead
  */
-- (void)setUserId:(NSString *)userId;
+- (void)setUserId:(NSString *)userId __attribute__ ((deprecated));;
 
 /**
  Move all events from oldUserId to newUserId if doMerge is true. If doMerge is false all events for oldUserId are removed.
@@ -434,8 +436,10 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  @param newUserId destination user
  @param doMerge if false all events for oldUserId are removed, if true all events for oldUserId are moved to newUserId
  @param completion callback
+ 
+ Deprecated. Use PWInAppManager mergeUserId method instead
  */
-- (void)mergeUserId:(NSString *)oldUserId to:(NSString *)newUserId doMerge:(BOOL)doMerge completion:(void (^)(NSError *error))completion;
+- (void)mergeUserId:(NSString *)oldUserId to:(NSString *)newUserId doMerge:(BOOL)doMerge completion:(void (^)(NSError *error))completion __attribute__ ((deprecated));
 
 /**
  Post events for In-App Messages. This can trigger In-App message display as specified in Pushwoosh Control Panel.
@@ -448,12 +452,16 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  @param event name of the event
  @param attributes NSDictionary of event attributes
  @param completion function to call after posting event
+ 
+ Deprecated. Use PWInAppManager postEvent method instead
  */
-- (void)postEvent:(NSString *)event withAttributes:(NSDictionary *)attributes completion:(void (^)(NSError *error))completion;
+- (void)postEvent:(NSString *)event withAttributes:(NSDictionary *)attributes completion:(void (^)(NSError *error))completion __attribute__ ((deprecated));
 
 /**
  See `postEvent:withAttributes:completion:`
+ 
+ Deprecated. Use PWInAppManager postEvent method instead
  */
-- (void)postEvent:(NSString *)event withAttributes:(NSDictionary *)attributes;
+- (void)postEvent:(NSString *)event withAttributes:(NSDictionary *)attributes __attribute__ ((deprecated));
 
 @end
