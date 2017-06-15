@@ -122,7 +122,7 @@
 
 		<framework src="com.google.android.gms:play-services-gcm:+" />
 		<framework src="com.google.android.gms:play-services-location:+" />
-		<framework src="com.android.support:support-v4:+" />
+		<framework src="com.android.support:support-v4:25.+" />
 		<framework src="com.pushwoosh:pushwoosh:4.12.2" />
 		<framework src="push.gradle" custom="true" type="gradleReference" />
 	</platform>
