@@ -5,15 +5,21 @@
 //
 
 #import <Foundation/Foundation.h>
+
+#if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
 #import <StoreKit/StoreKit.h>
 #import <UserNotifications/UserNotifications.h>
+#endif
 
-#define PUSHWOOSH_VERSION @"5.1.6"
+#define PUSHWOOSH_VERSION @"5.3.3"
 
 
 @class PushNotificationManager;
+
+#if TARGET_OS_IPHONE
 @class CLLocation;
+#endif
 
 typedef void (^PushwooshGetTagsHandler)(NSDictionary *tags);
 typedef void (^PushwooshErrorHandler)(NSError *error);
@@ -187,10 +193,14 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 @property (nonatomic, copy, readonly) NSDictionary *launchNotification;
 
+#if TARGET_OS_IPHONE
+
 /**
  Returns UNUserNotificationCenterDelegate that handles foreground push notifications on iOS10
  */
 @property (nonatomic, strong, readonly) id<UNUserNotificationCenterDelegate> notificationCenterDelegate;
+
+#endif
 
 /**
  Initializes PushNotificationManager. Usually called by Pushwoosh Runtime internally.
@@ -218,6 +228,12 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 - (void)unregisterForPushNotifications;
 
 - (instancetype)initWithApplicationCode:(NSString *)appCode appName:(NSString *)appName;
+
+#if TARGET_OS_IPHONE
+
+/**
+ Deprecated. Use initWithApplicationCode:appName: method instead
+ */
 - (id)initWithApplicationCode:(NSString *)appCode navController:(UIViewController *)navController appName:(NSString *)appName __attribute__((deprecated));
 
 /**
@@ -236,6 +252,8 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  Stops location tracking
  */
 - (void)stopLocationTracking;
+
+#endif
 
 /**
  Send tags to server. Tag names have to be created in the Pushwoosh Control Panel. Possible tag types: Integer, String, Incremental (integer only), List tags (array of values).
@@ -293,6 +311,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 - (void)sendBadges:(NSInteger)badge;
 
+#if TARGET_OS_IPHONE
 /**
  Sends in-app purchases to Pushwoosh. Use in paymentQueue:updatedTransactions: payment queue method (see example).
  
@@ -305,6 +324,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  @param transactions Array of SKPaymentTransaction items as received in the payment queue.
  */
 - (void)sendSKPaymentTransactions:(NSArray *)transactions;
+#endif
 
 /**
  Tracks individual in-app purchase. See recommended `sendSKPaymentTransactions:` method.
