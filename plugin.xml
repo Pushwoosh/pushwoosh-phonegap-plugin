@@ -117,7 +117,7 @@
 				android:name="com.pushwoosh.inapp.WebActivity"
 				android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
-			<service android:name=".inapp.InAppRetrieverService"
+			<service android:name="com.pushwoosh.inapp.InAppRetrieverService"
 				android:permission="android.permission.BIND_JOB_SERVICE" />
 
 			<receiver
