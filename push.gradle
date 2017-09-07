@@ -8,6 +8,13 @@ def doExtractStringFromManifest(name) {
     return matcher.group(1)
 }
 
+repositories {
+       jcenter()
+       maven {
+           url "https://maven.google.com"
+       }
+   }
+
 android {
     sourceSets {
         main {

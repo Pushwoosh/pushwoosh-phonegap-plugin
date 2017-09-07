@@ -10,6 +10,14 @@
 
 package com.pushwoosh.plugin.pushnotifications;
 
+import java.lang.annotation.Retention;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,6 +36,7 @@ import com.pushwoosh.beacon.PushwooshBeacon;
 import com.pushwoosh.exception.GetTagsException;
 import com.pushwoosh.exception.PushwooshException;
 import com.pushwoosh.exception.RegisterForPushNotificationsException;
+import com.pushwoosh.exception.UnregisterForPushNotificationException;
 import com.pushwoosh.function.Callback;
 import com.pushwoosh.function.Result;
 import com.pushwoosh.inapp.PushwooshInApp;
@@ -49,13 +58,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.annotation.Retention;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static com.pushwoosh.plugin.pushnotifications.PushwooshNotificationServiceExtension.KEY_PUSH_JSON;
 import static com.pushwoosh.plugin.pushnotifications.PushwooshNotificationServiceExtension.getPushOpenedAction;
@@ -267,7 +269,7 @@ public class PushNotifications extends CordovaPlugin {
 		callbackIds.put("unregisterDevice", callbackContext);
 
 		try {
-			PushwooshDelegate.unregisterForPushNotifications(new Callback<String, UnregisterForPushNotificationException>() {
+			Pushwoosh.getInstance().unregisterForPushNotifications(new Callback<String, UnregisterForPushNotificationException>() {
 				@Override
 				public void process(@NonNull final Result<String, UnregisterForPushNotificationException> result) {
 					if (result.isSuccess()) {
