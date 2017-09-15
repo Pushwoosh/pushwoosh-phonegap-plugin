@@ -111,27 +111,25 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	if([alertTypeString isKindOfClass:[NSString class]] && [alertTypeString isEqualToString:@"NONE"]) {
 		self.pushManager.showPushnotificationAlert = NO;
 	}
+    
+    _deviceReady = YES;
 	
-	AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
-	PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
-	if (pushHandler.startPushData && !_deviceReady) {
-		[self dispatchPushAccept:pushHandler.startPushData];
+	if (self.pushManager.launchNotification) {
+        NSDictionary *notification = [self createNotificationDataForPush:self.pushManager.launchNotification onStart:YES];
+        [self dispatchPushReceive:notification];
+        [self dispatchPushAccept:notification];
 	}
-
-	_deviceReady = YES;
 
 	[[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)dispatchPushReceive:(NSDictionary *)pushData {
-    if ([UIApplication sharedApplication].applicationState == UIApplicationStateActive) {
-        NSData *json = [NSJSONSerialization dataWithJSONObject:pushData options:NSJSONWritingPrettyPrinted error:nil];
-        NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+    NSData *json = [NSJSONSerialization dataWithJSONObject:pushData options:NSJSONWritingPrettyPrinted error:nil];
+    NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
         
-        NSString *pushReceiveJsStatement = [NSString stringWithFormat: @"cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").pushReceivedCallback(%@);", jsonString];
+    NSString *pushReceiveJsStatement = [NSString stringWithFormat: @"cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").pushReceivedCallback(%@);", jsonString];
         
-        [self.commandDelegate evalJs:WRITEJS(pushReceiveJsStatement)];
-    }
+    [self.commandDelegate evalJs:WRITEJS(pushReceiveJsStatement)];
 }
 
 - (void)dispatchPushAccept:(NSDictionary *)pushData {
@@ -288,18 +286,16 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 }
 
 - (void)onPushReceived:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
-    NSDictionary *notification = [self createNotificationDataForPush:pushNotification onStart:onStart];
-    
     if (_deviceReady) {
+        NSDictionary *notification = [self createNotificationDataForPush:pushNotification onStart:onStart];
         //send it to the webview
         [self dispatchPushReceive:notification];
     }
 }
 
 - (void)onPushAccepted:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
-    NSDictionary *notification = [self createNotificationDataForPush:pushNotification onStart:onStart];
-    
     if (_deviceReady) {
+        NSDictionary *notification = [self createNotificationDataForPush:pushNotification onStart:onStart];
         //send it to the webview
         [self dispatchPushAccept:notification];
     }
