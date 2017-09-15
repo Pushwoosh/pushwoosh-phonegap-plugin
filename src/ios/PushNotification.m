@@ -115,7 +115,7 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
 	PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
 	if (pushHandler.startPushData && !_deviceReady) {
-		[self dispatchPush:pushHandler.startPushData];
+		[self dispatchPushAccept:pushHandler.startPushData];
 	}
 
 	_deviceReady = YES;
@@ -123,23 +123,24 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	[[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-- (void)dispatchPush:(NSDictionary *)pushData {
-	NSData *json = [NSJSONSerialization dataWithJSONObject:pushData options:NSJSONWritingPrettyPrinted error:nil];
-	NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+- (void)dispatchPushReceive:(NSDictionary *)pushData {
+    if ([UIApplication sharedApplication].applicationState == UIApplicationStateActive) {
+        NSData *json = [NSJSONSerialization dataWithJSONObject:pushData options:NSJSONWritingPrettyPrinted error:nil];
+        NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+        
+        NSString *pushReceiveJsStatement = [NSString stringWithFormat: @"cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").pushReceivedCallback(%@);", jsonString];
+        
+        [self.commandDelegate evalJs:WRITEJS(pushReceiveJsStatement)];
+    }
+}
 
-	NSString *pushOpenJsStatement = [NSString stringWithFormat: @"cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%@);", jsonString];
-	NSString *pushReceiveJsStatement = [NSString stringWithFormat: @"cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").pushReceivedCallback(%@);", jsonString];
-
-	if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateBackground) {
-		[self.commandDelegate evalJs:WRITEJS(pushReceiveJsStatement)];
-	}
-	else if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive) {
-		[self.commandDelegate evalJs:WRITEJS(pushReceiveJsStatement)];
-		[self.commandDelegate evalJs:WRITEJS(pushOpenJsStatement)];
-	}
-	else {
-		[self.commandDelegate evalJs:WRITEJS(pushOpenJsStatement)];
-	}
+- (void)dispatchPushAccept:(NSDictionary *)pushData {
+    NSData *json = [NSJSONSerialization dataWithJSONObject:pushData options:NSJSONWritingPrettyPrinted error:nil];
+    NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
+    
+    NSString *pushOpenJsStatement = [NSString stringWithFormat: @"cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%@);", jsonString];
+    
+    [self.commandDelegate evalJs:WRITEJS(pushOpenJsStatement)];
 }
 
 - (void)registerDevice:(CDVInvokedUrlCommand *)command {
@@ -243,53 +244,65 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	}
 }
 
-- (void)onPushAccepted:(PushNotificationManager *)manager
-	  withNotification:(NSDictionary *)pushNotification
-			   onStart:(BOOL)onStart {
-	
-	if (!onStart && !_deviceReady) {
-		PWLogWarn(@"PUSHWOOSH WARNING: push notification onStart is false, but onDeviceReady has not been called. Did you "
-			  @"forget to call onDeviceReady?");
-	}
+- (NSDictionary *)createNotificationDataForPush:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
+    if (!onStart && !_deviceReady) {
+        PWLogWarn(@"PUSHWOOSH WARNING: onStart is false, but onDeviceReady has not been called. Did you "
+                  @"forget to call onDeviceReady?");
+    }
+    
+    NSMutableDictionary *notification = [NSMutableDictionary new];
+    
+    notification[@"onStart"] = @(onStart);
+    
+    BOOL isForegound = [UIApplication sharedApplication].applicationState == UIApplicationStateActive;
+    notification[@"foreground"] = @(isForegound);
+    
+    id alert = pushNotification[@"aps"][@"alert"];
+    NSString *message = alert;
+    if ([alert isKindOfClass:[NSDictionary class]]) {
+        message = alert[@"body"];
+    }
+    
+    if (message) {
+        notification[@"message"] = message;
+    }
+    
+    NSDictionary *userdata = [[PushNotificationManager pushManager] getCustomPushDataAsNSDict:pushNotification];
+    if (userdata) {
+        notification[@"userdata"] = userdata;
+    }
+    
+    notification[@"ios"] = pushNotification;
+    
+    PWLogDebug(@"Notification opened: %@", notification);
+    
+    if (onStart) {
+        //keep the start push
+        AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
+        PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
+        pushHandler.startPushData = notification;
+        pushHandler.startPushCleared = NO;
+    }
+    
+    return notification;
+}
 
-	NSMutableDictionary *notification = [NSMutableDictionary new];
-	
-	notification[@"onStart"] = @(onStart);
-	
-	BOOL isForegound = [UIApplication sharedApplication].applicationState == UIApplicationStateActive;
-	notification[@"foreground"] = @(isForegound);
-	
-	id alert = pushNotification[@"aps"][@"alert"];
-	NSString *message = alert;
-	if ([alert isKindOfClass:[NSDictionary class]]) {
-		message = alert[@"body"];
-	}
+- (void)onPushReceived:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
+    NSDictionary *notification = [self createNotificationDataForPush:pushNotification onStart:onStart];
+    
+    if (_deviceReady) {
+        //send it to the webview
+        [self dispatchPushReceive:notification];
+    }
+}
 
-	if (message) {
-		notification[@"message"] = message;
-	}
-	
-	NSDictionary *userdata = [[PushNotificationManager pushManager] getCustomPushDataAsNSDict:pushNotification];
-	if (userdata) {
-		notification[@"userdata"] = userdata;
-	}
-	
-	notification[@"ios"] = pushNotification;
-
-	PWLogDebug(@"Notification opened: %@", notification);
-
-	if (onStart) {
-		//keep the start push
-		AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
-		PushNotification *pushHandler = [delegate.viewController getCommandInstance:@"PushNotification"];
-		pushHandler.startPushData = notification;
-		pushHandler.startPushCleared = NO;
-	}
-
-	if (_deviceReady) {
-		//send it to the webview
-		[self dispatchPush:notification];
-	}
+- (void)onPushAccepted:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
+    NSDictionary *notification = [self createNotificationDataForPush:pushNotification onStart:onStart];
+    
+    if (_deviceReady) {
+        //send it to the webview
+        [self dispatchPushAccept:notification];
+    }
 }
 
 - (void)getRemoteNotificationStatus:(CDVInvokedUrlCommand *)command {
