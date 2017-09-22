@@ -159,6 +159,13 @@
 				android:enabled="true"
 				android:exported="false" />
 
+			<provider
+				android:name="com.pushwoosh.gcm.GcmInitProvider"
+				android:authorities="$PACKAGE_NAME.gcmpushwooshinitprovider"
+				android:enabled="true"
+				android:exported="false"
+				android:initOrder="53" />
+
 			<!-- amazon -->
 			<provider
 				android:name="com.pushwoosh.PushwooshInitProvider"
