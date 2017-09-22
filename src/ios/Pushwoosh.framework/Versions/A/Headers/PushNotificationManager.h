@@ -12,7 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #endif
 
-#define PUSHWOOSH_VERSION @"5.3.6"
+#define PUSHWOOSH_VERSION @"5.3.7"
 
 
 @class PushNotificationManager;
@@ -181,10 +181,14 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 @property (nonatomic, weak) NSObject<PushNotificationDelegate> *delegate;
 
+#if TARGET_OS_IPHONE
+
 /**
  Show push notifications alert when push notification is received while the app is running, default is `YES`
  */
 @property (nonatomic, assign) BOOL showPushnotificationAlert;
+
+#endif
 
 /**
  Returns push notification payload if the app was started in response to push notification or null otherwise
@@ -197,6 +201,10 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  Returns UNUserNotificationCenterDelegate that handles foreground push notifications on iOS10
  */
 @property (nonatomic, strong, readonly) id<UNUserNotificationCenterDelegate> notificationCenterDelegate;
+
+#else
+
+@property (nonatomic, strong, readonly) id<NSUserNotificationCenterDelegate> notificationCenterDelegate;
 
 #endif
 
