@@ -65,10 +65,9 @@ import static com.pushwoosh.plugin.pushnotifications.PushwooshNotificationServic
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 public class PushNotifications extends CordovaPlugin {
-	private static final String TAG = "CordovaPlugin";
+	public static final String TAG = "CordovaPlugin";
 
 	boolean receiversRegistered = false;
-	boolean broadcastPush = true;
 	JSONObject startPushData = null;
 
 	HashMap<String, CallbackContext> callbackIds = new HashMap<String, CallbackContext>();
@@ -124,9 +123,7 @@ public class PushNotifications extends CordovaPlugin {
 		intentFilter.addAction(getPushOpenedAction(cordova.getActivity()));
 		intentFilter.addAction(getPushReceivedAction(cordova.getActivity()));
 
-		//comment this code out if you would like to receive the notifications in the notifications center when the app is in foreground
-		if (broadcastPush)
-			cordova.getActivity().registerReceiver(pushReceiver, intentFilter);
+		cordova.getActivity().registerReceiver(pushReceiver, intentFilter);
 
 		receiversRegistered = true;
 	}
@@ -200,18 +197,6 @@ public class PushNotifications extends CordovaPlugin {
 		} catch (JSONException e) {
 			PWLog.error(TAG, "No parameters has been passed to onDeviceReady function. Did you follow the guide correctly?", e);
 			return false;
-		}
-
-		try {
-			String packageName = cordova.getActivity().getApplicationContext().getPackageName();
-			ApplicationInfo ai = cordova.getActivity().getPackageManager().getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-
-			if (ai.metaData != null && ai.metaData.containsKey("PW_NO_BROADCAST_PUSH"))
-				broadcastPush = !(ai.metaData.getBoolean("PW_NO_BROADCAST_PUSH"));
-
-			PWLog.debug(TAG, "broadcastPush = " + broadcastPush);
-		} catch (Exception e) {
-			PWLog.error(TAG, "Failed to read AndroidManifest");
 		}
 
 		try {

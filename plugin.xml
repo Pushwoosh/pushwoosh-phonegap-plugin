@@ -31,178 +31,25 @@
 		</config-file>
 
 		<config-file target="AndroidManifest.xml" parent="/manifest">
-			<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+			<!--BEACON-->
+			<!--<uses-permission android:name="android.permission.BLUETOOTH" />-->
+			<!--<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />-->
 
-			<!-- GCM connects to Google Services. -->
-			<uses-permission android:name="android.permission.INTERNET" />
+			<!--LOCATION-->
 
-			<!-- Keeps the processor from sleeping when a message is received. -->
-			<uses-permission android:name="android.permission.WAKE_LOCK" />
-
-			<!-- So the sounds from assets folder could work for notification sounds. -->
-			<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-			<!-- For local pushes rescheduling and location service restart -->
-			<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-
-			<!--
-			 Creates a custom permission so only this app can receive its messages.
-
-			 NOTE: the permission *must* be called PACKAGE.permission.C2D_MESSAGE,
-			 where PACKAGE is the application's package name.
-			 -->
-			<permission
-				android:name="$PACKAGE_NAME.permission.C2D_MESSAGE"
-				android:protectionLevel="signature" />
-
-			<uses-permission android:name="$PACKAGE_NAME.permission.C2D_MESSAGE" />
-
-			<!-- This app has permission to register and receive data message. -->
-			<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-
-			<!-- Badges -->
-					<!--for Samsung-->
-					<uses-permission android:name="com.sec.android.provider.badge.permission.READ"/>
-					<uses-permission android:name="com.sec.android.provider.badge.permission.WRITE"/>
-
-					<!--for htc-->
-					<uses-permission android:name="com.htc.launcher.permission.READ_SETTINGS"/>
-					<uses-permission android:name="com.htc.launcher.permission.UPDATE_SHORTCUT"/>
-
-					<!--for sony-->
-					<uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE"/>
-					<uses-permission android:name="com.sonymobile.home.permission.PROVIDER_INSERT_BADGE"/>
-
-					<!--for apex-->
-					<uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT"/>
-
-					<!--for solid-->
-					<uses-permission android:name="com.majeur.launcher.permission.UPDATE_BADGE"/>
-
-					<!--for huawei-->
-					<uses-permission android:name="com.huawei.android.launcher.permission.CHANGE_BADGE"/>
-					<uses-permission android:name="com.huawei.android.launcher.permission.READ_SETTINGS"/>
-					<uses-permission android:name="com.huawei.android.launcher.permission.WRITE_SETTINGS"/>
-
-					<!--for ZUK-->
-					<uses-permission android:name="android.permission.READ_APP_BADGE"/>
-
-					<!--for OPPO-->
-					<uses-permission android:name="com.oppo.launcher.permission.READ_SETTINGS"/>
-					<uses-permission android:name="com.oppo.launcher.permission.WRITE_SETTINGS"/>
-
-					<!--for EvMe-->
-					<uses-permission android:name="me.everything.badger.permission.BADGE_COUNT_READ"/>
-					<uses-permission android:name="me.everything.badger.permission.BADGE_COUNT_WRITE"/>
+			<!--<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />-->
+			<!--<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->
+			<!---->
+			<!--<uses-permission-sdk-23 android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
 		</config-file>
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
-			<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
 			<meta-data android:name="com.pushwoosh.log_level" android:value="$LOG_LEVEL" />
+			<meta-data android:name="com.pushwoosh.foreground_push" android:value="$ANDROID_FOREGROUND_PUSH" />
+
 			<meta-data android:name="com.pushwoosh.notification_service_extension" android:value="com.pushwoosh.plugin.pushnotifications.PushwooshNotificationServiceExtension" />
-			<meta-data android:name="PW_NO_BROADCAST_PUSH" android:value="$ANDROID_FOREGROUND_PUSH" />
-			<meta-data android:name="com.pushwoosh.plugin.badge" android:value="com.pushwoosh.badge.BadgePlugin" />
-			<meta-data android:name="com.pushwoosh.plugin.location"	android:value="com.pushwoosh.location.LocationPlugin" />
+
 			<meta-data android:name="com.pushwoosh.internal.plugin_provider"	android:value="com.pushwoosh.plugin.internal.PhonegapPluginProvider" />
-
-			<!-- core -->
-			<receiver android:name="com.google.android.gms.gcm.GcmReceiver"
-				android:exported="true"
-				android:permission="com.google.android.c2dm.permission.SEND">
-				<intent-filter>
-					<action android:name="com.google.android.c2dm.intent.RECEIVE" />
-					<category android:name="$PACKAGE_NAME" />
-				</intent-filter>
-			</receiver>
-
-			<activity
-				android:name="com.pushwoosh.inapp.WebActivity"
-				android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
-			<service android:name="com.pushwoosh.inapp.InAppRetrieverService"
-				android:permission="android.permission.BIND_JOB_SERVICE" />
-
-			<receiver
-				android:name="com.pushwoosh.BootReceiver"
-				android:enabled="true"
-				android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
-				<intent-filter>
-					<action android:name="android.intent.action.BOOT_COMPLETED" />
-
-					<category android:name="android.intent.category.DEFAULT" />
-				</intent-filter>
-			</receiver>
-
-			<service
-				android:name="com.pushwoosh.PushGcmIntentService"
-				android:exported="false">
-				<intent-filter android:priority="-50">
-					<action android:name="com.google.android.c2dm.intent.RECEIVE" />
-				</intent-filter>
-			</service>
-			<service
-				android:name="com.pushwoosh.GcmRegistrationService"
-				android:exported="false">
-				<intent-filter android:priority="-50">
-					<action android:name="com.google.android.gms.iid.InstanceID" />
-				</intent-filter>
-			</service>
-
-			<activity
-				android:name="com.pushwoosh.internal.utils.PermissionActivity"
-				android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
-			<receiver android:name="com.pushwoosh.notification.LocalNotificationReceiver" />
-
-			<service
-				android:name="com.pushwoosh.internal.utils.LockScreenService"
-				android:permission="android.permission.BIND_JOB_SERVICE"
-				android:enabled="true"
-				android:exported="false" />
-
-			<provider
-				android:name="com.pushwoosh.gcm.GcmInitProvider"
-				android:authorities="$PACKAGE_NAME.gcmpushwooshinitprovider"
-				android:enabled="true"
-				android:exported="false"
-				android:initOrder="53" />
-
-			<!-- amazon -->
-			<provider
-				android:name="com.pushwoosh.PushwooshInitProvider"
-				android:authorities="$PACKAGE_NAME.pushwooshinitprovider"
-				android:enabled="true"
-				android:exported="false"
-				android:initOrder="50" />
-
-			<service
-				android:name="com.pushwoosh.PushwooshService"
-				android:exported="false"
-				android:permission="android.permission.BIND_JOB_SERVICE" />
-
-			<receiver
-				android:name="com.pushwoosh.NotificationOpenReceiver"
-				android:enabled="true"
-				android:exported="false" />
-
-			<provider
-				android:name="com.pushwoosh.amazon.AmazonInitProvider"
-				android:authorities="$PACKAGE_NAME.amazonpushwooshinitprovider"
-				android:enabled="true"
-				android:exported="false"
-				android:initOrder="52" />
-
-			<service android:name="com.pushwoosh.PushAmazonIntentService" />
-
-			<receiver
-				android:name="com.pushwoosh.PushAmazonReceiver"
-				android:permission="com.amazon.device.messaging.permission.SEND">
-				<intent-filter>
-					<action android:name="com.amazon.device.messaging.intent.REGISTRATION" />
-					<action android:name="com.amazon.device.messaging.intent.RECEIVE" />
-
-					<category android:name="$PACKAGE_NAME" />
-				</intent-filter>
-			</receiver>
 
 			<!-- Beacons -->
 			<service
@@ -217,6 +64,8 @@
 			<service android:name="com.pushwoosh.beacon.PushBeaconService" />
 
 			<!-- Location -->
+			<meta-data android:name="com.pushwoosh.plugin.location"	android:value="com.pushwoosh.location.LocationPlugin" />
+
 			<service android:name="com.pushwoosh.location.network.GeoLocationServiceApi16" />
 
 			<activity
@@ -251,19 +100,19 @@
 			target-dir="src/com/pushwoosh/plugin/internal" />
 
 
-		<framework src="com.google.android.gms:play-services-gcm:11.2.0" />
-		<framework src="com.google.android.gms:play-services-location:11.2.0" />
+		<framework src="com.google.android.gms:play-services-gcm:11.+" />
+		<framework src="com.google.android.gms:play-services-location:11.+" />
 
-		<framework src="com.google.firebase:firebase-core:11.2.0" />
-		<framework src="com.google.firebase:firebase-messaging:11.2.0" />
+		<framework src="com.google.firebase:firebase-core:11.+" />
+		<framework src="com.google.firebase:firebase-messaging:11.+" />
 
 		<framework src="com.android.support:support-v4:26.+" />
-		<lib-file src="src/android/libs/pushwoosh_v5.1.1.jar"/>
-		<lib-file src="src/android/libs/pushwoosh-amazon_v5.1.1.jar"/>
-		<lib-file src="src/android/libs/pushwoosh-badge_v5.1.1.jar"/>
+		<framework src="com.pushwoosh:pushwoosh:5.1.1"/>
+		<framework src="com.pushwoosh:pushwoosh-amazon:5.1.1"/>
+		<framework src="com.pushwoosh:pushwoosh-badge:5.1.1"/>
+		<framework src="com.pushwoosh:pushwoosh-gcm:5.1.1"/>
 		<lib-file src="src/android/libs/pushwoosh-beacon_v5.1.1.jar"/>
 		<lib-file src="src/android/libs/pushwoosh-location_v5.1.1.jar"/>
-		<lib-file src="src/android/libs/pushwoosh-gcm_v5.1.1.jar"/>
 		<framework src="push.gradle" custom="true" type="gradleReference" />
 	</platform>
 
