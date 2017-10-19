@@ -17,15 +17,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -59,18 +58,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-import static com.pushwoosh.plugin.pushnotifications.PushwooshNotificationServiceExtension.KEY_PUSH_JSON;
-import static com.pushwoosh.plugin.pushnotifications.PushwooshNotificationServiceExtension.getPushOpenedAction;
-import static com.pushwoosh.plugin.pushnotifications.PushwooshNotificationServiceExtension.getPushReceivedAction;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 public class PushNotifications extends CordovaPlugin {
 	public static final String TAG = "CordovaPlugin";
+	private static final Object sStartPushLock = new Object();
 
-	boolean receiversRegistered = false;
-	JSONObject startPushData = null;
+	private static String sStartPushData;
+	private static String sReceivedPushData;
 
-	HashMap<String, CallbackContext> callbackIds = new HashMap<String, CallbackContext>();
+	private static AtomicBoolean sAppReady = new AtomicBoolean();
+	private static PushNotifications sInstance;
+
+	private final HashMap<String, CallbackContext> callbackIds = new HashMap<String, CallbackContext>();
 
 	private static final Map<String, Method> exportedMethods;
 
@@ -92,72 +92,18 @@ public class PushNotifications extends CordovaPlugin {
 		exportedMethods = methods;
 	}
 
-	/**
-	 * Called when the activity receives a new intent.
-	 */
-	public void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
+	private final Handler handler = new Handler(Looper.getMainLooper());
 
-		startPushData = getPushFromIntent(intent);
-		checkMessage(intent);
-	}
-
-	private BroadcastReceiver pushReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(final Context context, final Intent intent) {
-			String action = intent.getAction();
-			if(action.equals(getPushOpenedAction(context))){
-				doOnPushOpened(intent.getStringExtra(KEY_PUSH_JSON));
-			} else if(action.equals(getPushReceivedAction(context))){
-				doOnPushReceived(intent.getStringExtra(KEY_PUSH_JSON));
-			}
-		}
-	};
-
-	//Registration of the receivers
-	public void registerReceivers() {
-		if (receiversRegistered)
-			return;
-
-		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(getPushOpenedAction(cordova.getActivity()));
-		intentFilter.addAction(getPushReceivedAction(cordova.getActivity()));
-
-		cordova.getActivity().registerReceiver(pushReceiver, intentFilter);
-
-		receiversRegistered = true;
-	}
-
-	public void unregisterReceivers() {
-		if (!receiversRegistered)
-			return;
-
-		try {
-			cordova.getActivity().unregisterReceiver(pushReceiver);
-		} catch (Exception e) {
-			// pass. for some reason Phonegap call this method before onResume. Not Android lifecycle style...
-		}
-
-		receiversRegistered = false;
+	public PushNotifications () {
+		sInstance = this;
+		sAppReady.set(false);
 	}
 
 	@Override
-	public void onResume(boolean multitasking) {
-		super.onResume(multitasking);
-		registerReceivers();
-	}
-
-	@Override
-	public void onPause(boolean multitasking) {
-		super.onPause(multitasking);
-		unregisterReceivers();
-	}
-
-	/**
-	 * The final call you receive before your activity is destroyed.
-	 */
 	public void onDestroy() {
 		super.onDestroy();
+		PWLog.noise("OnDestroy");
+		sAppReady.set(false);
 	}
 
 	private JSONObject getPushFromIntent(Intent intent) {
@@ -179,16 +125,6 @@ public class PushNotifications extends CordovaPlugin {
 		return null;
 	}
 
-	private void checkMessage(Intent intent) {
-		if (null != intent) {
-			if (intent.hasExtra(Pushwoosh.PUSH_RECEIVE_EVENT)) {
-				doOnPushOpened(intent.getExtras().getString(Pushwoosh.PUSH_RECEIVE_EVENT));
-			}
-
-			cordova.getActivity().setIntent(intent);
-		}
-	}
-
 	@CordovaMethod
 	private boolean onDeviceReady(JSONArray data, CallbackContext callbackContext) {
 		JSONObject params = null;
@@ -200,10 +136,6 @@ public class PushNotifications extends CordovaPlugin {
 		}
 
 		try {
-			//make sure the receivers are on
-			registerReceivers();
-
-			startPushData = getPushFromIntent(cordova.getActivity().getIntent());
 
 			String appid = null;
 			if (params.has("appid")) {
@@ -214,12 +146,23 @@ public class PushNotifications extends CordovaPlugin {
 
 			Pushwoosh.getInstance().setAppId(appid);
 			Pushwoosh.getInstance().setSenderId(params.getString("projectid"));
+
+
+			synchronized (sStartPushLock) {
+				if (sReceivedPushData != null) {
+					doOnPushReceived(sReceivedPushData);
+				}
+
+				if (sStartPushData != null) {
+					doOnPushOpened(sStartPushData);
+				}
+			}
+
+			sAppReady.set(true);
 		} catch (Exception e) {
 			PWLog.error(TAG, "Missing pw_appid parameter. Did you follow the guide correctly?", e);
 			return false;
 		}
-
-		checkMessage(cordova.getActivity().getIntent());
 		return true;
 	}
 
@@ -239,13 +182,11 @@ public class PushNotifications extends CordovaPlugin {
 			});
 		} catch (java.lang.RuntimeException e) {
 			callbackIds.remove("registerDevice");
-			;
 			PWLog.error(TAG, "registering for push notifications failed", e);
 
 			callbackContext.error(e.getMessage());
 		}
 
-		checkMessage(cordova.getActivity().getIntent());
 		return true;
 	}
 
@@ -763,6 +704,7 @@ public class PushNotifications extends CordovaPlugin {
 
 		String jsStatement = String.format("cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").notificationCallback(%s);", convertNotification(notification));
 		evalJs(jsStatement);
+		sStartPushData = null;
 	}
 
 	public void doOnPushReceived(String notification)
@@ -771,6 +713,8 @@ public class PushNotifications extends CordovaPlugin {
 
 		String jsStatement = String.format("cordova.require(\"pushwoosh-cordova-plugin.PushNotification\").pushReceivedCallback(%s);", convertNotification(notification));
 		evalJs(jsStatement);
+
+		sReceivedPushData = null;
 	}
 
 	private String convertNotification(String notification)
@@ -808,7 +752,7 @@ public class PushNotifications extends CordovaPlugin {
 	{
 		final String url = "javascript:" + statement;
 
-		cordova.getActivity().runOnUiThread(new Runnable()
+		handler.post(new Runnable()
 		{
 			@Override
 			public void run()
@@ -823,5 +767,34 @@ public class PushNotifications extends CordovaPlugin {
 				}
 			}
 		});
+	}
+
+
+	static void openPush(String pushData) {
+		try {
+			synchronized (sStartPushLock) {
+				sStartPushData = pushData;
+				if (sAppReady.get() && sInstance != null) {
+					sInstance.doOnPushOpened(pushData);
+				}
+			}
+		} catch (Exception e) {
+			// React Native is highly unstable
+			PWLog.exception(e);
+		}
+	}
+
+	static void messageReceived(String pushData) {
+		try {
+			synchronized (sStartPushLock) {
+				sReceivedPushData = pushData;
+				if (sAppReady.get() && sInstance != null) {
+					sInstance.doOnPushReceived(pushData);
+				}
+			}
+		} catch (Exception e) {
+			// React Native is highly unstable
+			PWLog.exception(e);
+		}
 	}
 }

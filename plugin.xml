@@ -40,7 +40,7 @@
 			<!--<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />-->
 			<!--<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->
 			<!---->
-			<!--<uses-permission-sdk-23 android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
+			<!--<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
 		</config-file>
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
@@ -107,12 +107,12 @@
 		<framework src="com.google.firebase:firebase-messaging:11.+" />
 
 		<framework src="com.android.support:support-v4:26.+" />
-		<framework src="com.pushwoosh:pushwoosh:5.1.1"/>
-		<framework src="com.pushwoosh:pushwoosh-amazon:5.1.1"/>
-		<framework src="com.pushwoosh:pushwoosh-badge:5.1.1"/>
-		<framework src="com.pushwoosh:pushwoosh-gcm:5.1.1"/>
-		<lib-file src="src/android/libs/pushwoosh-beacon_v5.1.1.jar"/>
-		<lib-file src="src/android/libs/pushwoosh-location_v5.1.1.jar"/>
+		<framework src="com.pushwoosh:pushwoosh:5.4.1"/>
+		<framework src="com.pushwoosh:pushwoosh-amazon:5.4.1"/>
+		<framework src="com.pushwoosh:pushwoosh-badge:5.4.1"/>
+		<framework src="com.pushwoosh:pushwoosh-gcm:5.4.1"/>
+		<lib-file src="src/android/libs/pushwoosh-beacon_v5.4.1.jar"/>
+		<lib-file src="src/android/libs/pushwoosh-location_v5.4.1.jar"/>
 		<framework src="push.gradle" custom="true" type="gradleReference" />
 	</platform>
 

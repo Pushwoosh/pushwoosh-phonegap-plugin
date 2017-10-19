@@ -10,8 +10,13 @@ public class PhonegapPluginProvider implements PluginProvider {
 			Class.forName("org.apache.cordova.CordovaPlugin");
 			return "Cordova";
 		} catch (ClassNotFoundException ignore) {
-      //Otherwise this is PhoneGap build
+            //Otherwise this is PhoneGap build
 			return "PhoneGap Build";
 		}
+	}
+
+	@Override
+	public int richMediaStartDelay() {
+		return DEFAULT_RICH_MEDIA_START_DELAY;
 	}
 }
