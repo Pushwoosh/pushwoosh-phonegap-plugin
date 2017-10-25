@@ -281,10 +281,6 @@ public class PushNotifications extends CordovaPlugin {
 
 	@CordovaMethod
 	private boolean startLocationTracking(JSONArray data, final CallbackContext callbackContext) {
-		if (ActivityCompat.checkSelfPermission(cordova.getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(cordova.getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-			return false;
-		}
-
 		PushwooshLocation.startLocationTracking();
 		return true;
 	}
