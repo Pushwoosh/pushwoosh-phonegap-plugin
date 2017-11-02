@@ -224,6 +224,46 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)createLocalNotification:(CDVInvokedUrlCommand *)command {
+    NSDictionary *params = command.arguments[0];
+    NSString *body = params[@"msg"];
+    NSUInteger delay = [params[@"seconds"] unsignedIntegerValue];
+    NSDictionary *userData = params[@"userData"];
+    
+    [self sendLocalNotificationWithBody:body delay:delay userData:userData];
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)sendLocalNotificationWithBody:(NSString *)body delay:(NSUInteger)delay userData:(NSDictionary *)userData {
+    if (@available(iOS 10, *)) {
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+        content.body = body;
+        content.sound = [UNNotificationSound defaultSound];
+        content.userInfo = userData;
+        UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:delay repeats:NO];
+        NSString *identifier = @"LocalNotification";
+        UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
+                                                                              content:content
+                                                                              trigger:trigger];
+        
+        [center addNotificationRequest:request withCompletionHandler:^(NSError *_Nullable error) {
+            if (error != nil) {
+                NSLog(@"Something went wrong: %@", error);
+            }
+        }];
+    } else {
+        UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+        localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:delay];
+        localNotification.alertBody = body;
+        localNotification.timeZone = [NSTimeZone defaultTimeZone];
+        localNotification.userInfo = userData;
+        [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
+    }
+}
+
 - (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString *)token {
 	if (self.callbackIds[@"registerDevice"]) {
 		NSMutableDictionary *results = [PushNotificationManager getRemoteNotificationStatus];
