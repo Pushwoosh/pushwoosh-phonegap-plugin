@@ -47,6 +47,16 @@ PushNotification.prototype.onDeviceReady = function(config) {
 	exec(null, null, "PushNotification", "onDeviceReady", config ? [config] : []);
 };
 
+//Function: onAppActivated
+//[windows] The event fires when Windows Runtime activation has occurred
+//
+//Parameters:
+// "args" - activation arguments
+//
+PushNotification.prototype.onAppActivated = function (args) {
+    exec(null, null, "PushNotification", "onAppActivated", args ? [args] : []);
+};
+
 //Function: registerDevice
 //[android, ios, wp8, windows] Register device for push notifications and retreive a push Token
 //

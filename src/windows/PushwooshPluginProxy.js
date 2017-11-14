@@ -1,97 +1,107 @@
 var cordova = require('cordova'),
-	pushwooshPlugin= require('./PushNotification');
+    pushwooshPlugin = require('./PushNotification');
 
 
-	var platform = require('cordova/platform');
+var platform = require('cordova/platform');
 
 module.exports = {
 
-	onDeviceReady : function(success, fail, config) {
-		this.service = new PushSDK.NotificationService.getCurrent(config[0].appid);
+    onDeviceReady: function (success, fail, config) {
+        this.service = new PushSDK.NotificationService.getCurrent(config[0].appid);
 
-		var startPushData = null;
-	
-		if (platform.activationContext && platform.activationContext.args) {
-			startPushData = platform.activationContext.args;
-		}
-	
-		if (startPushData !== null)
-			PushSDK.NotificationService.handleStartPush(startPushData);
+        var startPushData = null;
 
-		success();
-	},
+        if (platform.activationContext && platform.activationContext.args) {
+            startPushData = platform.activationContext.args;
+        }
 
-	registerDevice: function (success, fail) {
-		if (!this.service) {
-			// postpone
-			setTimeout(function () { registerDevice(success, fail) }, 1000);
-		}
+        if (startPushData !== null)
+            PushSDK.NotificationService.handleStartPush(startPushData);
 
-		this.service.ononpushtokenreceived = function (token) {
-			success({ "pushToken" : token });
-		};
+        success();
+    },
 
-		this.service.ononpushtokenfailed = fail;
+    onAppActivated: function (success, fail, args) {
+        if (args !== null && args.length > 0)
+            PushSDK.NotificationService.handleStartPush(args[0]);
+    },
 
-		this.service.ononpushaccepted = function (args) {
-			var unifiedPush = { "onStart": args.onStart, "foreground": !args.onStart, "userdata": JSON.parse(args.userData), "windows": args };
-			setTimeout(function () { cordova.require("pushwoosh-cordova-plugin.PushNotification").notificationCallback(unifiedPush); }, 0);
-		}
+    registerDevice: function (success, fail) {
+        if (!this.service) {
+            // postpone
+            setTimeout(function () { this.registerDevice(success, fail) }, 1000);
+        }
 
-		this.service.subscribeToPushService();
-	},
+        this.service.ononpushtokenreceived = function (token) {
+            success({ "pushToken": token });
+        };
 
-	unregisterDevice: function(success, fail) {
-	    this.service.unsubscribeFromPushes(function () { success(); }, fail);
-	},
+        this.service.ononpushtokenfailed = fail;
 
-	getPushwooshHWID: function (success) {
-		success(this.service.deviceUniqueID);
-	},
+        this.service.ononpushreceived = function (args) {
+            var unifiedPush = { "onStart": args.onStart, "foreground": !args.onStart, "userdata": JSON.parse(args.userData), "windows": args };
+            setTimeout(function () { cordova.require("pushwoosh-cordova-plugin.PushNotification").pushReceivedCallback(unifiedPush); }, 0);
+        }
 
-	getPushToken: function(success) {
-		success(this.service.pushToken);
-	},
+        this.service.ononpushaccepted = function (args) {
+            var unifiedPush = { "onStart": args.onStart, "foreground": !args.onStart, "userdata": JSON.parse(args.userData), "windows": args };
+            setTimeout(function () { cordova.require("pushwoosh-cordova-plugin.PushNotification").notificationCallback(unifiedPush); }, 0);
+        }
 
-	startLocationTracking: function(success, fail) {
-		this.service.startGeoLocation();
-		success();
-	},
+        this.service.subscribeToPushService();
+    },
 
-	stopLocationTracking: function(success, fail) {
-		this.service.stopLocationTracking();
-		success();
-	},
+    unregisterDevice: function (success, fail) {
+        this.service.unsubscribeFromPushes(function () { success(); }, fail);
+    },
 
-	getTags: function (success, fail) {
-		this.service.getTags(
-			function (sender, tagsString) {
-				var tags = JSON.parse(tagsString);
-				success(tags);
-			},
-			function (sender, error) {
-				fail(error);
-			}
-		);
-	},
+    getPushwooshHWID: function (success) {
+        success(this.service.deviceUniqueID);
+    },
 
-	setTags: function (success, fail, tags) {
-		var keys = [];
-		var values = [];
+    getPushToken: function (success) {
+        success(this.service.pushToken);
+    },
 
-		for (key in tags[0]) {
-			keys.push(key);
-			values.push(tags[0][key]);
-		}
+    startLocationTracking: function (success, fail) {
+        this.service.startGeoLocation();
+        success();
+    },
 
-		this.service.sendTag(keys, values, null, null);
-		success();
-	},
+    stopLocationTracking: function (success, fail) {
+        this.service.stopLocationTracking();
+        success();
+    },
 
-	setApplicationIconBadgeNumber: function(success, fail, config) {
-		var badge = config[0]["badge"];
-		this.service.setBadgeNumber(badge);
-	}
+    getTags: function (success, fail) {
+        this.service.getTags(
+            function (sender, tagsString) {
+                var tags = JSON.parse(tagsString);
+                success(tags);
+            },
+            function (sender, error) {
+                fail(error);
+            }
+        );
+    },
+
+    setTags: function (success, fail, tags) {
+        var keys = [];
+        var values = [];
+
+        for (key in tags[0]) {
+            keys.push(key);
+            values.push(tags[0][key]);
+        }
+
+        this.service.sendTag(keys, values, null, null);
+        success();
+    },
+
+    setApplicationIconBadgeNumber: function (success, fail, config) {
+        var badge = config[0]["badge"];
+        this.service.setBadgeNumber(badge);
+    }
 };
 
 require("cordova/exec/proxy").add("PushNotification", module.exports);
