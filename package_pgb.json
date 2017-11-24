@@ -1,0 +1,29 @@
+{
+  "name": "pushwoosh-pgb-plugin",
+  "version": "7.0.11",
+  "description": "\n    This plugin allows you to send and receive push notifications. Powered by Pushwoosh (www.pushwoosh.com).\n    ",
+  "cordova": {
+    "id": "pushwoosh-pgb-plugin",
+    "platforms": [
+      "android",
+      "ios",
+      "wp8"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pushwoosh/pushwoosh-phonegap-3.0-plugin.git"
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios",
+    "cordova-wp8"
+  ],
+  "author": "Pushwoosh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Pushwoosh/pushwoosh-phonegap-3.0-plugin/issues"
+  },
+  "homepage": "https://github.com/Pushwoosh/pushwoosh-phonegap-3.0-plugin#readme"
+}
