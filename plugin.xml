@@ -113,7 +113,6 @@
 		<framework src="com.pushwoosh:pushwoosh-gcm:5.4.1"/>
 		<lib-file src="src/android/libs/pushwoosh-beacon_v5.4.1.jar"/>
 		<lib-file src="src/android/libs/pushwoosh-location_v5.4.1.jar"/>
-		<framework src="push.gradle" custom="true" type="gradleReference" />
 	</platform>
 
 	<!-- ios -->
