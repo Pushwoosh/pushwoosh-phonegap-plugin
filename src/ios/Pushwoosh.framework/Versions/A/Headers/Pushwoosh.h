@@ -6,3 +6,8 @@
 
 #import "PushNotificationManager.h"
 #import "PWInAppManager.h"
+#import "PWLog.h"
+
+#if TARGET_OS_IPHONE
+    #import "PWInbox.h"
+#endif

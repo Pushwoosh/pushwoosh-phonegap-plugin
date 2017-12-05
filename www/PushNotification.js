@@ -47,6 +47,16 @@ PushNotification.prototype.onDeviceReady = function(config) {
 	exec(null, null, "PushNotification", "onDeviceReady", config ? [config] : []);
 };
 
+//Function: onAppActivated
+//[windows] The event fires when Windows Runtime activation has occurred
+//
+//Parameters:
+// "args" - activation arguments
+//
+PushNotification.prototype.onAppActivated = function (args) {
+    exec(null, null, "PushNotification", "onAppActivated", args ? [args] : []);
+};
+
 //Function: registerDevice
 //[android, ios, wp8, windows] Register device for push notifications and retreive a push Token
 //
@@ -294,7 +304,7 @@ PushNotification.prototype.postEvent = function(event, attributes) {
 };
 
 //Function: createLocalNotification
-//[android] Schedules local notification,
+//[android, ios] Schedules local notification,
 //
 //Parameters:
 // "config.msg" - notification message
@@ -305,7 +315,7 @@ PushNotification.prototype.postEvent = function(event, attributes) {
 //
 //Example:
 //(start code)
-//	pushwoosh.createLocalNotification({msg:"Your pumpkins are ready!", seconds:30, userData:"optional"}
+//	pushwoosh.createLocalNotification({msg:"Your pumpkins are ready!", seconds:30, userData:"optional"});
 //(end)
 PushNotification.prototype.createLocalNotification = function(config, success, fail) {
 	exec(success, fail, "PushNotification", "createLocalNotification", config ? [config] : []);
