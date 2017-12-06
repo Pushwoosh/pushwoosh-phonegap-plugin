@@ -21,7 +21,7 @@ cordova platform remove android
 cordova platform add android@7.0.0
 ```
 
-Using npm (requires cordova 5.0+):
+Using npm (requires cordova 7.0+):
 
 ```
 cordova plugin add pushwoosh-cordova-plugin@7.1.0
