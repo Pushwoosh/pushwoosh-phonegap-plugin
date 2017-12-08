@@ -237,7 +237,7 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 }
 
 - (void)sendLocalNotificationWithBody:(NSString *)body delay:(NSUInteger)delay userData:(NSDictionary *)userData {
-    if (@available(iOS 10, *)) {
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 10.0) {
         UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
         UNMutableNotificationContent *content = [UNMutableNotificationContent new];
         content.body = body;
