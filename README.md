@@ -21,6 +21,8 @@ cordova platform remove android
 cordova platform add android@7.0.0
 ```
 
+#### Cordova
+
 Using npm (requires cordova 7.0+):
 
 ```
@@ -31,6 +33,14 @@ Using git:
 
 ```
 cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#7.1.0
+```
+
+#### Phonegap
+
+Using npm (requires phonegap 7.1+):
+
+```
+cordova plugin add pushwoosh-pgb-plugin@7.1.1
 ```
 
 ### Guide
