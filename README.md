@@ -26,13 +26,13 @@ cordova platform add android@7.0.0
 Using npm (requires cordova 7.0+):
 
 ```
-cordova plugin add pushwoosh-cordova-plugin@7.1.0
+cordova plugin add pushwoosh-cordova-plugin@7.2.0
 ```
 
 Using git:
 
 ```
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#7.1.0
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#7.2.0
 ```
 
 #### Phonegap
