@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="7.2.1">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="7.2.2">
 
 	<name>Pushwoosh</name>
 
@@ -107,10 +107,10 @@
 		<framework src="com.google.firebase:firebase-messaging:11.+" />
 
 		<framework src="com.android.support:support-v4:26.+" />
-		<framework src="com.pushwoosh.java7:pushwoosh:5.5.1"/>
-		<framework src="com.pushwoosh.java7:pushwoosh-amazon:5.5.1"/>
-		<framework src="com.pushwoosh.java7:pushwoosh-badge:5.5.1"/>
-		<framework src="com.pushwoosh.java7:pushwoosh-gcm:5.5.1"/>
+		<framework src="com.pushwoosh.java7:pushwoosh:5.5.2"/>
+		<framework src="com.pushwoosh.java7:pushwoosh-amazon:5.5.2"/>
+		<framework src="com.pushwoosh.java7:pushwoosh-badge:5.5.2"/>
+		<framework src="com.pushwoosh.java7:pushwoosh-gcm:5.5.2"/>
 		<lib-file src="src/android/libs/pushwoosh-beacon_v5.5.2.jar"/>
 		<lib-file src="src/android/libs/pushwoosh-location_v5.5.2.jar"/>
 	</platform>
