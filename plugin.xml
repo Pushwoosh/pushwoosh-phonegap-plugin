@@ -107,10 +107,10 @@
 		<framework src="com.google.firebase:firebase-messaging:11.+" />
 
 		<framework src="com.android.support:support-v4:26.+" />
-		<framework src="com.pushwoosh:pushwoosh:5.5.1"/>
-		<framework src="com.pushwoosh:pushwoosh-amazon:5.5.1"/>
-		<framework src="com.pushwoosh:pushwoosh-badge:5.5.1"/>
-		<framework src="com.pushwoosh:pushwoosh-gcm:5.5.1"/>
+		<framework src="com.pushwoosh.java7:pushwoosh:5.5.1"/>
+		<framework src="com.pushwoosh.java7:pushwoosh-amazon:5.5.1"/>
+		<framework src="com.pushwoosh.java7:pushwoosh-badge:5.5.1"/>
+		<framework src="com.pushwoosh.java7:pushwoosh-gcm:5.5.1"/>
 		<lib-file src="src/android/libs/pushwoosh-beacon_v5.5.1.jar"/>
 		<lib-file src="src/android/libs/pushwoosh-location_v5.5.1.jar"/>
 	</platform>
