@@ -9,18 +9,6 @@ Cordova Pushwoosh Push Notifications plugin
 
 Cross-Platform push notifications by Pushwoosh for Cordova / PhoneGap
 
-### Installation
-
-Starting with Pushwoosh Cordova plugin **v7.1.0**, you need to use [Android Plugin for Gradle v3.0.0](https://developer.android.com/studio/build/gradle-plugin-3-0-0.html) (or higher) with Gradle v4.1 (or higher). You should add Java 8 support as well. To do so you should use [Cordova-android v7.0.0](https://github.com/apache/cordova-android) (or higher):
-
-```
-#remove previous android platform
-cordova platform remove android
-
-#add new one with cordova-android v7.0.0
-cordova platform add android@7.0.0
-```
-
 #### Cordova
 
 Using npm (requires cordova 7.0+):
