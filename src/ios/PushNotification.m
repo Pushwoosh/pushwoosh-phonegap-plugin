@@ -155,10 +155,21 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 }
 
 - (void)unregisterDevice:(CDVInvokedUrlCommand *)command {
-	[[PushNotificationManager pushManager] unregisterForPushNotifications];
-
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    self.callbackIds[@"unregisterDevice"] = command.callbackId;
+    
+    [[PushNotificationManager pushManager] unregisterForPushNotificationsWithCompletion:^(NSError *error) {
+        if (!error) {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"unregisterDevice"]];
+        } else {
+            NSMutableDictionary *results = [NSMutableDictionary dictionary];
+            results[@"error"] = [NSString stringWithFormat:@"%@", error];
+            
+            CDVPluginResult *pluginResult =
+            [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"unregisterDevice"]];
+        }
+    }];
 }
 
 - (void)startBeaconPushes:(CDVInvokedUrlCommand *)command {
