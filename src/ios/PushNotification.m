@@ -416,7 +416,15 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 }
 
 - (void)presentInboxUI:(CDVInvokedUrlCommand *)command {
-    [self.viewController presentViewController:[PWIInboxUI createInboxControllerWithStyle:[PWIInboxStyle defaultStyle]] animated:YES completion:nil];
+    UIViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[PWIInboxStyle defaultStyle]];
+    inboxViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"Close") style:UIBarButtonItemStylePlain target:self action:@selector(closeInbox)];
+    [self.viewController presentViewController:[[UINavigationController alloc] initWithRootViewController:inboxViewController] animated:YES completion:nil];
+}
+
+- (void)closeInbox {
+    if ([self.viewController.presentedViewController isKindOfClass:[UINavigationController class]] && [((UINavigationController*)self.viewController.presentedViewController).viewControllers.firstObject isKindOfClass:[PWIInboxViewController class]]) {
+        [self.viewController dismissViewControllerAnimated:YES completion:nil];
+    }
 }
 
 BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id application, id notificationSettings) {
