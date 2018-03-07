@@ -12,6 +12,7 @@
 
 #import "PushNotification.h"
 #import "PWLog.h"
+#import "PushwooshInboxUI.h"
 
 #import "AppDelegate.h"
 
@@ -412,6 +413,10 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	NSString *event = command.arguments[0];
 	NSDictionary *attributes = command.arguments[1];
 	[self.pushManager postEvent:event withAttributes:attributes];
+}
+
+- (void)presentInboxUI:(CDVInvokedUrlCommand *)command {
+    [self.viewController presentViewController:[PWIInboxUI createInboxControllerWithStyle:[PWIInboxStyle defaultStyle]] animated:YES completion:nil];
 }
 
 BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id application, id notificationSettings) {

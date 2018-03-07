@@ -50,6 +50,7 @@ import com.pushwoosh.notification.SoundType;
 import com.pushwoosh.notification.VibrateType;
 import com.pushwoosh.tags.Tags;
 import com.pushwoosh.tags.TagsBundle;
+import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -619,6 +620,11 @@ public class PushNotifications extends CordovaPlugin {
 
 		return true;
 	}
+    
+    @CordovaMethod
+    private boolean presentInboxUI(JSONArray data, final CallbackContext callbackContext) {
+        startActivity(new Intent(this.cordova.getActivity(), InboxActivity.class))
+    }
 
 	@Override
 	public boolean execute(String action, JSONArray data, CallbackContext callbackId)

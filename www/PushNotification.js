@@ -463,4 +463,8 @@ PushNotification.prototype.notificationCallback = function(notification) {
 	document.dispatchEvent(ev);
 };
 
+PushNotification.prototype.presentInboxUI = function() {
+	exec(null, null, "PushNotification", "presentInboxUI", []);
+}
+
 module.exports = new PushNotification();

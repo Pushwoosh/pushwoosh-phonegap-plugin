@@ -107,10 +107,18 @@
 		<framework src="com.google.firebase:firebase-messaging:11.+" />
 
 		<framework src="com.android.support:support-v4:26.+" />
-		<framework src="com.pushwoosh:pushwoosh:5.5.5"/>
+        <framework src="com.android.support:appcompat-v7:26.+" />
+        <framework src="com.android.support:recyclerview-v7:26.+" />
+        <framework src="com.android.support:design:26.+" />
+        <framework src="com.android.support.constraint:constraint-layout:1.0.2" />
+        <framework src="com.github.bumptech.glide:glide:4.3.1" />
+        <framework src="org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60" />
+        <framework src="com.pushwoosh:pushwoosh:5.5.5"/>
 		<framework src="com.pushwoosh:pushwoosh-amazon:5.5.5"/>
 		<framework src="com.pushwoosh:pushwoosh-badge:5.5.5"/>
 		<framework src="com.pushwoosh:pushwoosh-gcm:5.5.5"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox:5.5.5"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.5.5"/>
 		<lib-file src="src/android/libs/pushwoosh-beacon_v5.5.5.jar"/>
 		<lib-file src="src/android/libs/pushwoosh-location_v5.5.5.jar"/>
 	</platform>
@@ -151,7 +159,12 @@
 		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PushNotificationManager.h" target-dir="ios"/>
 		<header-file src="src/ios/PWLog.h" target-dir="ios"/>
+        <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PushwooshInboxUI.h" target-dir="ios"/>
+        <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxStyle.h" target-dir="ios"/>
+        <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxUI.h" target-dir="ios"/>
 		<source-file src="src/ios/Pushwoosh.framework/Versions/A/Pushwoosh" framework="true"/>
+        <source-file src="src/ios/PushwooshInboxUI.framework/Versions/A/PushwooshInboxUI" framework="true"/>
+        <resource-file src="src/ios/PushwooshInboxBundle.bundle" />
 	</platform>
 
 	<!-- wp8 -->
