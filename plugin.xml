@@ -100,11 +100,11 @@
 			target-dir="src/com/pushwoosh/plugin/internal" />
 
 
-		<framework src="com.google.android.gms:play-services-gcm:11.+" />
-		<framework src="com.google.android.gms:play-services-location:11.+" />
+		<framework src="com.google.android.gms:play-services-gcm:+" />
+		<framework src="com.google.android.gms:play-services-location:+" />
 
-		<framework src="com.google.firebase:firebase-core:11.+" />
-		<framework src="com.google.firebase:firebase-messaging:11.+" />
+		<framework src="com.google.firebase:firebase-core:+" />
+		<framework src="com.google.firebase:firebase-messaging:+" />
 
 		<framework src="com.android.support:support-v4:26.+" />
         <framework src="com.android.support:appcompat-v7:26.+" />
