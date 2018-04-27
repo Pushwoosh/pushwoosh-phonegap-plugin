@@ -26,7 +26,7 @@
 
 	<!-- android -->
 	<platform name="android">
-		<config-file>
+		<config-file target="res/xml/config.xml" parent="/*">
 			<access origin="*.pushwoosh.com" />
 		</config-file>
 
@@ -136,7 +136,7 @@
 			</feature>
 		</config-file>
 
-		<config-file>
+		<config-file target="config.xml" parent="/*">
 			<access origin="*.pushwoosh.com" />
 		</config-file>
 
