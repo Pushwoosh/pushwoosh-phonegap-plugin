@@ -463,4 +463,44 @@ PushNotification.prototype.notificationCallback = function(notification) {
 	document.dispatchEvent(ev);
 };
 
+PushNotification.prototype.presentInboxUI = function() {
+	exec(null, null, "PushNotification", "presentInboxUI", []);
+}
+
+// Show inApp for change setting Enable/disable all communication with Pushwoosh
+PushNotification.prototype.showGDPRConsentUI = function() {
+	exec(null, null, "PushNotification", "showGDPRConsentUI", []);
+}
+
+// Show inApp for all device data from Pushwoosh and stops all interactions and communication permanently.
+PushNotification.prototype.showGDPRDeletionUI = function() {
+	exec(null, null, "PushNotification", "showGDPRDeletionUI", []);
+}
+
+// Enable/disable all communication with Pushwoosh. Enabled by default.
+PushNotification.prototype.setCommunicationEnabled = function(enable, success, fail) {
+	exec(success, fail, "PushNotification", "setCommunicationEnabled", [enable]);
+};
+
+// Removes all device data from Pushwoosh and stops all interactions and communication permanently.
+PushNotification.prototype.removeAllDeviceData = function(success, fail) {
+	exec(success, fail, "PushNotification", "removeAllDeviceData", []);
+};
+
+
+// Enable/disable all communication with Pushwoosh. Enabled by default.
+PushNotification.prototype.isCommunicationEnabled = function(success) {
+	return exec(success, null, "PushNotification", "isCommunicationEnabled", []);
+};
+
+// Indicates availability of the GDPR compliance solution.
+PushNotification.prototype.isDeviceDataRemoved = function(success) {
+	return exec(success, null, "PushNotification", "isDeviceDataRemoved", []);
+};
+
+// Indicates availability of the GDPR compliance solution.
+PushNotification.prototype.isAvailableGDPR = function(success) {
+	return exec(success, null, "PushNotification", "isAvailableGDPR", []);
+};
+
 module.exports = new PushNotification();
