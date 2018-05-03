@@ -10,23 +10,11 @@
 
 package com.pushwoosh.plugin.pushnotifications;
 
-import java.lang.annotation.Retention;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
 import com.pushwoosh.Pushwoosh;
@@ -39,6 +27,7 @@ import com.pushwoosh.exception.UnregisterForPushNotificationException;
 import com.pushwoosh.function.Callback;
 import com.pushwoosh.function.Result;
 import com.pushwoosh.inapp.PushwooshInApp;
+import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
 import com.pushwoosh.internal.platform.utils.GeneralUtils;
 import com.pushwoosh.internal.utils.PWLog;
 import com.pushwoosh.location.PushwooshLocation;
@@ -57,6 +46,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.annotation.Retention;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -619,6 +616,12 @@ public class PushNotifications extends CordovaPlugin {
 
 		return true;
 	}
+    
+    @CordovaMethod
+    private boolean presentInboxUI(JSONArray data, final CallbackContext callbackContext) {
+        this.cordova.getActivity().startActivity(new Intent(this.cordova.getActivity(), InboxActivity.class));
+        return true;
+    }
 
 	@CordovaMethod
 	public boolean showGDPRConsentUI(JSONArray data, final CallbackContext callbackContext){

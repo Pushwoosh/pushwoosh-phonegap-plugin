@@ -12,6 +12,7 @@
 
 #import "PushNotification.h"
 #import "PWLog.h"
+#import "PushwooshInboxUI.h"
 #import "PWGDPRManager.h"
 
 #import "AppDelegate.h"
@@ -156,10 +157,21 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 }
 
 - (void)unregisterDevice:(CDVInvokedUrlCommand *)command {
-	[[PushNotificationManager pushManager] unregisterForPushNotifications];
-
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    self.callbackIds[@"unregisterDevice"] = command.callbackId;
+    
+    [[PushNotificationManager pushManager] unregisterForPushNotificationsWithCompletion:^(NSError *error) {
+        if (!error) {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"unregisterDevice"]];
+        } else {
+            NSMutableDictionary *results = [NSMutableDictionary dictionary];
+            results[@"error"] = [NSString stringWithFormat:@"%@", error];
+            
+            CDVPluginResult *pluginResult =
+            [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"unregisterDevice"]];
+        }
+    }];
 }
 
 - (void)startBeaconPushes:(CDVInvokedUrlCommand *)command {
@@ -466,6 +478,18 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
     self.callbackIds[@"isAvailableGDPR"] = command.callbackId;
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[PWGDPRManager sharedManager] isAvailable]];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"isAvailableGDPR"]];
+}
+
+- (void)presentInboxUI:(CDVInvokedUrlCommand *)command {
+    UIViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[PWIInboxStyle defaultStyle]];
+    inboxViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"Close") style:UIBarButtonItemStylePlain target:self action:@selector(closeInbox)];
+    [self.viewController presentViewController:[[UINavigationController alloc] initWithRootViewController:inboxViewController] animated:YES completion:nil];
+}
+
+- (void)closeInbox {
+    if ([self.viewController.presentedViewController isKindOfClass:[UINavigationController class]] && [((UINavigationController*)self.viewController.presentedViewController).viewControllers.firstObject isKindOfClass:[PWIInboxViewController class]]) {
+        [self.viewController dismissViewControllerAnimated:YES completion:nil];
+    }
 }
 
 BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id application, id notificationSettings) {
