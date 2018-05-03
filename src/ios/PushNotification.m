@@ -12,6 +12,7 @@
 
 #import "PushNotification.h"
 #import "PWLog.h"
+#import "PWGDPRManager.h"
 
 #import "AppDelegate.h"
 
@@ -401,6 +402,70 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	NSString *event = command.arguments[0];
 	NSDictionary *attributes = command.arguments[1];
 	[self.pushManager postEvent:event withAttributes:attributes];
+}
+
+- (void)showGDPRConsentUI:(CDVInvokedUrlCommand *)command {
+    [[PWGDPRManager sharedManager] showGDPRConsentUI];
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)showGDPRDeletionUI:(CDVInvokedUrlCommand *)command {
+    [[PWGDPRManager sharedManager] showGDPRDeletionUI];
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)setCommunicationEnabled:(CDVInvokedUrlCommand *)command {
+    self.callbackIds[@"setCommunicationEnabled"] = command.callbackId;
+    
+    NSNumber *enabledObject = [command.arguments firstObject];
+    
+    BOOL enabled = [enabledObject boolValue];
+    
+    [[PWGDPRManager sharedManager] setCommunicationEnabled:enabled completion:^(NSError *error) {
+        if (!error) {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"setCommunicationEnabled"]];
+        } else {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"setCommunicationEnabled"]];
+        }
+    }];
+}
+
+- (void)removeAllDeviceData:(CDVInvokedUrlCommand *)command {
+    self.callbackIds[@"removeAllDeviceData"] = command.callbackId;
+    
+    [[PWGDPRManager sharedManager] removeAllDeviceDataWithCompletion:^(NSError *error) {
+        if (!error) {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"removeAllDeviceData"]];
+        } else {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"removeAllDeviceData"]];
+        }
+    }];
+}
+
+- (void)isCommunicationEnabled:(CDVInvokedUrlCommand *)command {
+    self.callbackIds[@"isCommunicationEnabled"] = command.callbackId;
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[PWGDPRManager sharedManager] isCommunicationEnabled]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"isCommunicationEnabled"]];
+}
+
+- (void)isDeviceDataRemoved:(CDVInvokedUrlCommand *)command {
+    self.callbackIds[@"isDeviceDataRemoved"] = command.callbackId;
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[PWGDPRManager sharedManager] isDeviceDataRemoved]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"isDeviceDataRemoved"]];
+}
+
+- (void)isAvailableGDPR:(CDVInvokedUrlCommand *)command {
+    self.callbackIds[@"isAvailableGDPR"] = command.callbackId;
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[PWGDPRManager sharedManager] isAvailable]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"isAvailableGDPR"]];
 }
 
 BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id application, id notificationSettings) {

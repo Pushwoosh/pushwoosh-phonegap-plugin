@@ -12,7 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #endif
 
-#define PUSHWOOSH_VERSION @"5.5.2"
+#define PUSHWOOSH_VERSION @"5.7"
 
 
 @class PushNotificationManager;
@@ -160,7 +160,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 @end
 
 /**
- `PushNotificationManager` class offers access to the singletone-instance of the push manager responsible for registering the device with the APS servers, receiving and processing push notifications.
+ `PushNotificationManager` class offers access to the singleton-instance of the push manager responsible for registering the device with the APS servers, receiving and processing push notifications.
  */
 @interface PushNotificationManager : NSObject {
 }
@@ -229,19 +229,24 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 - (void)registerForPushNotifications;
 
 /**
- Unregisters from push notifications. You should call this method in rare circumstances only, such as when a new version of the app drops support for remote notifications. Users can temporarily prevent apps from receiving remote notifications through the Notifications section of the Settings app. Apps unregistered through this method can always re-register.
+ Unregisters from push notifications.
  */
-- (void)unregisterForPushNotifications;
+- (void)unregisterForPushNotificationsWithCompletion:(void (^)(NSError *error))completion;
 
 /**
- Deprecated. Use initializeWithAppCode:appName: method class
+ Deprecated. Use unregisterForPushNotificationsWithCompletion: method instead
+ */
+- (void)unregisterForPushNotifications __attribute__((deprecated));
+
+/**
+ Deprecated. Use initializeWithAppCode:appName: method instead
  */
 - (instancetype)initWithApplicationCode:(NSString *)appCode appName:(NSString *)appName __attribute__((deprecated));
 
 #if TARGET_OS_IPHONE
 
 /**
- Deprecated. Use initializeWithAppCode:appName: method class
+ Deprecated. Use initializeWithAppCode:appName: method instead
  */
 - (id)initWithApplicationCode:(NSString *)appCode navController:(UIViewController *)navController appName:(NSString *)appName __attribute__((deprecated));
 
@@ -365,10 +370,9 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 - (void)handlePushRegistration:(NSData *)devToken;
 - (void)handlePushRegistrationString:(NSString *)deviceID;
 
-//internal
 - (void)handlePushRegistrationFailure:(NSError *)error;
 
-//if the push is received while the app is running. internal
+//if the push is received while the app is running.
 - (BOOL)handlePushReceived:(NSDictionary *)userInfo;
 
 /**
