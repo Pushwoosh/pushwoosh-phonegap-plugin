@@ -487,13 +487,10 @@ PushNotification.prototype.removeAllDeviceData = function(success, fail) {
 	exec(success, fail, "PushNotification", "removeAllDeviceData", []);
 };
 
-
-// Enable/disable all communication with Pushwoosh. Enabled by default.
 PushNotification.prototype.isCommunicationEnabled = function(success) {
 	return exec(success, null, "PushNotification", "isCommunicationEnabled", []);
 };
 
-// Indicates availability of the GDPR compliance solution.
 PushNotification.prototype.isDeviceDataRemoved = function(success) {
 	return exec(success, null, "PushNotification", "isDeviceDataRemoved", []);
 };
