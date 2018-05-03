@@ -463,21 +463,18 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 }
 
 - (void)isCommunicationEnabled:(CDVInvokedUrlCommand *)command {
-    self.callbackIds[@"isCommunicationEnabled"] = command.callbackId;
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[PWGDPRManager sharedManager] isCommunicationEnabled]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"isCommunicationEnabled"]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)isDeviceDataRemoved:(CDVInvokedUrlCommand *)command {
-    self.callbackIds[@"isDeviceDataRemoved"] = command.callbackId;
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[PWGDPRManager sharedManager] isDeviceDataRemoved]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"isDeviceDataRemoved"]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)isAvailableGDPR:(CDVInvokedUrlCommand *)command {
-    self.callbackIds[@"isAvailableGDPR"] = command.callbackId;
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[PWGDPRManager sharedManager] isAvailable]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"isAvailableGDPR"]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)presentInboxUI:(CDVInvokedUrlCommand *)command {
