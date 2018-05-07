@@ -659,11 +659,14 @@ public class PushNotifications extends CordovaPlugin {
 
 	@CordovaMethod
 	public boolean removeAllDeviceData(JSONArray data, final CallbackContext callbackContext){
-		GDPRManager.getInstance().removeAllDeviceData(result -> {
-			if(result.isSuccess()){
-				callbackContext.success();
-			}else {
-				callbackContext.error(result.getException().getMessage());
+		GDPRManager.getInstance().removeAllDeviceData(new Callback<Void, PushwooshException>() {
+			@Override
+			public void process(@NonNull Result<Void, PushwooshException> result) {
+				if(result.isSuccess()){
+					callbackContext.success();
+				}else {
+					callbackContext.error(result.getException().getMessage());
+				}
 			}
 		});
 		return true;
@@ -673,11 +676,14 @@ public class PushNotifications extends CordovaPlugin {
 	public boolean setCommunicationEnabled(JSONArray data, final CallbackContext callbackContext){
 		try {
 			boolean enable = data.getBoolean(0);
-			GDPRManager.getInstance().setCommunicationEnabled(enable, result -> {
-				if(result.isSuccess()){
-					callbackContext.success();
-				}else {
-					callbackContext.error(result.getException().getMessage());
+			GDPRManager.getInstance().setCommunicationEnabled(enable, new Callback<Void, PushwooshException>() {
+				@Override
+				public void process(@NonNull Result<Void, PushwooshException> result) {
+					if(result.isSuccess()){
+						callbackContext.success();
+					}else {
+						callbackContext.error(result.getException().getMessage());
+					}
 				}
 			});
 			return true;
