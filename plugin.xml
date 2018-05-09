@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="7.3.1">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="7.4.1">
 
 	<name>Pushwoosh</name>
 
@@ -113,14 +113,14 @@
         <framework src="com.android.support.constraint:constraint-layout:1.0.2" />
         <framework src="com.github.bumptech.glide:glide:4.3.1" />
         <framework src="org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60" />
-        <framework src="com.pushwoosh:pushwoosh:5.5.8"/>
-		<framework src="com.pushwoosh:pushwoosh-amazon:5.5.8"/>
-		<framework src="com.pushwoosh:pushwoosh-badge:5.5.8"/>
-		<framework src="com.pushwoosh:pushwoosh-gcm:5.5.8"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox:5.5.8"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.5.8"/>
-		<lib-file src="src/android/libs/pushwoosh-beacon_v5.5.8.jar"/>
-		<lib-file src="src/android/libs/pushwoosh-location_v5.5.8.jar"/>
+        <framework src="com.pushwoosh:pushwoosh:5.7.2"/>
+		<framework src="com.pushwoosh:pushwoosh-amazon:5.7.2"/>
+		<framework src="com.pushwoosh:pushwoosh-badge:5.7.2"/>
+		<framework src="com.pushwoosh:pushwoosh-gcm:5.7.2"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox:5.7.2"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.7.2"/>
+		<lib-file src="src/android/libs/pushwoosh-beacon_v5.7.2.jar"/>
+		<lib-file src="src/android/libs/pushwoosh-location_v5.7.2.jar"/>
 	</platform>
 
 	<!-- ios -->
@@ -158,6 +158,7 @@
 		<header-file src="src/ios/PushNotification.h" target-dir="ios"/>
 		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PushNotificationManager.h" target-dir="ios"/>
+		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWGDPRManager.h" target-dir="ios"/>
 		<header-file src="src/ios/PWLog.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PushwooshInboxUI.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxStyle.h" target-dir="ios"/>

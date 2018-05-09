@@ -17,6 +17,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationManagerCompat;
 
+import com.pushwoosh.GDPRManager;
 import com.pushwoosh.Pushwoosh;
 import com.pushwoosh.badge.PushwooshBadge;
 import com.pushwoosh.beacon.PushwooshBeacon;
@@ -622,6 +623,77 @@ public class PushNotifications extends CordovaPlugin {
         this.cordova.getActivity().startActivity(new Intent(this.cordova.getActivity(), InboxActivity.class));
         return true;
     }
+
+	@CordovaMethod
+	public boolean showGDPRConsentUI(JSONArray data, final CallbackContext callbackContext){
+		GDPRManager.getInstance().showGDPRConsentUI();
+		return true;
+	}
+
+	@CordovaMethod
+	public boolean showGDPRDeletionUI(JSONArray data, final CallbackContext callbackContext){
+		GDPRManager.getInstance().showGDPRDeletionUI();
+		return true;
+	}
+
+	@CordovaMethod
+	public boolean isDeviceDataRemoved(JSONArray data, final CallbackContext callbackContext){
+		boolean removed = GDPRManager.getInstance().isDeviceDataRemoved();
+		callbackContext.success(removed ? 1 : 0);
+		return true;
+	}
+
+	@CordovaMethod
+	public boolean isCommunicationEnabled(JSONArray data, final CallbackContext callbackContext){
+		boolean enabled = GDPRManager.getInstance().isCommunicationEnabled();
+		callbackContext.success(enabled ? 1 : 0);
+		return true;
+
+	}
+
+	@CordovaMethod
+	public boolean isAvailableGDPR(JSONArray data, final CallbackContext callbackContext){
+		boolean isAvailableGDPR = GDPRManager.getInstance().isAvailable();
+		callbackContext.success(isAvailableGDPR ? 1 : 0);
+		return true;
+	}
+
+	@CordovaMethod
+	public boolean removeAllDeviceData(JSONArray data, final CallbackContext callbackContext){
+		GDPRManager.getInstance().removeAllDeviceData(new Callback<Void, PushwooshException>() {
+			@Override
+			public void process(@NonNull Result<Void, PushwooshException> result) {
+				if(result.isSuccess()){
+					callbackContext.success();
+				}else {
+					callbackContext.error(result.getException().getMessage());
+				}
+			}
+		});
+		return true;
+	}
+
+	@CordovaMethod
+	public boolean setCommunicationEnabled(JSONArray data, final CallbackContext callbackContext){
+		try {
+			boolean enable = data.getBoolean(0);
+			GDPRManager.getInstance().setCommunicationEnabled(enable, new Callback<Void, PushwooshException>() {
+				@Override
+				public void process(@NonNull Result<Void, PushwooshException> result) {
+					if(result.isSuccess()){
+						callbackContext.success();
+					}else {
+						callbackContext.error(result.getException().getMessage());
+					}
+				}
+			});
+			return true;
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
 
 	@Override
 	public boolean execute(String action, JSONArray data, CallbackContext callbackId)

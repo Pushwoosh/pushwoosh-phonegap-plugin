@@ -12,7 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #endif
 
-#define PUSHWOOSH_VERSION @"5.5.5"
+#define PUSHWOOSH_VERSION @"5.7"
 
 
 @class PushNotificationManager;
@@ -160,7 +160,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 @end
 
 /**
- `PushNotificationManager` class offers access to the singletone-instance of the push manager responsible for registering the device with the APS servers, receiving and processing push notifications.
+ `PushNotificationManager` class offers access to the singleton-instance of the push manager responsible for registering the device with the APS servers, receiving and processing push notifications.
  */
 @interface PushNotificationManager : NSObject {
 }
