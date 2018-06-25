@@ -12,7 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #endif
 
-#define PUSHWOOSH_VERSION @"5.7.2"
+#define PUSHWOOSH_VERSION @"5.8.0"
 
 
 @class PushNotificationManager;
@@ -122,14 +122,14 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  
  @param code In-App code
  */
-- (void)onInAppClosed:(NSString *)code;
+- (void)onInAppClosed:(NSString *)code __attribute__((deprecated("Use PWRichMediaPresentingDelegate protocol from PWRichMediaManager.h")));
 
 /**
  Tells the delegate that In-App with specified code has been displayed
  
  @param code In-App code
  */
-- (void)onInAppDisplayed:(NSString *)code;
+- (void)onInAppDisplayed:(NSString *)code __attribute__((deprecated("Use PWRichMediaPresentingDelegate protocol from PWRichMediaManager.h")));
 
 @end
 

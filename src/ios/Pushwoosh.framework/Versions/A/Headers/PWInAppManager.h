@@ -79,10 +79,12 @@
 
 #endif
 
+
 /*
  `PWInAppManager` class offers access to the singleton-instance of the inapp messages manager responsible for sending events and managing inapp message notifications.
  */
 @interface PWInAppManager : NSObject
+
 
 + (instancetype)sharedManager;
 
