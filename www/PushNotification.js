@@ -463,6 +463,80 @@ PushNotification.prototype.notificationCallback = function(notification) {
 	document.dispatchEvent(ev);
 };
 
+// Opens Inbox screen.
+//
+// Supported style keys:
+//
+// Customizes the date formatting
+// "dateFormat"
+//
+// The default icon in the cell next to the message; if not specified, the app icon is used
+// "defaultImageIcon"
+//
+// The appearance of the unread messages mark (iOS only)
+// "unreadImage"
+//
+// The image which is displayed if an error occurs and the list of inbox messages is empty
+// "listErrorImage"
+//
+// The image which is displayed if the list of inbox messages is empty
+// "listEmptyImage"
+//
+// The error text which is displayed when an error occurs; cannot be localized
+// "listErrorMessage"
+//
+// The text which is displayed if the list of inbox messages is empty; cannot be localized
+// "listEmptyMessage"
+//
+// The default text color (iOS only)
+// "defaultTextColor"
+//
+// The accent color
+// "accentColor"
+//
+// The default background color
+// "backgroundColor"
+//
+// The default selection color
+// "highlightColor"
+//
+// The color of message titles
+// "titleColor"
+//
+// The color of message titles if message was readed (Android only)
+// "readTitleColor"
+//
+// The color of messages descriptions
+// "descriptionColor"
+//
+// The color of messages descriptions if message was readed (Android only)
+// "readDescriptionColor"
+//
+// The color of message dates
+// "dateColor"
+//
+// The color of message dates if message was readed (Android only)
+// "readDateColor"
+//
+// The color of the separator
+// "dividerColor"
+//
+//Example:
+// Pushwoosh.presentInboxUI({
+//   "dateFormat" : "dd.MMMM.YYYY",
+//   "defaultImageIcon" : 'img/icon.png',
+//   "listErrorImage" : 'img/error.png',
+//   "listEmptyImage" : 'img/empty.png',
+//   "listErrorMessage" : "Error message1",
+//   "listEmptyMessage" : "Error message2",
+//   "accentColor" : '#ff00ff',
+//   "highlightColor" : '#ff00ff',
+//   "dateColor" : '#ff00ff',
+//   "titleColor" : '#ff00ff',
+//   "dividerColor" : '#ff00ff',
+//   "descriptionColor" : '#ff00ff',
+//   "backgroundColor" : '#ff00ff'
+// });
 PushNotification.prototype.presentInboxUI = function() {
 	exec(null, null, "PushNotification", "presentInboxUI", []);
 }

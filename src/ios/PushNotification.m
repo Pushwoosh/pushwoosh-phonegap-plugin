@@ -477,8 +477,76 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (UIImage *)imageFromInboxStyleDict:(NSDictionary *)dict forKey:(NSString *)key {
+    NSObject *object = dict[key];
+    if (object != nil && [object isKindOfClass:[NSString class]]) {
+        return [UIImage imageWithContentsOfFile:[((CDVViewController *)self.viewController).commandDelegate pathForResource:(NSString *)object]];
+    }
+    return nil;
+}
+
+- (UIColor *)colorFromInboxStyleDict:(NSDictionary *)dict forKey:(NSString *)key {
+    NSObject *object = dict[key];
+    if (object != nil && [object isKindOfClass:[NSString class]]) {
+        return [((CDVViewController *)self.viewController) colorFromColorString:(NSString *)object];
+    }
+    return nil;
+}
+
+- (NSString *)stringFromInboxStyleDict:(NSDictionary *)dict forKey:(NSString *)key {
+    NSObject *object = dict[key];
+    if (object != nil && [object isKindOfClass:[NSString class]]) {
+        return (NSString *)object;
+    }
+    return nil;
+}
+
+- (NSString *(^)(NSDate *date, NSObject *owner))dateFormatterBlockFromInboxStyleDict:(NSDictionary *)dict forKey:(NSString *)key {
+    NSObject *object = dict[key];
+    if (object != nil && [object isKindOfClass:[NSString class]]) {
+        NSDateFormatter *formatter = [NSDateFormatter new];
+        formatter.dateFormat = (NSString*)object;
+        return ^NSString *(NSDate *date, NSObject *owner) {
+            return [formatter stringFromDate:date];
+        };
+    }
+    return nil;
+}
+
+- (PWIInboxStyle *)inboxStyleForDictionary:(NSDictionary *)styleDictionary {
+    PWIInboxStyle *style = [PWIInboxStyle defaultStyle];
+    
+    if (![self.viewController isKindOfClass:[CDVViewController class]]) {
+        return style;
+    }
+    
+#define styleValue(prop, key, type) { id val = [self type##FromInboxStyleDict:styleDictionary forKey:key]; if (val != nil) prop = val; }
+    
+    styleValue(style.defaultImageIcon, @"defaultImageIcon", image);
+    styleValue(style.dateFormatterBlock, @"dateFormat", dateFormatterBlock);
+    styleValue(style.listErrorMessage, @"listErrorMessage", string);
+    styleValue(style.listEmptyMessage, @"listEmptyMessage", string);
+    styleValue(style.accentColor, @"accentColor", color);
+    styleValue(style.defaultTextColor, @"defaultTextColor", color);
+    styleValue(style.backgroundColor, @"backgroundColor", color);
+    styleValue(style.selectionColor, @"highlightColor", color);
+    styleValue(style.titleColor, @"titleColor", color);
+    styleValue(style.descriptionColor, @"descriptionColor", color);
+    styleValue(style.dateColor, @"dateColor", color);
+    styleValue(style.separatorColor, @"dividerColor", color);
+    
+    styleValue(style.listErrorImage, @"listErrorImage", image);
+    styleValue(style.listEmptyImage, @"listEmptyImage", image);
+    styleValue(style.unreadImage, @"unreadImage", image);
+    
+#undef styleValue
+    
+    return style;
+}
+
 - (void)presentInboxUI:(CDVInvokedUrlCommand *)command {
-    UIViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[PWIInboxStyle defaultStyle]];
+    NSDictionary *styleDictionary = [command.arguments firstObject];
+    UIViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[self inboxStyleForDictionary:styleDictionary]];
     inboxViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"Close") style:UIBarButtonItemStylePlain target:self action:@selector(closeInbox)];
     [self.viewController presentViewController:[[UINavigationController alloc] initWithRootViewController:inboxViewController] animated:YES completion:nil];
 }
