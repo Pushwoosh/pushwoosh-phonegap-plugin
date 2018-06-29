@@ -523,12 +523,12 @@ PushNotification.prototype.notificationCallback = function(notification) {
 //
 //Example:
 // Pushwoosh.presentInboxUI({
-//   "dateFormat" : "dd.MMMM.YYYY",
+//   "dateFormat" : "dd.MMMM.yyyy",
 //   "defaultImageIcon" : 'img/icon.png',
 //   "listErrorImage" : 'img/error.png',
 //   "listEmptyImage" : 'img/empty.png',
-//   "listErrorMessage" : "Error message1",
-//   "listEmptyMessage" : "Error message2",
+//   "listErrorMessage" : "Error message",
+//   "listEmptyMessage" : "Empty message",
 //   "accentColor" : '#ff00ff',
 //   "highlightColor" : '#ff00ff',
 //   "dateColor" : '#ff00ff',
@@ -537,8 +537,8 @@ PushNotification.prototype.notificationCallback = function(notification) {
 //   "descriptionColor" : '#ff00ff',
 //   "backgroundColor" : '#ff00ff'
 // });
-PushNotification.prototype.presentInboxUI = function() {
-	exec(null, null, "PushNotification", "presentInboxUI", []);
+PushNotification.prototype.presentInboxUI = function(params) {
+	exec(null, null, "PushNotification", "presentInboxUI", [ params ]);
 }
 
 // Show inApp for change setting Enable/disable all communication with Pushwoosh
