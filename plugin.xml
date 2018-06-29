@@ -92,6 +92,9 @@
 
 		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PushNotifications.java"
 			target-dir="src/com/pushwoosh/plugin/pushnotifications" />
+            
+        <source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/InboxUiStyleManager.java"
+            target-dir="src/com/pushwoosh/plugin/pushnotifications" />
 
 		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PushwooshNotificationServiceExtension.java"
 			target-dir="src/com/pushwoosh/plugin/pushnotifications" />
