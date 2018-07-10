@@ -58,7 +58,7 @@ class InboxUiStyleManager {
         private InboxDateFormatter optDateFormatter(String key, InboxDateFormatter defaultValue) {
             String dateFormat = style.optString(key);
             if (dateFormat != null && !dateFormat.isEmpty()) {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.getDefault());;
+                final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.getDefault());
                 return new InboxDateFormatter() {
                     @Override
                     public String transform(Date date) {
