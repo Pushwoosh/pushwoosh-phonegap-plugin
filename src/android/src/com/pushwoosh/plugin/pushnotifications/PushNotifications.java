@@ -621,7 +621,7 @@ public class PushNotifications extends CordovaPlugin {
     @CordovaMethod
     private boolean presentInboxUI(JSONArray data, final CallbackContext callbackContext) {
 		if (data.length() > 0)
-			InboxUiStyleManager.setStyle(this.cordova.getContext(), data.optJSONObject(0));
+			InboxUiStyleManager.setStyle(this.cordova.getActivity(), data.optJSONObject(0));
         this.cordova.getActivity().startActivity(new Intent(this.cordova.getActivity(), InboxActivity.class));
         return true;
     }
