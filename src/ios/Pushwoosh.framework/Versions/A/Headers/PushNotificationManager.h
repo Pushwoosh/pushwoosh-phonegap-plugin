@@ -12,7 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #endif
 
-#define PUSHWOOSH_VERSION @"5.8.0"
+#define PUSHWOOSH_VERSION @"5.8.1"
 
 
 @class PushNotificationManager;
@@ -372,7 +372,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 
 - (void)handlePushRegistrationFailure:(NSError *)error;
 
-//if the push is received while the app is running.
+//If the push is received while the app is running. Call it only for iOS version < 10. For iOS 10 and higher use notificationCenterDelegate.
 - (BOOL)handlePushReceived:(NSDictionary *)userInfo;
 
 /**
