@@ -14,6 +14,7 @@
 #import "PWLog.h"
 #import "PushwooshInboxUI.h"
 #import "PWGDPRManager.h"
+#import "PWInAppManager.h"
 
 #import "AppDelegate.h"
 
@@ -24,6 +25,20 @@
 
 
 #define WRITEJS(VAL) [NSString stringWithFormat:@"setTimeout(function() { %@; }, 0);", VAL]
+
+@interface PWCommonJSBridge: NSObject <PWJavaScriptInterface>
+
+@end
+
+@implementation PWCommonJSBridge
+
+- (void)callFunction:(NSString *)functionName :(NSString *)parameters {
+    NSString *function = parameters != nil ? [NSString stringWithFormat:@"%@(%@)", functionName, parameters] : [NSString stringWithFormat:@"%@()", functionName];
+    [((AppDelegate *)([UIApplication sharedApplication].delegate)).viewController.webViewEngine evaluateJavaScript:function completionHandler:nil];
+}
+
+@end
+
 
 @interface PushNotification()
 
@@ -414,6 +429,11 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	NSString *event = command.arguments[0];
 	NSDictionary *attributes = command.arguments[1];
 	[self.pushManager postEvent:event withAttributes:attributes];
+}
+
+- (void)addJavaScriptInterface:(CDVInvokedUrlCommand *)command {
+    NSString *name = command.arguments[0];
+    [[PWInAppManager sharedManager] addJavascriptInterface:[PWCommonJSBridge new] withName:name];
 }
 
 - (void)showGDPRConsentUI:(CDVInvokedUrlCommand *)command {
