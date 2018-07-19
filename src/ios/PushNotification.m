@@ -26,15 +26,19 @@
 
 #define WRITEJS(VAL) [NSString stringWithFormat:@"setTimeout(function() { %@; }, 0);", VAL]
 
+
 @interface PWCommonJSBridge: NSObject <PWJavaScriptInterface>
 
+@property (nonatomic) CDVPlugin *plugin;
+
 @end
+
 
 @implementation PWCommonJSBridge
 
 - (void)callFunction:(NSString *)functionName :(NSString *)parameters {
     NSString *function = parameters != nil ? [NSString stringWithFormat:@"%@(%@)", functionName, parameters] : [NSString stringWithFormat:@"%@()", functionName];
-    [((AppDelegate *)([UIApplication sharedApplication].delegate)).viewController.webViewEngine evaluateJavaScript:function completionHandler:nil];
+    [_plugin.webViewEngine evaluateJavaScript:function completionHandler:nil];
 }
 
 @end
@@ -120,7 +124,7 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	else {
 		[PushNotificationManager initializeWithAppCode:appid appName:appname];
 	}
-
+    
 	[UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
 	[self.pushManager sendAppOpen];
 
@@ -433,7 +437,9 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 
 - (void)addJavaScriptInterface:(CDVInvokedUrlCommand *)command {
     NSString *name = command.arguments[0];
-    [[PWInAppManager sharedManager] addJavascriptInterface:[PWCommonJSBridge new] withName:name];
+    PWCommonJSBridge *bridge = [PWCommonJSBridge new];
+    bridge.plugin = self;
+    [[PWInAppManager sharedManager] addJavascriptInterface:bridge withName:name];
 }
 
 - (void)showGDPRConsentUI:(CDVInvokedUrlCommand *)command {
