@@ -875,17 +875,10 @@ public class PushNotifications extends CordovaPlugin {
 
 
 	public class JavascriptInterfaceCordova {
-		private final Handler mainHandler = new Handler(Looper.getMainLooper());
-		private final CordovaWebView webView;
-
-		public JavascriptInterfaceCordova(CordovaWebView webView) {
-			this.webView = webView;
-		}
-
 		@JavascriptInterface
 		public void callFunction(String functionName) {
 			String url = String.format("%s();", functionName);
-			mainHandler.post(() -> webView.loadUrl("javascript:"+ url));
+			evalJs(url);
 		}
 
 		@JavascriptInterface
@@ -896,8 +889,7 @@ public class PushNotifications extends CordovaPlugin {
 			} else {
 				url = String.format("%s(%s);", functionName, args);
 			}
-
-			mainHandler.post(() -> webView.loadUrl("javascript:" + url));
+			evalJs(url);
 		}
 	}
 
@@ -905,8 +897,7 @@ public class PushNotifications extends CordovaPlugin {
 	private boolean addJavaScriptInterface(JSONArray data, final CallbackContext callbackContext) {
 		try {
 			String name = data.getString(0);
-			PushwooshInApp.getInstance()
-					.addJavascriptInterface(new JavascriptInterfaceCordova(webView), name);
+			PushwooshInApp.getInstance().addJavascriptInterface(new JavascriptInterfaceCordova(), name);
 		} catch (JSONException e) {
 			PWLog.error(TAG, "No parameters has been passed to addJavaScriptInterface function. Did you follow the guide correctly?", e);
 			return false;
