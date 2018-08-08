@@ -101,6 +101,10 @@ class InboxUiStyleManager {
         public void parse() {
             PushwooshInboxStyle style = PushwooshInboxStyle.INSTANCE;
 
+            style.setBarCoolor(optColor("barColor", style.getBarCoolor()));
+            style.setBarAcccentColor(optColor("barAccentColor", style.getBarAcccentColor()));
+            style.setBarTitle(this.style.optString("barTitle", style.getBarTitle()));
+
             style.setDateFormatter(optDateFormatter("dateFormat", style.getDateFormatter()));
 
             style.setListErrorMessage(this.style.optString("listErrorMessage", style.getListErrorMessage() != null ?  style.getListErrorMessage().toString() : ""));
