@@ -565,6 +565,10 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
     styleValue(style.listEmptyImage, @"listEmptyImage", image);
     styleValue(style.unreadImage, @"unreadImage", image);
     
+    styleValue(style.barTextColor, @"barTextColor", color);
+    styleValue(style.barAccentColor, @"barAccentColor", color);
+    styleValue(style.barBackgroundColor, @"barBackgroundColor", color);
+    styleValue(style.barTitle, @"barTitle", string);
 #undef styleValue
     
     return style;
