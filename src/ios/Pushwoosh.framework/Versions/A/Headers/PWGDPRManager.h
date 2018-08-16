@@ -1,5 +1,5 @@
 //
-//  PWInAppManager.h
+//  PWGDPRManager.h
 //  Pushwoosh SDK
 //  (c) Pushwoosh 2018
 //

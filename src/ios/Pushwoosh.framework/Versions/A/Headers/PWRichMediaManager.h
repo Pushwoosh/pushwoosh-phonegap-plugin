@@ -1,5 +1,5 @@
 //
-//  PWInAppManager.h
+//  PWRichMediaManager.h
 //  Pushwoosh SDK
 //  (c) Pushwoosh 2018
 //

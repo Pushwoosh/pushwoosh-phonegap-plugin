@@ -1,5 +1,5 @@
 //
-//  PushNotificationManager.h
+//  PWInbox.h
 //  Pushwoosh SDK
 //  (c) Pushwoosh 2017
 //
