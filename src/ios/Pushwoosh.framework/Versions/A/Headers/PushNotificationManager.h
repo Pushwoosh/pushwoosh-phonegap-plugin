@@ -12,7 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #endif
 
-#define PUSHWOOSH_VERSION @"5.8.4"
+#define PUSHWOOSH_VERSION @"5.9.0"
 
 
 @class PushNotificationManager;
@@ -131,6 +131,20 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 - (void)onInAppDisplayed:(NSString *)code __attribute__((deprecated("Use PWRichMediaPresentingDelegate protocol from PWRichMediaManager.h")));
 
+
+#if TARGET_OS_IPHONE
+/**
+ The method will be called on the delegate when the application is launched in response to the user's request to view in-app notification settings.
+ Add UNAuthorizationOptionProvidesAppNotificationSettings as an option in [PushNotificationManager pushManager].additionalAuthorizationOptions to add a button to inline notification settings view and the notification settings view in Settings.
+ The notification will be nil when opened from Settings.
+ 
+ @param pushManager PushNotificationManager instance
+ @param notification Source notification
+ */
+- (void)pushManager:(PushNotificationManager *)pushManager openSettingsForNotification:(UNNotification *)notification __IOS_AVAILABLE(12.0);
+
+#endif
+
 @end
 
 /**
@@ -187,6 +201,11 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  Show push notifications alert when push notification is received while the app is running, default is `YES`
  */
 @property (nonatomic, assign) BOOL showPushnotificationAlert;
+
+/**
+ Authorization options in addition to UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCarPlay.
+ */
+@property (nonatomic) UNAuthorizationOptions additionalAuthorizationOptions __IOS_AVAILABLE(12.0);
 
 #endif
 

@@ -71,6 +71,18 @@ typedef NSString * (^PWIDateFormatterBlock)(NSDate *date, NSObject *owner);
 //! The font of message dates
 @property (nonatomic, readwrite) UIFont *dateFont;
 
+//! The default bar color
+@property (nonatomic, readwrite) UIColor *barBackgroundColor;
+
+//! The default back button color
+@property(nonatomic, readwrite) UIColor *barAccentColor;
+
+//! The default bar accent color
+@property (nonatomic, readwrite) UIColor *barTextColor;
+
+//! The default bar title text
+@property (nonatomic, readwrite) NSString *barTitle;
+
 /**
  The method returning the default style; all parameters might be changed
  
