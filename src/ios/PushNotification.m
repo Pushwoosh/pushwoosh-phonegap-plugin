@@ -15,6 +15,7 @@
 #import "PushwooshInboxUI.h"
 #import "PWGDPRManager.h"
 #import "PWInAppManager.h"
+#import "PWBackward.h"
 
 #import "AppDelegate.h"
 
@@ -514,7 +515,7 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 - (UIColor *)colorFromInboxStyleDict:(NSDictionary *)dict forKey:(NSString *)key {
     NSObject *object = dict[key];
     if (object != nil && [object isKindOfClass:[NSString class]]) {
-        return [((CDVViewController *)self.viewController) colorFromColorString:(NSString *)object];
+        return [PWBackward colorFromColorString:(NSString *)object cordovaViewController:((CDVViewController *)self.viewController)];
     }
     return nil;
 }

@@ -160,6 +160,8 @@
 
 		<header-file src="src/ios/PushNotification.h" target-dir="ios"/>
 		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
+        <header-file src="src/ios/PWBackward.h" target-dir="ios"/>
+        <source-file src="src/ios/PWBackward.m" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PushNotificationManager.h" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWInAppManager.h" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWGDPRManager.h" target-dir="ios"/>
