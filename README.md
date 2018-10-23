@@ -28,7 +28,7 @@ cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#7.
 Using npm (requires phonegap 7.1+):
 
 ```
-cordova plugin add pushwoosh-pgb-plugin@7.1.1
+cordova plugin add pushwoosh-cordova-plugin@7.1.1
 ```
 
 ### Guide
