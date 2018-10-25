@@ -46,7 +46,7 @@
     [[NSScanner scannerWithString:colorString] scanHexInt:&colorInt];
 
     //int to UIColor
-    CGFloat (^extractColor)(uint8_t) = ^(uint8_t byte){ return ((colorInt >> (byte * 8)) & 0xFF) / 255.; };
+    CGFloat (^extractColor)(uint8_t) = ^(uint8_t byte){ return (CGFloat)(((colorInt >> (byte * 8)) & 0xFF) / 255.); };
     return [UIColor colorWithRed:extractColor(2) green:extractColor(1) blue:extractColor(0) alpha:extractColor(3)];
 }
     
