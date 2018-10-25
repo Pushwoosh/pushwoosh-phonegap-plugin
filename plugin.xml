@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="7.9.2">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="7.9.3">
 
 	<name>Pushwoosh</name>
 
@@ -116,14 +116,14 @@
         <framework src="com.android.support.constraint:constraint-layout:1.0.2" />
         <framework src="com.github.bumptech.glide:glide:4.7.1" />
         <framework src="org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60" />
-        <framework src="com.pushwoosh:pushwoosh:5.9.2"/>
-		<framework src="com.pushwoosh:pushwoosh-amazon:5.9.2"/>
-		<framework src="com.pushwoosh:pushwoosh-badge:5.9.2"/>
-		<framework src="com.pushwoosh:pushwoosh-gcm:5.9.2"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox:5.9.2"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.9.2"/>
-		<lib-file src="src/android/libs/pushwoosh-beacon_v5.9.2.jar"/>
-		<lib-file src="src/android/libs/pushwoosh-location_v5.9.2.jar"/>
+        <framework src="com.pushwoosh:pushwoosh:5.9.3"/>
+		<framework src="com.pushwoosh:pushwoosh-amazon:5.9.3"/>
+		<framework src="com.pushwoosh:pushwoosh-badge:5.9.3"/>
+		<framework src="com.pushwoosh:pushwoosh-gcm:5.9.3"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox:5.9.3"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.9.3"/>
+		<lib-file src="src/android/libs/pushwoosh-beacon_v5.9.3.jar"/>
+		<lib-file src="src/android/libs/pushwoosh-location_v5.9.3.jar"/>
 	</platform>
 
 	<!-- ios -->
