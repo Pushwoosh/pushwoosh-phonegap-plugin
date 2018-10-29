@@ -1,4 +1,4 @@
-Phonegup Pushwoosh Push Notifications plugin
+Phonegap Pushwoosh Push Notifications plugin
 ===================================================
 
 [![GitHub release](https://img.shields.io/github/release/Pushwoosh/pushwoosh-phonegap-plugin.svg?style=flat-square)](https://github.com/Pushwoosh/pushwoosh-phonegap-plugin/releases) 
