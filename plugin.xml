@@ -162,6 +162,7 @@
 		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
         <header-file src="src/ios/PWBackward.h" target-dir="ios"/>
         <source-file src="src/ios/PWBackward.m" target-dir="ios"/>
+        <header-file src="src/ios/PushwooshGeozones.framework/Versions/A/Headers/PWGeozonesManager.h" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PushNotificationManager.h" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWInAppManager.h" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWGDPRManager.h" target-dir="ios"/>
@@ -169,6 +170,8 @@
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PushwooshInboxUI.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxStyle.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxUI.h" target-dir="ios"/>
+        
+        <source-file src="src/ios/PushwooshGeozones.framework/Versions/A/PushwooshGeozones" framework="true"/>
 		<source-file src="src/ios/Pushwoosh.framework/Versions/A/Pushwoosh" framework="true"/>
         <source-file src="src/ios/PushwooshInboxUI.framework/Versions/A/PushwooshInboxUI" framework="true"/>
         <resource-file src="src/ios/PushwooshInboxBundle.bundle" />

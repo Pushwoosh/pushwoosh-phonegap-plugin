@@ -16,6 +16,7 @@
 #import "PWGDPRManager.h"
 #import "PWInAppManager.h"
 #import "PWBackward.h"
+#import "PWGeozonesManager.h"
 
 #import "AppDelegate.h"
 
@@ -237,21 +238,21 @@ void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, cons
 	NSNumber *lat = command.arguments[0][@"lat"];
 	NSNumber *lon = command.arguments[0][@"lon"];
 	CLLocation *location = [[CLLocation alloc] initWithLatitude:[lat doubleValue] longitude:[lon doubleValue]];
-	[[PushNotificationManager pushManager] sendLocation:location];
+	[[PWGeozonesManager sharedManager] sendLocation:location];
 
 	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)startLocationTracking:(CDVInvokedUrlCommand *)command {
-	[[PushNotificationManager pushManager] startLocationTracking];
+	[[PWGeozonesManager sharedManager] startLocationTracking];
 
 	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)stopLocationTracking:(CDVInvokedUrlCommand *)command {
-	[[PushNotificationManager pushManager] stopLocationTracking];
+	[[PWGeozonesManager sharedManager] stopLocationTracking];
 
 	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
