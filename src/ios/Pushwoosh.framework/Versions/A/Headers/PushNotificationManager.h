@@ -12,7 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #endif
 
-#define PUSHWOOSH_VERSION @"5.9.1"
+#define PUSHWOOSH_VERSION @"5.10.0"
 
 
 @class PushNotificationManager;
@@ -270,21 +270,27 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 - (id)initWithApplicationCode:(NSString *)appCode navController:(UIViewController *)navController appName:(NSString *)appName __attribute__((deprecated));
 
 /**
- Sends geolocation to the server for GeoFencing push technology. Called internally, please use `startLocationTracking` and `stopLocationTracking` functions.
- 
- @param location Location to be sent.
- */
-- (void)sendLocation:(CLLocation *)location;
-
-/**
  Start location tracking.
+ 
+ Deprecated. Use PushwooshGeozones framework.
  */
-- (void)startLocationTracking;
+- (void)startLocationTracking __attribute__((deprecated("Use PushwooshGeozones framework")));
 
 /**
  Stops location tracking
+ 
+ Deprecated. Use PushwooshGeozones framework.
  */
-- (void)stopLocationTracking;
+- (void)stopLocationTracking __attribute__((deprecated("Use PushwooshGeozones framework")));
+
+/**
+ Explicitly sends geolocation to the server for GeoFencing push technology. Also called internally, please use `startLocationTracking` and `stopLocationTracking` functions.
+ 
+ @param location Location to be sent.
+ 
+ Deprecated. Use PushwooshGeozones framework.
+ */
+- (void)sendLocation:(CLLocation *)location __attribute__((deprecated("Use PushwooshGeozones framework")));
 
 #endif
 
