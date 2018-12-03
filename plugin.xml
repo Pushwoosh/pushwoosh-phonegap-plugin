@@ -20,8 +20,8 @@
 	<preference name="IOS_FOREGROUND_ALERT_TYPE" default="NONE" />
 	<preference name="ANDROID_FOREGROUND_PUSH" default="false" />
     <preference name="ANDROID_IS_ENABLE_FOREGROUND_SERVICE" default="false" />
-    <preference name="ANDROID_TEXT_NOTIFICATION_FOREGROUND_SERVICE" default="Do some work..." />
-    <preference name="ANDROID_CHANNEL_NAME_NOTIFICATION_FOREGROUND_SERVICE" default="Foreground service" />
+    <preference name="ANDROID_NOTIFICATION_FOREGROUND_SERVICE_TEXT" default="Do some work..." />
+    <preference name="ANDROID_NOTIFICATION_FOREGROUND_SERVICE_CHANNEL_NAME" default="Foreground service" />
 
 	<js-module src="www/PushNotification.js" name="PushNotification">
 		<clobbers target="plugins.pushNotification" />
@@ -54,8 +54,8 @@
 
 			<meta-data android:name="com.pushwoosh.internal.plugin_provider"	android:value="com.pushwoosh.plugin.internal.PhonegapPluginProvider" />
             <meta-data android:name="com.pushwoosh.start_foreground_service" android:value="$ANDROID_IS_ENABLE_FOREGROUND_SERVICE" />
-            <meta-data android:name="com.pushwoosh.text_foreground_service_notification" android:value="$ANDROID_TEXT_NOTIFICATION_FOREGROUND_SERVICE" />
-            <meta-data android:name="com.pushwoosh.channel_name_foreground_service_notification" android:value="$ANDROID_CHANNEL_NAME_NOTIFICATION_FOREGROUND_SERVICE" />
+            <meta-data android:name="com.pushwoosh.foreground_service_notification_text" android:value="$ANDROID_NOTIFICATION_FOREGROUND_SERVICE_TEXT" />
+            <meta-data android:name="com.pushwoosh.foreground_service_notification_channel_name" android:value="$ANDROID_NOTIFICATION_FOREGROUND_SERVICE_CHANNEL_NAME" />
 			<!-- Beacons -->
 			<service
 				android:name="com.pushwoosh.thirdparty.radiusnetworks.ibeacon.service.IBeaconService"
