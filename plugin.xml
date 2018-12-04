@@ -81,7 +81,8 @@
 				android:name="com.pushwoosh.location.network.GeoLocationServiceApi21"
 				android:exported="true"
 				android:permission="android.permission.BIND_JOB_SERVICE" />
-
+            <service android:name="com.pushwoosh.location.forgroundservice.ForegroundService"/>
+            
 			<receiver android:name="com.pushwoosh.location.geofencer.GeofenceReceiver">
 				<intent-filter>
 					<action android:name="$PACKAGE_NAME.action.GEOFENCE" />
