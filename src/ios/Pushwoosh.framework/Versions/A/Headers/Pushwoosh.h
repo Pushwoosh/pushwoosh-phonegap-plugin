@@ -11,5 +11,7 @@
 #import "PWAppDelegate.h"
 
 #if TARGET_OS_IPHONE
+    #import "PWRichMediaManager.h"
+    #import "PWRichMediaStyle.h"
     #import "PWInbox.h"
 #endif

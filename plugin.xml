@@ -20,7 +20,7 @@
 	<preference name="IOS_FOREGROUND_ALERT_TYPE" default="NONE" />
 	<preference name="ANDROID_FOREGROUND_PUSH" default="false" />
     <preference name="ANDROID_IS_ENABLE_FOREGROUND_SERVICE" default="false" />
-    <preference name="ANDROID_NOTIFICATION_FOREGROUND_SERVICE_TEXT" default="Do some work..." />
+    <preference name="ANDROID_NOTIFICATION_FOREGROUND_SERVICE_TEXT" default="Work in progress" />
     <preference name="ANDROID_NOTIFICATION_FOREGROUND_SERVICE_CHANNEL_NAME" default="Foreground service" />
 
 	<js-module src="www/PushNotification.js" name="PushNotification">
@@ -53,9 +53,6 @@
 			<meta-data android:name="com.pushwoosh.notification_service_extension" android:value="com.pushwoosh.plugin.pushnotifications.PushwooshNotificationServiceExtension" />
 
 			<meta-data android:name="com.pushwoosh.internal.plugin_provider"	android:value="com.pushwoosh.plugin.internal.PhonegapPluginProvider" />
-            <meta-data android:name="com.pushwoosh.start_foreground_service" android:value="$ANDROID_IS_ENABLE_FOREGROUND_SERVICE" />
-            <meta-data android:name="com.pushwoosh.foreground_service_notification_text" android:value="$ANDROID_NOTIFICATION_FOREGROUND_SERVICE_TEXT" />
-            <meta-data android:name="com.pushwoosh.foreground_service_notification_channel_name" android:value="$ANDROID_NOTIFICATION_FOREGROUND_SERVICE_CHANNEL_NAME" />
 			<!-- Beacons -->
 			<service
 				android:name="com.pushwoosh.thirdparty.radiusnetworks.ibeacon.service.IBeaconService"
@@ -69,6 +66,10 @@
 			<service android:name="com.pushwoosh.beacon.PushBeaconService" />
 
 			<!-- Location -->
+            <meta-data android:name="com.pushwoosh.start_foreground_service" android:value="$ANDROID_IS_ENABLE_FOREGROUND_SERVICE" />
+            <meta-data android:name="com.pushwoosh.foreground_service_notification_text" android:value="$ANDROID_NOTIFICATION_FOREGROUND_SERVICE_TEXT" />
+            <meta-data android:name="com.pushwoosh.foreground_service_notification_channel_name" android:value="$ANDROID_NOTIFICATION_FOREGROUND_SERVICE_CHANNEL_NAME" />
+            
 			<meta-data android:name="com.pushwoosh.plugin.location"	android:value="com.pushwoosh.location.LocationPlugin" />
 
 			<service android:name="com.pushwoosh.location.network.GeoLocationServiceApi16" />
@@ -81,7 +82,8 @@
 				android:name="com.pushwoosh.location.network.GeoLocationServiceApi21"
 				android:exported="true"
 				android:permission="android.permission.BIND_JOB_SERVICE" />
-            <service android:name="com.pushwoosh.location.forgroundservice.ForegroundService"/>
+                
+            <service android:name="com.pushwoosh.location.foregroundservice.ForegroundService"/>
             
 			<receiver android:name="com.pushwoosh.location.geofencer.GeofenceReceiver">
 				<intent-filter>
@@ -122,14 +124,14 @@
         <framework src="com.android.support.constraint:constraint-layout:1.0.2" />
         <framework src="com.github.bumptech.glide:glide:4.7.1" />
         <framework src="org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60" />
-        <framework src="com.pushwoosh:pushwoosh:5.9.4"/>
-		<framework src="com.pushwoosh:pushwoosh-amazon:5.9.4"/>
-		<framework src="com.pushwoosh:pushwoosh-badge:5.9.4"/>
-		<framework src="com.pushwoosh:pushwoosh-gcm:5.9.4"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox:5.9.4"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.9.4"/>
-		<lib-file src="src/android/libs/pushwoosh-beacon_v5.9.4.jar"/>
-		<lib-file src="src/android/libs/pushwoosh-location_v5.9.4.jar"/>
+        <framework src="com.pushwoosh:pushwoosh:5.11.0"/>
+		<framework src="com.pushwoosh:pushwoosh-amazon:5.11.0"/>
+		<framework src="com.pushwoosh:pushwoosh-badge:5.11.0"/>
+		<framework src="com.pushwoosh:pushwoosh-gcm:5.11.0"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox:5.11.0"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.11.0"/>
+		<lib-file src="src/android/libs/pushwoosh-beacon_v5.11.0.jar"/>
+		<lib-file src="src/android/libs/pushwoosh-location_v5.11.0.jar"/>
 	</platform>
 
 	<!-- ios -->
