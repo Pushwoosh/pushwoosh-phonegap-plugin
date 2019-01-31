@@ -14,4 +14,5 @@
     #import "PWRichMediaManager.h"
     #import "PWRichMediaStyle.h"
     #import "PWInbox.h"
+    #import "PWInlineInAppView.h"
 #endif
