@@ -90,6 +90,15 @@ module.exports = {
     var buildGradle = readBuildGradle(target);
     buildGradle = addPlugin(buildGradle);
     writeBuildGradle(buildGradle, target);
+
+    if (!fs.existsSync("google-services.json")) {
+      console.log('google-services.json not exist');
+      return;
+    }
+    fs.copyFile("google-services.json", path.join("platforms", "android", "app","google-services.json"), (err) => {
+      if (err) throw err;
+      console.log('google-services.json was copied to platforms/android/app/google-services.json');
+    });
   },
 
   restoreRootBuildGradle: function() {
@@ -102,7 +111,7 @@ module.exports = {
     var buildGradle = readBuildGradle(target);
 
     // remove any lines we added
-    buildGradle = buildGradle.replace(/(?:^|\r?\n)(.*)cordova-plugin-firebase*?(?=$|\r?\n)/g, '');
+    buildGradle = buildGradle.replace(/(?:^|\r?\n)(.*)pushwoosh-plugin*?(?=$|\r?\n)/g, '');
   
     writeBuildGradle(buildGradle, target);
   }

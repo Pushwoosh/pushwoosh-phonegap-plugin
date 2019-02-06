@@ -41,8 +41,10 @@ module.exports = {
               var folder = destinationPath.substring(0, destinationPath.lastIndexOf('/'));
               fs.ensureDirSync(folder);
               fs.writeFileSync(destinationPath, contents);
+              console.log("dest:"+destinationPath+" from:"+folder);
             });
           } catch (e) {
+            console.log(err);
             // skip
           }
         } catch (err) {
