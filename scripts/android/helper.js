@@ -16,14 +16,14 @@ function addDependencies(buildGradle) {
   var whitespace = match[1];
   
   // modify the line to add the necessary dependencies
-  var googlePlayDependency = whitespace + 'classpath \'com.google.gms:google-services:4.1.0\'';
+  var googlePlayDependency = whitespace + 'classpath \'com.google.gms:google-services:4.1.0\' // google-services dependency from pushwoosh-plugin';
   var modifiedLine = match[0] + '\n' + googlePlayDependency;
   
   // modify the actual line
   return buildGradle.replace(/^(\s*)classpath 'com.android.tools.build(.*)/m, modifiedLine);
 }
 function addPlugin(buildGradle) {
-  return "apply plugin: \'com.google.gms.google-services\'\n" + buildGradle;
+  return buildGradle + "\napply plugin: \'com.google.gms.google-services\' // Google\'s Maven repository from pushwoosh-plugin";
 }
 /*
  * Add 'google()' and Crashlytics to the repository repo list
@@ -43,7 +43,7 @@ function addRepos(buildGradle) {
 
     // Add google() to the allprojects section of the string
     match = secondHalfOfFile.match(/^(\s*)jcenter\(\)/m);
-    var googlesMavenRepo = whitespace + 'google()';
+    var googlesMavenRepo = whitespace + 'google() // Google\'s Maven repository from pushwoosh-plugin';
     modifiedLine = match[0] + '\n' + googlesMavenRepo;
     // modify the part of the string that is after 'allprojects'
     secondHalfOfFile = secondHalfOfFile.replace(/^(\s*)jcenter\(\)/m, modifiedLine);
@@ -69,9 +69,22 @@ function writeBuildGradle(contents, target) {
   fs.writeFileSync(target, contents);
 }
 
+function restore(target){
+    if (!fs.existsSync(target)) {
+      return;
+    }
+
+    var buildGradle = readBuildGradle(target);
+
+    // remove any lines we added
+    buildGradle = buildGradle.replace(/(?:^|\r?\n)(.*)pushwoosh-plugin*?(?=$|\r?\n)/g, '');
+  
+    writeBuildGradle(buildGradle, target);
+}
+
 module.exports = {
 
-  modifyRootBuildGradle: function() {
+  modifyBuildGradle: function() {
     var target = path.join("platforms", "android", "build.gradle");
    
     if (!fs.existsSync(target)) {
@@ -101,18 +114,12 @@ module.exports = {
     });
   },
 
-  restoreRootBuildGradle: function() {
+  restoreBuildGradle: function() {
     var target = path.join("platforms", "android", "build.gradle");
-
-    if (!fs.existsSync(target)) {
-      return;
-    }
-
-    var buildGradle = readBuildGradle(target);
-
-    // remove any lines we added
-    buildGradle = buildGradle.replace(/(?:^|\r?\n)(.*)pushwoosh-plugin*?(?=$|\r?\n)/g, '');
-  
-    writeBuildGradle(buildGradle, target);
+    restore(target);
+    target = path.join("platforms", "android", "app",  "build.gradle");
+    restore(target);
   }
+
+
 };
