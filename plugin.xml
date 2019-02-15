@@ -29,10 +29,8 @@
 
 	<!-- android -->
 	<platform name="android">
-		<hook type="after_plugin_install" src="scripts/android/after_plugin_install.js" />
-	<!--	<hook type="after_prepare" src="scripts/after_prepare.js" />  -->
-		<hook type="before_plugin_uninstall" src="scripts/android/before_plugin_uninstall.js" />
-		
+		<dependency id="cordova-support-google-services" url="https://github.com/chemerisuk/cordova-support-google-services" />
+	
 		<config-file>
 			<access origin="*.pushwoosh.com" />
 		</config-file>
@@ -135,8 +133,6 @@
         <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.11.0"/>
 		<lib-file src="src/android/libs/pushwoosh-beacon_v5.11.0.jar"/>
 		<lib-file src="src/android/libs/pushwoosh-location_v5.11.0.jar"/>
-
-	<!-- 	<resource-file src="src/android/google-services.json" target="."/> -->
 	</platform>
 
 	<!-- ios -->
