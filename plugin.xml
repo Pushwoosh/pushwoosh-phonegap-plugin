@@ -33,19 +33,6 @@
 			<access origin="*.pushwoosh.com" />
 		</config-file>
 
-		<config-file target="AndroidManifest.xml" parent="/manifest">
-			<!--BEACON-->
-			<!--<uses-permission android:name="android.permission.BLUETOOTH" />-->
-			<!--<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />-->
-
-			<!--LOCATION-->
-
-			<!--<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />-->
-			<!--<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->
-			<!---->
-			<!--<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
-		</config-file>
-
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<meta-data android:name="com.pushwoosh.log_level" android:value="$LOG_LEVEL" />
 			<meta-data android:name="com.pushwoosh.foreground_push" android:value="$ANDROID_FOREGROUND_PUSH" />
@@ -53,43 +40,6 @@
 			<meta-data android:name="com.pushwoosh.notification_service_extension" android:value="com.pushwoosh.plugin.pushnotifications.PushwooshNotificationServiceExtension" />
 
 			<meta-data android:name="com.pushwoosh.internal.plugin_provider"	android:value="com.pushwoosh.plugin.internal.PhonegapPluginProvider" />
-			<!-- Beacons -->
-			<service
-				android:name="com.pushwoosh.thirdparty.radiusnetworks.ibeacon.service.IBeaconService"
-				android:enabled="true"
-				android:exported="true"
-				android:isolatedProcess="false"
-				android:label="iBeacon" />
-			<service
-				android:name="com.pushwoosh.thirdparty.radiusnetworks.ibeacon.IBeaconIntentProcessor"
-				android:enabled="true" />
-			<service android:name="com.pushwoosh.beacon.PushBeaconService" />
-
-			<!-- Location -->
-            <meta-data android:name="com.pushwoosh.start_foreground_service" android:value="$ANDROID_IS_ENABLE_FOREGROUND_SERVICE" />
-            <meta-data android:name="com.pushwoosh.foreground_service_notification_text" android:value="$ANDROID_NOTIFICATION_FOREGROUND_SERVICE_TEXT" />
-            <meta-data android:name="com.pushwoosh.foreground_service_notification_channel_name" android:value="$ANDROID_NOTIFICATION_FOREGROUND_SERVICE_CHANNEL_NAME" />
-            
-			<meta-data android:name="com.pushwoosh.plugin.location"	android:value="com.pushwoosh.location.LocationPlugin" />
-
-			<service android:name="com.pushwoosh.location.network.GeoLocationServiceApi16" />
-
-			<activity
-				android:name="com.pushwoosh.location.internal.utils.ResolutionActivity"
-				android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
-			<service
-				android:name="com.pushwoosh.location.network.GeoLocationServiceApi21"
-				android:exported="true"
-				android:permission="android.permission.BIND_JOB_SERVICE" />
-                
-            <service android:name="com.pushwoosh.location.foregroundservice.ForegroundService"/>
-            
-			<receiver android:name="com.pushwoosh.location.geofencer.GeofenceReceiver">
-				<intent-filter>
-					<action android:name="$PACKAGE_NAME.action.GEOFENCE" />
-				</intent-filter>
-			</receiver>
 		</config-file>
 
 		<config-file target="res/xml/config.xml" parent="/*">
@@ -130,8 +80,6 @@
 		<framework src="com.pushwoosh:pushwoosh-gcm:5.12.1"/>
         <framework src="com.pushwoosh:pushwoosh-inbox:5.12.1"/>
         <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.12.1"/>
-		<lib-file src="src/android/libs/pushwoosh-beacon_v5.12.1.jar"/>
-		<lib-file src="src/android/libs/pushwoosh-location_v5.12.1.jar"/>
 	</platform>
 
 	<!-- ios -->
@@ -170,7 +118,6 @@
 		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
         <header-file src="src/ios/PWBackward.h" target-dir="ios"/>
         <source-file src="src/ios/PWBackward.m" target-dir="ios"/>
-        <header-file src="src/ios/PushwooshGeozones.framework/Versions/A/Headers/PWGeozonesManager.h" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PushNotificationManager.h" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWInAppManager.h" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWGDPRManager.h" target-dir="ios"/>
@@ -179,7 +126,6 @@
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxStyle.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxUI.h" target-dir="ios"/>
         
-        <source-file src="src/ios/PushwooshGeozones.framework/Versions/A/libPushwooshGeozones.a" framework="true"/>
 		<source-file src="src/ios/Pushwoosh.framework/Versions/A/libPushwoosh.a" framework="true"/>
         <source-file src="src/ios/PushwooshInboxUI.framework/Versions/A/libPushwooshInboxUI.a" framework="true"/>
         <resource-file src="src/ios/PushwooshInboxBundle.bundle" />
