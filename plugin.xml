@@ -19,9 +19,6 @@
 	<preference name="LOG_LEVEL" default="DEBUG" />
 	<preference name="IOS_FOREGROUND_ALERT_TYPE" default="NONE" />
 	<preference name="ANDROID_FOREGROUND_PUSH" default="false" />
-    <preference name="ANDROID_IS_ENABLE_FOREGROUND_SERVICE" default="false" />
-    <preference name="ANDROID_NOTIFICATION_FOREGROUND_SERVICE_TEXT" default="Work in progress" />
-    <preference name="ANDROID_NOTIFICATION_FOREGROUND_SERVICE_CHANNEL_NAME" default="Foreground service" />
 
 	<js-module src="www/PushNotification.js" name="PushNotification">
 		<clobbers target="plugins.pushNotification" />
@@ -62,7 +59,6 @@
 
 
 		<framework src="com.google.android.gms:play-services-gcm:+" />
-		<framework src="com.google.android.gms:play-services-location:+" />
 
 		<framework src="com.google.firebase:firebase-core:+" />
 		<framework src="com.google.firebase:firebase-messaging:+" />
