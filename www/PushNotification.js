@@ -176,29 +176,6 @@ PushNotification.prototype.getPushwooshHWID = function(success) {
 	exec(success, null, "PushNotification", "getPushwooshHWID", []);
 };
 
-//Function: startLocationTracking
-//[android, ios, wp8, windows] Starts geolocation based push notifications. You need to configure Geozones in Pushwoosh Control panel.
-//
-//Parameters:
-// "success" - success callback
-// "fail" - error callback
-//
-PushNotification.prototype.startLocationTracking = function(success, fail) {
-	exec(success, fail, "PushNotification", "startLocationTracking", []);
-};
-
-//Function: stopLocationTracking
-//[android, ios, wp8, windows] Stops geolocation based push notifications
-//
-//Parameters:
-// "success" - success callback
-// "fail" - error callback
-//
-PushNotification.prototype.stopLocationTracking = function(success, fail) {
-	exec(success, fail, "PushNotification", "stopLocationTracking", []);
-};
-
-
 //Function: getRemoteNotificationStatus
 //[android, ios] Returns a detailed status of push notification permissions.
 //
@@ -353,25 +330,6 @@ PushNotification.prototype.clearLocalNotification = function() {
 //[android] Clears all notifications presented in Android Notification Center
 PushNotification.prototype.clearNotificationCenter = function() {
 	exec(null, null, "PushNotification", "clearNotificationCenter", []);
-};
-
-//Function: startBeaconPushes
-//[android] Starts beacon tracking
-PushNotification.prototype.startBeaconPushes = function(success, fail) {
-	exec(success, fail, "PushNotification", "startBeaconPushes", []);
-};
-
-//Function: stopBeaconPushes
-//[android] Stops beacon tracking
-PushNotification.prototype.stopBeaconPushes = function(success, fail) {
-	exec(success, fail, "PushNotification", "stopBeaconPushes", []);
-};
-
-//Function: setBeaconBackgroundMode
-//[android] let the plugin know that the app went to background mode (or vise versa).
-//Call this when going background when using beacons
-PushNotification.prototype.setBeaconBackgroundMode = function(on, success, fail) {
-	exec(success, fail, "PushNotification", "setBeaconBackgroundMode", [on]);
 };
 
 //Function: setMultiNotificationMode
