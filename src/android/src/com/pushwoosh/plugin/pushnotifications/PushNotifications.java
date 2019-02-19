@@ -21,7 +21,6 @@ import android.webkit.JavascriptInterface;
 import com.pushwoosh.GDPRManager;
 import com.pushwoosh.Pushwoosh;
 import com.pushwoosh.badge.PushwooshBadge;
-import com.pushwoosh.beacon.PushwooshBeacon;
 import com.pushwoosh.exception.GetTagsException;
 import com.pushwoosh.exception.PushwooshException;
 import com.pushwoosh.exception.RegisterForPushNotificationsException;
@@ -32,7 +31,6 @@ import com.pushwoosh.inapp.PushwooshInApp;
 import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
 import com.pushwoosh.internal.platform.utils.GeneralUtils;
 import com.pushwoosh.internal.utils.PWLog;
-import com.pushwoosh.location.PushwooshLocation;
 import com.pushwoosh.notification.LocalNotification;
 import com.pushwoosh.notification.LocalNotificationReceiver;
 import com.pushwoosh.notification.PushMessage;
@@ -78,6 +76,7 @@ public class PushNotifications extends CordovaPlugin {
 	@interface CordovaMethod {
 
 	}
+
 
 	static {
 		HashMap<String, Method> methods = new HashMap<String, Method>();
@@ -276,50 +275,6 @@ public class PushNotifications extends CordovaPlugin {
 	@CordovaMethod
 	private boolean getPushwooshHWID(JSONArray data, final CallbackContext callbackContext) {
 		callbackContext.success(Pushwoosh.getInstance().getHwid());
-		return true;
-	}
-
-	@CordovaMethod
-	private boolean startLocationTracking(JSONArray data, final CallbackContext callbackContext) {
-		PushwooshLocation.startLocationTracking();
-		return true;
-	}
-
-	@CordovaMethod
-	private boolean stopLocationTracking(JSONArray data, final CallbackContext callbackContext)
-	{
-		PushwooshLocation.stopLocationTracking();
-		return true;
-	}
-
-	@CordovaMethod
-	private boolean startBeaconPushes(JSONArray data, final CallbackContext callbackContext)
-	{
-		PushwooshBeacon.startTrackingBeaconPushes();
-		return true;
-	}
-
-	@CordovaMethod
-	private boolean stopBeaconPushes(JSONArray data, final CallbackContext callbackContext)
-	{
-		PushwooshBeacon.stopTrackingBeaconPushes();
-		return true;
-	}
-
-	@CordovaMethod
-	private boolean setBeaconBackgroundMode(JSONArray data, final CallbackContext callbackContext)
-	{
-		try
-		{
-			boolean type = data.getBoolean(0);
-			PushwooshBeacon.setBeaconBackgroundMode(type);
-		}
-		catch (Exception e)
-		{
-			PWLog.error(TAG, "No parameters passed (missing parameters)", e);
-			return false;
-		}
-
 		return true;
 	}
 

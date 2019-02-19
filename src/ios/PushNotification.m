@@ -16,11 +16,9 @@
 #import "PWGDPRManager.h"
 #import "PWInAppManager.h"
 #import "PWBackward.h"
-#import "PWGeozonesManager.h"
 
 #import "AppDelegate.h"
 
-#import <CoreLocation/CoreLocation.h>
 #import <UserNotifications/UserNotifications.h>
 
 #import <objc/runtime.h>
@@ -238,30 +236,6 @@ static PushNotification *pw_PushNotificationPlugin;
 			[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
 		[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"getTags"]];
 	}];
-}
-
-- (void)sendLocation:(CDVInvokedUrlCommand *)command {
-	NSNumber *lat = command.arguments[0][@"lat"];
-	NSNumber *lon = command.arguments[0][@"lon"];
-	CLLocation *location = [[CLLocation alloc] initWithLatitude:[lat doubleValue] longitude:[lon doubleValue]];
-	[[PWGeozonesManager sharedManager] sendLocation:location];
-
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)startLocationTracking:(CDVInvokedUrlCommand *)command {
-	[[PWGeozonesManager sharedManager] startLocationTracking];
-
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)stopLocationTracking:(CDVInvokedUrlCommand *)command {
-	[[PWGeozonesManager sharedManager] stopLocationTracking];
-
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)createLocalNotification:(CDVInvokedUrlCommand *)command {
