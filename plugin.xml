@@ -29,7 +29,7 @@
 
 	<!-- android -->
 	<platform name="android">
-		<dependency id="cordova-support-google-services" url="https://github.com/chemerisuk/cordova-support-google-services" />
+		<dependency id="cordova-support-google-services" version="1.2.1" />
 	
 		<config-file>
 			<access origin="*.pushwoosh.com" />
