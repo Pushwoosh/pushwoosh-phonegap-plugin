@@ -26,6 +26,8 @@
 
 	<!-- android -->
 	<platform name="android">
+		<dependency id="cordova-support-google-services" version="1.2.1" />
+	
 		<config-file>
 			<access origin="*.pushwoosh.com" />
 		</config-file>
@@ -73,7 +75,6 @@
         <framework src="com.pushwoosh:pushwoosh:5.12.1"/>
 		<framework src="com.pushwoosh:pushwoosh-amazon:5.12.1"/>
 		<framework src="com.pushwoosh:pushwoosh-badge:5.12.1"/>
-		<framework src="com.pushwoosh:pushwoosh-gcm:5.12.1"/>
         <framework src="com.pushwoosh:pushwoosh-inbox:5.12.1"/>
         <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.12.1"/>
 	</platform>
