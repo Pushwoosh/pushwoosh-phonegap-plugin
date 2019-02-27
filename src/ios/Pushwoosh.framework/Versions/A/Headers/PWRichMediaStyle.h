@@ -99,5 +99,10 @@ typedef PWLoadingView *(^PWRichMediaLoadingViewBlock)(void);
  */
 @property (nonatomic) BOOL shouldHideStatusBar;
 
+/**
+ A Boolean value that determines whether HTML5 videos play inline or use the native full-screen controller.
+ */
+@property (nonatomic) NSNumber *allowsInlineMediaPlayback;
+
 @end
 

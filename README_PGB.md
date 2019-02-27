@@ -14,7 +14,7 @@ Cross-Platform push notifications by Pushwoosh for PhoneGap
 Using npm (requires cordova 5.0+):
 
 ```
-cordova plugin add pushwoosh-pgb-plugin@7.12.1
+cordova plugin add pushwoosh-pgb-plugin@7.13.0
 ```
 
 ### Guide
