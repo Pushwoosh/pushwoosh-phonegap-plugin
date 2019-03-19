@@ -33,11 +33,11 @@ cordova plugin add pushwoosh-cordova-plugin@7.13.0
 
 ### Guide
 
-http://docs.pushwoosh.com/docs/cordova-phonegap
+https://www.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/cordova/integrating-cordova-plugin
 
 ### Documentation
 
-http://docs.pushwoosh.com/docs/cordova-api-reference
+https://www.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/cordova/cordova-plugin-api-reference
 
 ### Acknowledgments
 Plugman support by Platogo
