@@ -12,7 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #endif
 
-#define PUSHWOOSH_VERSION @"5.13.0"
+#define PUSHWOOSH_VERSION @"5.13.1"
 
 
 @class PushNotificationManager;

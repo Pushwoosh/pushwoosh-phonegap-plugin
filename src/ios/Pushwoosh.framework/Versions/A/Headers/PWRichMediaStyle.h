@@ -104,5 +104,10 @@ typedef PWLoadingView *(^PWRichMediaLoadingViewBlock)(void);
  */
 @property (nonatomic) NSNumber *allowsInlineMediaPlayback;
 
+/**
+ A Boolean value that determines whether HTML5 videos can play automatically or require the user to start playing them.
+ */
+@property (nonatomic) NSNumber *mediaPlaybackRequiresUserAction;
+
 @end
 
