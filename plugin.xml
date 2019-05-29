@@ -27,10 +27,6 @@
 	<!-- android -->
 	<platform name="android">
 		<dependency id="cordova-support-google-services" version="1.2.1" />
-	
-		<config-file>
-			<access origin="*.pushwoosh.com" />
-		</config-file>
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<meta-data android:name="com.pushwoosh.log_level" android:value="$LOG_LEVEL" />
@@ -87,10 +83,6 @@
 			<feature name="PushNotification">
 				<param name="ios-package" value="PushNotification"/>
 			</feature>
-		</config-file>
-
-		<config-file>
-			<access origin="*.pushwoosh.com" />
 		</config-file>
 
 		<config-file target="*-Info.plist" parent="Pushwoosh_LOG_LEVEL">
