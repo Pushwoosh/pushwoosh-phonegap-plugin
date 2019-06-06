@@ -12,7 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #endif
 
-#define PUSHWOOSH_VERSION @"5.13.1"
+#define PUSHWOOSH_VERSION @"5.15.0"
 
 
 @class PushNotificationManager;
@@ -171,6 +171,25 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 + (NSDictionary *)incrementalTagWithInteger:(NSInteger)delta;
 
+/**
+ Creates a dictionary for extending Tag’s values list with additional values
+ 
+ Example:
+ 
+ NSDictionary *tags = \@{
+ \@"Alias" : aliasField.text,
+ \@"FavNumber" : \@([favNumField.text intValue]),
+ \@"List" : [PWTags appendValuesToListTag:@[ @"Item1" ]]
+ };
+ 
+ [[PushNotificationManager pushManager] setTags:tags];
+ 
+ @param array Array of values to be added to the tag.
+ 
+ @return Dictionary to be sent as the value for the tag
+ */
++ (NSDictionary *)appendValuesToListTag:(NSArray<NSString *> *)array;
+
 @end
 
 /**
@@ -226,6 +245,13 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 @property (nonatomic, strong, readonly) id<NSUserNotificationCenterDelegate> notificationCenterDelegate;
 
 #endif
+
+/**
+ Set custom application language. Must be a lowercase two-letter code according to ISO-639-1 standard ("en", "de", "fr", etc.).
+ Device language used by default.
+ Set to nil if you want to use device language again.
+ */
+@property (nonatomic) NSString *language;
 
 /**
  Initializes PushNotificationManager. Usually called by Pushwoosh Runtime internally.
