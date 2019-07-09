@@ -9,7 +9,11 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+@protocol PWInboxMessageProtocol;
+
 @interface PWIInboxViewController : UIViewController
+
+@property (nonatomic) void (^onMessageClickBlock)(id<PWInboxMessageProtocol> message);
 
 /**
  Reloads everything from scratch.
