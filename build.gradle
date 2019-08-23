@@ -1,0 +1,21 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:+'
+        classpath 'com.google.gms:google-services:4.2.0'
+    }
+}
+
+ext.cdvPluginPostBuildExtras = {
+    if (!plugins.hasPlugin('com.google.gms.google-services')) {
+            apply {
+                plugin com.google.gms.googleservices.GoogleServicesPlugin
+            }
+        }
+}
