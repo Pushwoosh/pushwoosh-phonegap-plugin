@@ -17,9 +17,14 @@ ext.cdvPluginPostBuildExtras = {
             resolutionStrategy.force 'com.google.android.gms:play-services-basement:(+,16.2.0]'
             resolutionStrategy.force 'com.google.android.gms:play-services-base:(+,16.0.1]'
     }
-    if (!plugins.hasPlugin('com.google.gms.google-services')) {
-            apply {
-                plugin com.google.gms.googleservices.GoogleServicesPlugin
+
+    rootProject.subprojects {
+        if (name == "app") {
+            if (!plugins.hasPlugin('com.google.gms.google-services')) {
+                apply {
+                    plugin com.google.gms.googleservices.GoogleServicesPlugin
+                }
             }
         }
+    }
 }
