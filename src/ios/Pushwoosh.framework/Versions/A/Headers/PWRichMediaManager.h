@@ -41,6 +41,11 @@ typedef NS_ENUM(NSUInteger, PWRichMediaSource) {
 @property (nonatomic, readonly) NSString *content;
 
 /**
+ Payload of the associated push notification if source is equal to PWRichMediaSourcePush.
+*/
+@property (nonatomic, readonly) NSDictionary *pushPayload;
+
+/**
  Checks if PWRichMediaSourceInApp is a required In-App. Always returns YES for PWRichMediaSourcePush.
  */
 @property (nonatomic, readonly, getter=isRequired) BOOL required;

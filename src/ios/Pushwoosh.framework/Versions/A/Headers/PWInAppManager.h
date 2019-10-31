@@ -5,9 +5,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
-#if TARGET_OS_IPHONE
-
+#import <WebKit/WebKit.h>
 /**
  `PWJavaScriptInterface` protocol is a representation of Javascript object that can be added at runtime into In-App Message HTML page
  to provide native calls and callbacks to Objective-C/Swift.
@@ -43,17 +41,17 @@
 /**
  Tells the delegate that In-App Message load stated
  */
-- (void)onWebViewStartLoad:(UIWebView*)webView;
+- (void)onWebViewStartLoad:(WKWebView *)webView;
 
 /**
  Tells the delegate that In-App Message load finished
  */
-- (void)onWebViewFinishLoad:(UIWebView*)webView;
+- (void)onWebViewFinishLoad:(WKWebView *)webView;
 
 /**
  Tells the delegate that In-App Message is closing
  */
-- (void)onWebViewStartClose:(UIWebView*)webView;
+- (void)onWebViewStartClose:(WKWebView *)webView;
 
 @end
 
@@ -78,8 +76,6 @@
 - (NSString*) executeWithParams: (NSArray*) params;
 
 @end
-
-#endif
 
 
 /*

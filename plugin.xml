@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="7.18.2">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="7.18.3">
 
 	<name>Pushwoosh</name>
 
@@ -65,11 +65,11 @@
         <framework src="com.android.support.constraint:constraint-layout:1.0.2" />
         <framework src="com.github.bumptech.glide:glide:4.7.1" />
         <framework src="org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60" />
-        <framework src="com.pushwoosh:pushwoosh:5.19.0"/>
-		<framework src="com.pushwoosh:pushwoosh-amazon:5.19.0"/>
-		<framework src="com.pushwoosh:pushwoosh-badge:5.19.0"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox:5.19.0"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.19.0"/>
+        <framework src="com.pushwoosh:pushwoosh:5.19.5"/>
+		<framework src="com.pushwoosh:pushwoosh-amazon:5.19.5"/>
+		<framework src="com.pushwoosh:pushwoosh-badge:5.19.5"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox:5.19.5"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.19.5"/>
 	</platform>
 
 	<!-- ios -->
