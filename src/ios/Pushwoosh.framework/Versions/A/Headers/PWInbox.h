@@ -115,9 +115,23 @@ typedef NS_ENUM(NSInteger, PWInboxMessageType) {
  
  @param completion - return the collection of the InboxMessages.
  */
-+ (id<NSObject>)addObserverForUpdateInboxMessagesCompletion:(void (^)(NSArray<NSString *> *messagesDeleted,
++ (id<NSObject>)addObserverForUpdateInboxMessagesCompletion:(void (^)(NSArray<NSObject<PWInboxMessageProtocol> *> *messagesDeleted,
                                                                       NSArray<NSObject<PWInboxMessageProtocol> *> *messagesAdded,
                                                                       NSArray<NSObject<PWInboxMessageProtocol> *> *messagesUpdated))completion;
+
+/**
+Subscribe for unread messages count changes. @warning You need to unsubscribe by calling the removeObserver method, if you don't want to receive notifications
+
+@param block - return the count of unread messages.
+*/
++ (id<NSObject>)addObserverForUnreadMessagesCountUsingBlock:(void (^)(NSUInteger count))block;
+
+/**
+Subscribe for messages with no action performed count changes. @warning You need to unsubscribe by calling the removeObserver method, if you don't want to receive notifications
+
+@param block - return the count of unread messages.
+*/
++ (id<NSObject>)addObserverForNoActionPerformedMessagesCountUsingBlock:(void (^)(NSUInteger count))block;
 
 /**
  Unsubscribes from notifications
