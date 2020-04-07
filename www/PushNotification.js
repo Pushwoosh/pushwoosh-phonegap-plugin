@@ -43,8 +43,18 @@ function PushNotification() {}
 //		serviceName: "XXXX" 
 //	});
 //(end)
-PushNotification.prototype.onDeviceReady = function(config) {
-	exec(null, null, "PushNotification", "onDeviceReady", config ? [config] : []);
+PushNotification.prototype.onDeviceReady = function(success, fail, config) {
+	exec(success, fail, "PushNotification", "onDeviceReady", config ? [config] : []);
+};
+
+//Function: onAppActivated
+//[windows] The event fires when Windows Runtime activation has occurred
+//
+//Parameters:
+// "args" - activation arguments
+//
+PushNotification.prototype.onAppActivated = function (args) {
+    exec(null, null, "PushNotification", "onAppActivated", args ? [args] : []);
 };
 
 //Function: onAppActivated

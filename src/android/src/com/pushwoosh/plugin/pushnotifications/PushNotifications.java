@@ -136,6 +136,10 @@ public class PushNotifications extends CordovaPlugin {
 
 		try {
 
+			if (sStartPushData != null) {
+				doOnPushOpened(sStartPushData.toString());
+			}
+
 			String appid = null;
 			if (params.has("appid")) {
 				appid = params.getString("appid");
@@ -162,6 +166,8 @@ public class PushNotifications extends CordovaPlugin {
 			PWLog.error(TAG, "Missing pw_appid parameter. Did you follow the guide correctly?", e);
 			return false;
 		}
+		
+		callbackContext.success();
 		return true;
 	}
 
@@ -574,14 +580,14 @@ public class PushNotifications extends CordovaPlugin {
 
 		return true;
 	}
-
-	@CordovaMethod
-	private boolean presentInboxUI(JSONArray data, final CallbackContext callbackContext) {
+    
+    @CordovaMethod
+    private boolean presentInboxUI(JSONArray data, final CallbackContext callbackContext) {
 		if (data.length() > 0)
-			InboxUiStyleManager.setStyle(this.cordova.getActivity(), data.optJSONObject(0));
-		this.cordova.getActivity().startActivity(new Intent(this.cordova.getActivity(), InboxActivity.class));
-		return true;
-	}
+			InboxUiStyleManager.setStyle(this.cordova.getActivity().getApplicationContext(), data.optJSONObject(0));
+        this.cordova.getActivity().startActivity(new Intent(this.cordova.getActivity(), InboxActivity.class));
+        return true;
+    }
 
 	@CordovaMethod
 	public boolean showGDPRConsentUI(JSONArray data, final CallbackContext callbackContext){
