@@ -5,16 +5,15 @@
 //
 
 #import <Foundation/Foundation.h>
-
-#if TARGET_OS_IPHONE
-
+#import <WebKit/WebKit.h>
 /**
  `PWJavaScriptInterface` protocol is a representation of Javascript object that can be added at runtime into In-App Message HTML page
  to provide native calls and callbacks to Objective-C/Swift.
  
  Example:
  
- ```ObjC
+ Objective-C:
+ @code
  @implementation JavaScriptInterface
 
  - (void)nativeCall:(NSString*)str :(PWJavaScriptCallback*)callback {
@@ -26,13 +25,14 @@
  ...
  
  [[PWInAppManager sharedManager] addJavascriptInterface:[JavaScriptInterface new] withName:@"ObjC"];
- ```
+ @endcode
  
- ```javascript
+ JavaScript:
+ @code
  ObjC.nativeCall("exampleString", function(str) {
 	console.log(str);
  });
- ```
+ @endcode
  */
 @protocol PWJavaScriptInterface
 
@@ -41,17 +41,17 @@
 /**
  Tells the delegate that In-App Message load stated
  */
-- (void)onWebViewStartLoad:(UIWebView*)webView;
+- (void)onWebViewStartLoad:(WKWebView *)webView;
 
 /**
  Tells the delegate that In-App Message load finished
  */
-- (void)onWebViewFinishLoad:(UIWebView*)webView;
+- (void)onWebViewFinishLoad:(WKWebView *)webView;
 
 /**
  Tells the delegate that In-App Message is closing
  */
-- (void)onWebViewStartClose:(UIWebView*)webView;
+- (void)onWebViewStartClose:(WKWebView *)webView;
 
 @end
 
@@ -76,8 +76,6 @@
 - (NSString*) executeWithParams: (NSArray*) params;
 
 @end
-
-#endif
 
 
 /*
@@ -113,9 +111,10 @@
  Post events for In-App Messages. This can trigger In-App message display as specified in Pushwoosh Control Panel.
  
  Example:
- 
+ @code
  [[PWInAppManager sharedManager] setUserId:@"96da2f590cd7246bbde0051047b0d6f7"];
  [[PWInAppManager sharedManager] postEvent:@"buttonPressed" withAttributes:@{ @"buttonNumber" : @"4", @"buttonLabel" : @"Banner" } completion:nil];
+ @endcode
  
  @param event name of the event
  @param attributes NSDictionary of event attributes

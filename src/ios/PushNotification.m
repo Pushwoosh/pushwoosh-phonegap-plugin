@@ -542,7 +542,7 @@ static PushNotification *pw_PushNotificationPlugin;
 - (PWIInboxStyle *)inboxStyleForDictionary:(NSDictionary *)styleDictionary {
     PWIInboxStyle *style = [PWIInboxStyle defaultStyle];
     
-    if (![self.viewController isKindOfClass:[CDVViewController class]]) {
+    if (![self.viewController isKindOfClass:[CDVViewController class]] || ![styleDictionary isKindOfClass:[NSDictionary class]]) {
         return style;
     }
     

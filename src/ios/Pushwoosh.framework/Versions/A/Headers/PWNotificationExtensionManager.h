@@ -17,13 +17,14 @@ NS_ASSUME_NONNULL_BEGIN
  Sends message delivery event to Pushwoosh and downloads media attachment. Call it from UNNotificationServiceExtension. Don't forget to set Pushwoosh_APPID in extension Info.plist.
  
  Example:
- 
+ @code
  - (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent * _Nonnull))contentHandler {
- self.contentHandler = contentHandler;
- self.bestAttemptContent = [request.content mutableCopy];
- 
- [[PWNotificationExtensionManager sharedManager] handleNotificationRequest:request contentHandler:contentHandler];
+     self.contentHandler = contentHandler;
+     self.bestAttemptContent = [request.content mutableCopy];
+     
+     [[PWNotificationExtensionManager sharedManager] handleNotificationRequest:request contentHandler:contentHandler];
  }
+ @endcode
  */
 - (void)handleNotificationRequest:(UNNotificationRequest *)request contentHandler:(void (^)(UNNotificationContent *))contentHandler;
 
