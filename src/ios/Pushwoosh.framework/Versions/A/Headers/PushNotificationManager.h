@@ -12,7 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #endif
 
-#define PUSHWOOSH_VERSION @"5.21.0"
+#define PUSHWOOSH_VERSION @"5.23.1"
 
 
 @class PushNotificationManager;
@@ -481,6 +481,11 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  The same as getCustomPushData but returns NSDictionary rather than JSON string (converts JSON string into NSDictionary).
  */
 - (NSDictionary *)getCustomPushDataAsNSDict:(NSDictionary *)pushNotification;
+
+/**
+ Check is this message from Pushwoosh.
+ */
++ (BOOL)isPushwooshMessage:(NSDictionary *)message;
 
 /**
  Returns dictionary with enabled remove notificaton types.

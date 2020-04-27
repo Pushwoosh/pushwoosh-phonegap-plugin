@@ -6,7 +6,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:+'
-        classpath 'com.google.gms:google-services:4.0.2'
+        classpath 'com.google.gms:google-services:4.3.3'
     }
 }
 
@@ -30,11 +30,11 @@ cdvPluginPostBuildExtras.push({
     implementation "com.android.support.constraint:constraint-layout:1.0.2"
     implementation "com.github.bumptech.glide:glide:4.7.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60"
-    implementation "com.pushwoosh:pushwoosh:5.22.0"
-    implementation "com.pushwoosh:pushwoosh-amazon:5.22.0"
-    implementation "com.pushwoosh:pushwoosh-badge:5.22.0"
-    implementation "com.pushwoosh:pushwoosh-inbox:5.22.0"
-    implementation "com.pushwoosh:pushwoosh-inbox-ui:5.22.0"
+    implementation "com.pushwoosh:pushwoosh:5.22.6"
+    implementation "com.pushwoosh:pushwoosh-amazon:5.22.6"
+    implementation "com.pushwoosh:pushwoosh-badge:5.22.6"
+    implementation "com.pushwoosh:pushwoosh-inbox:5.22.6"
+    implementation "com.pushwoosh:pushwoosh-inbox-ui:5.22.6"
   }
 })
 
