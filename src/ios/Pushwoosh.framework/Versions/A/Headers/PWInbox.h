@@ -140,4 +140,8 @@ Subscribe for messages with no action performed count changes. @warning You need
  */
 + (void)removeObserver:(id<NSObject>)observer;
 
+/**
+ updates observers
+ */
++ (void)updateInboxForNewUserId:(void (^)(NSUInteger messagesCount))completion;
 @end

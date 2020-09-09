@@ -65,11 +65,12 @@
         <framework src="com.android.support.constraint:constraint-layout:1.0.2" />
         <framework src="com.github.bumptech.glide:glide:4.7.1" />
         <framework src="org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60" />
-        <framework src="com.pushwoosh:pushwoosh:5.22.6"/>
-		<framework src="com.pushwoosh:pushwoosh-amazon:5.22.6"/>
-		<framework src="com.pushwoosh:pushwoosh-badge:5.22.6"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox:5.22.6"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox-ui:5.22.6"/>
+        <framework src="com.pushwoosh:pushwoosh:6.0.5"/>
+		<framework src="com.pushwoosh:pushwoosh-amazon:6.0.5"/>
+        <framework src="com.pushwoosh:pushwoosh-firebase:6.0.5"/>
+		<framework src="com.pushwoosh:pushwoosh-badge:6.0.5"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox:6.0.5"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox-ui:6.0.5"/>
 	</platform>
 
 	<!-- ios -->

@@ -35,8 +35,12 @@ Indicates availability of the GDPR compliance solution.
  */
 - (void)removeAllDeviceDataWithCompletion:(void (^)(NSError *error))completion;
 
+#if TARGET_OS_IOS || TARGET_OS_OSX
+
 - (void)showGDPRConsentUI;
 
 - (void)showGDPRDeletionUI;
+
+#endif
 
 @end
