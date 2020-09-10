@@ -1,6 +1,6 @@
 {
   "name": "pushwoosh-cordova-plugin",
-  "version": "7.18.11",
+  "version": "8.0.0",
   "description": "\n    This plugin allows you to send and receive push notifications. Powered by Pushwoosh (www.pushwoosh.com).\n    ",
   "cordova": {
     "id": "pushwoosh-cordova-plugin",
