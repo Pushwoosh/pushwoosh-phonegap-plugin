@@ -7,7 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.pushwoosh.inbox.ui.PushwooshInboxStyle;
 import com.pushwoosh.inbox.ui.model.customizing.formatter.InboxDateFormatter;

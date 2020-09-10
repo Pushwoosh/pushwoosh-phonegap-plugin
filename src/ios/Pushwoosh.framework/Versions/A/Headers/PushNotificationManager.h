@@ -6,19 +6,22 @@
 
 #import <Foundation/Foundation.h>
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS
+
 #import <UIKit/UIKit.h>
 #import <StoreKit/StoreKit.h>
-#import <UserNotifications/UserNotifications.h>
-#endif
 
-#define PUSHWOOSH_VERSION @"5.23.1"
+#endif
 
 
 @class PushNotificationManager;
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS || TARGET_OS_WATCH
+
+#import <UserNotifications/UserNotifications.h>
+
 @class CLLocation;
+
 #endif
 
 typedef void (^PushwooshGetTagsHandler)(NSDictionary *tags);
@@ -28,6 +31,8 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  `PushNotificationDelegate` protocol defines the methods that can be implemented in the delegate of the `PushNotificationManager` class' singleton object.
  These methods provide information about the key events for push notification manager such as registering with APS services, receiving push notifications or working with the received notification.
  These methods implementation allows to react on these events properly.
+ 
+ Deprecated. Use PWMessagingDelegate instead.
  */
 @protocol PushNotificationDelegate
 
@@ -133,7 +138,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 - (void)onInAppDisplayed:(NSString *)code __attribute__((deprecated("Use PWRichMediaPresentingDelegate protocol from PWRichMediaManager.h")));
 
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS || TARGET_OS_WATCH
 /**
  The method will be called on the delegate when the application is launched in response to the user's request to view in-app notification settings.
  Add UNAuthorizationOptionProvidesAppNotificationSettings as an option in [PushNotificationManager pushManager].additionalAuthorizationOptions to add a button to inline notification settings view and the notification settings view in Settings.
@@ -198,6 +203,8 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 
 /**
  `PushNotificationManager` class offers access to the singleton-instance of the push manager responsible for registering the device with the APS servers, receiving and processing push notifications.
+ 
+ Deprecated. Use Pushwoosh class instead.
  */
 @interface PushNotificationManager : NSObject {
 }
@@ -218,7 +225,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 @property (nonatomic, weak) NSObject<PushNotificationDelegate> *delegate;
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS || TARGET_OS_WATCH
 
 /**
  Show push notifications alert when push notification is received while the app is running, default is `YES`
@@ -237,14 +244,14 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 @property (nonatomic, copy, readonly) NSDictionary *launchNotification;
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS || TARGET_OS_WATCH
 
 /**
  Returns UNUserNotificationCenterDelegate that handles foreground push notifications on iOS10
  */
 @property (nonatomic, strong, readonly) id<UNUserNotificationCenterDelegate> notificationCenterDelegate;
 
-#else
+#elif TARGET_OS_OSX
 
 @property (nonatomic, strong, readonly) id<NSUserNotificationCenterDelegate> notificationCenterDelegate;
 
@@ -292,7 +299,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 - (instancetype)initWithApplicationCode:(NSString *)appCode appName:(NSString *)appName __attribute__((deprecated));
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS
 
 /**
  Deprecated. Use initializeWithAppCode:appName: method instead
@@ -376,11 +383,11 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  
  @param badge Current badge value.
  */
-- (void)sendBadges:(NSInteger)badge;
+- (void)sendBadges:(NSInteger)badge __API_AVAILABLE(macos(10.10), ios(8.0));
 
 + (NSString *)pushwooshVersion;
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS
 /**
  Sends in-app purchases to Pushwoosh. Use in paymentQueue:updatedTransactions: payment queue method (see example).
  
@@ -394,7 +401,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  @param transactions Array of SKPaymentTransaction items as received in the payment queue.
  */
 - (void)sendSKPaymentTransactions:(NSArray *)transactions;
-#endif
+
 
 /**
  Tracks individual in-app purchase. See recommended `sendSKPaymentTransactions:` method.
@@ -406,6 +413,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 - (void)sendPurchase:(NSString *)productIdentifier withPrice:(NSDecimalNumber *)price currencyCode:(NSString *)currencyCode andDate:(NSDate *)date;
 
+#endif
 /**
  Gets current push token.
  
@@ -481,11 +489,6 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  The same as getCustomPushData but returns NSDictionary rather than JSON string (converts JSON string into NSDictionary).
  */
 - (NSDictionary *)getCustomPushDataAsNSDict:(NSDictionary *)pushNotification;
-
-/**
- Check is this message from Pushwoosh.
- */
-+ (BOOL)isPushwooshMessage:(NSDictionary *)message;
 
 /**
  Returns dictionary with enabled remove notificaton types.
@@ -565,5 +568,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  Deprecated. Use PWInAppManager postEvent method instead
  */
 - (void)postEvent:(NSString *)event withAttributes:(NSDictionary *)attributes __attribute__ ((deprecated));
+
++ (BOOL)isPushwooshMessage:(NSDictionary *)userInfo;
 
 @end
