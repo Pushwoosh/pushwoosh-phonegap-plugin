@@ -1,5 +1,5 @@
 framework module Pushwoosh {
-  umbrella header "Pushwoosh.h"
+  umbrella header "PWMessaging.h"
 
   export *
   module * { export * }

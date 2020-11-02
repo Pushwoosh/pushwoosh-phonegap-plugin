@@ -5,6 +5,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 FOUNDATION_EXPORT NSTimeInterval const PWRichMediaStyleDefaultAnimationDuration;
 
