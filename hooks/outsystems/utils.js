@@ -6,15 +6,8 @@ var fs = require("fs");
  * @returns {string} platform version
  */
 function getPlatformVersion(context) {
-    var projectRoot = context.opts.projectRoot;
-    var platformsJsonFile = path.join(
-        projectRoot,
-        "platforms",
-        "platforms.json"
-    );
-    var platforms = require(platformsJsonFile);
-    var platform = context.opts.plugin.platform;
-    return platforms[platform];
+    var platform = context.opts.cordova.version;
+    return platform;
 }
 
 function rmNonEmptyDir(dir_path) {
