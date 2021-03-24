@@ -82,6 +82,14 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 - (void)onPushAccepted:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification DEPRECATED_ATTRIBUTE;
 
 /**
+ Tells the delegate that a custom action was triggered when opening a notification.
+ 
+ @param identifier NSString containing an ID of a clicked button. This ID is set by a user when creating a category in the Pushwoosh Control Panel
+ @param notification NSDictionary with push payload. 
+*/
+- (void)onActionIdentifierReceived:(NSString *)identifier withNotification:(NSDictionary *)notification;
+
+/**
  Tells the delegate that the user has pressed on the push notification banner.
  
  @param pushManager The push manager that received the remote notification.
