@@ -19,7 +19,7 @@
 #endif
 
 
-#define PUSHWOOSH_VERSION @"6.0.6"
+#define PUSHWOOSH_VERSION @"6.1.1"
 
 
 @class Pushwoosh, PWMessage, PWNotificationCenterDelegateProxy;
@@ -238,6 +238,10 @@ Unregisters from push notifications.
  */
 - (void)setTags:(NSDictionary *)tags completion:(void (^)(NSError *error))completion;
 
+- (void)setEmailTags:(NSDictionary *)tags forEmail:(NSString *)email;
+
+- (void)setEmailTags:(NSDictionary *)tags forEmail:(NSString *)email completion:(void(^)(NSError *error))completion;
+
 /**
  Get tags from server. Calls delegate method if exists and handler (block).
  
@@ -343,8 +347,88 @@ Unregisters from push notifications.
 /**
  Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
  This allows data and events to be matched across multiple user devices.
+ If setUserId succeeds competion is called with nil argument. If setUserId fails completion is called with error.
+ 
+ @param userId user identifier
+ */
+- (void)setUserId:(NSString *)userId completion:(void(^)(NSError * error))completion;
+
+/**
+ Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
+ This allows data and events to be matched across multiple user devices.
+ 
+ @param userId user identifier
  */
 - (void)setUserId:(NSString *)userId;
+
+/**
+ Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
+ This allows data and events to be matched across multiple user devices.
+ If setUser succeeds competion is called with nil argument. If setUser fails completion is called with error.
+ 
+ @param userId user identifier
+ @param emails user's emails array
+ */
+- (void)setUser:(NSString *)userId emails:(NSArray *)emails completion:(void(^)(NSError * error))completion;
+
+
+/**
+ Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
+ This allows data and events to be matched across multiple user devices.
+ 
+ @param userId user identifier
+ @param emails user's emails array
+ */
+- (void)setUser:(NSString *)userId emails:(NSArray *)emails;
+
+/**
+ Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
+ This allows data and events to be matched across multiple user devices.
+ If setUser succeeds competion is called with nil argument. If setUser fails completion is called with error.
+ 
+ @param userId user identifier
+ @param email user's email string
+ */
+- (void)setUser:(NSString *)userId email:(NSString *)email completion:(void(^)(NSError * error))completion;
+
+/**
+ Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
+ This allows data and events to be matched across multiple user devices.
+ 
+ @param userId user identifier
+ @param email user's email string
+ */
+- (void)setUser:(NSString *)userId email:(NSString *)email;
+
+/**
+ Register emails list associated to the current user.
+ If setEmails succeeds competion is called with nil argument. If setEmails fails completion is called with error.
+ 
+ @param emails user's emails array
+ */
+- (void)setEmails:(NSArray *)emails completion:(void(^)(NSError * error))completion;
+
+/**
+ Register emails list associated to the current user.
+ 
+ @param emails user's emails array
+ */
+- (void)setEmails:(NSArray *)emails;
+
+/**
+ Register email associated to the current user. Email should be a string and could not be null or empty.
+ If setEmail succeeds competion is called with nil argument. If setEmail fails completion is called with error.
+ 
+ @param email user's email string
+ */
+- (void)setEmail:(NSString *)email completion:(void(^)(NSError * error))completion;
+
+/**
+ Register email associated to the current user. Email should be a string and could not be null or empty.
+ 
+ @param email user's email string
+ */
+- (void)setEmail:(NSString *)email;
 
 /**
  Move all events from oldUserId to newUserId if doMerge is true. If doMerge is false all events for oldUserId are removed.
