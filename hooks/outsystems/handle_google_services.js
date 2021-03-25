@@ -67,7 +67,8 @@ function getGoogleServiceTargetDir(context) {
     switch (platform) {
         case "android": {
             var platformVersion = utils.getPlatformVersion(context);
-            if (platformVersion >= "7") {
+            var majorPlatformVersion = platformVersion.split(".")[0];
+            if (parseInt(majorPlatformVersion) >= 7) {
                 return path.join(platformPath, "app");
             } else {
                 return platformPath;
