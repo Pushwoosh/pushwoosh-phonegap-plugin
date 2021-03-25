@@ -30,6 +30,8 @@ function getZipFile(resourcesFolder, prefZipFilename) {
         });
         return zipFile;
     } catch (error) {
+        console.log("getZipFile error:");
+        console.log(error);
         return undefined;
     }
 }
