@@ -17,6 +17,8 @@ var utils = require("./utils");
 function getZipFile(resourcesFolder, prefZipFilename) {
     try {
         var dirFiles = fs.readdirSync(resourcesFolder);
+        console.log("dirFiles value:");
+        console.log(dirFiles);
         var zipFile;
         dirFiles.forEach(function(file) {
             if (file.match(/\.zip$/)) {
@@ -119,8 +121,12 @@ function copyGoogleServiceOnIos(sourceDir, targetDir) {
 module.exports = function(context) {
     return new Promise(function(resolve, reject) {
         var wwwpath = utils.getWwwPath(context);
+        console.log("wwwpath value:");
+        console.log(wwwpath);
         var configPath = path.join(wwwpath, "google-services");
 
+        console.log("configPath value:");
+        console.log(configPath);
         var prefZipFilename = "google-services";
         var zipFile = getZipFile(configPath, prefZipFilename);
 
