@@ -125,10 +125,22 @@ module.exports = function(context) {
         var wwwpath = utils.getWwwPath(context);
         console.log("wwwpath value:");
         console.log(wwwpath);
+        console.log("wwwpath dir contents:");
+        try {
+            console.log(fs.readdirSync(wwwpath));
+        } catch (error) {
+            console.log("error getting wwwpath dir contents:");
+            console.log(error);
+        }
+
         var configPath = path.join(wwwpath, "google-services");
 
         console.log("configPath value:");
         console.log(configPath);
+        var platformVersion = utils.getPlatformVersion(context);
+        console.log("platform version:");
+        console.log(platformVersion);
+
         var prefZipFilename = "google-services";
         var zipFile = getZipFile(configPath, prefZipFilename);
 
