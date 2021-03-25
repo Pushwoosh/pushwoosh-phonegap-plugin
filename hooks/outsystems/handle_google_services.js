@@ -15,6 +15,8 @@ var utils = require("./utils");
  *
  */
 function getZipFile(resourcesFolder, prefZipFilename) {
+    console.log("getZipFile resourcesFolder value:", resourcesFolder);
+    console.log("getZipFile prefZipFilename value:", prefZipFilename);
     try {
         var dirFiles = fs.readdirSync(resourcesFolder);
         console.log("dirFiles value:");
@@ -122,6 +124,7 @@ function copyGoogleServiceOnIos(sourceDir, targetDir) {
 
 module.exports = function(context) {
     return new Promise(function(resolve, reject) {
+        console.log("context: ", context);
         var wwwpath = utils.getWwwPath(context);
         console.log("wwwpath value:");
         console.log(wwwpath);

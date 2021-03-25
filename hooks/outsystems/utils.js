@@ -1,5 +1,6 @@
 var path = require("path");
 var fs = require("fs");
+const { log } = require("console");
 /**
  * Get the platform version for the current execution
  * @param {object} context
@@ -46,7 +47,9 @@ function getPlatformPath(context) {
  */
 function getWwwPath(context) {
     var platformPath = getPlatformPath(context);
+    console.log("platformPath: ", platformPath);
     var platform = context.opts.plugin.platform;
+    console.log("platform: ", platform);
     var wwwfolder;
     if (platform === "android") {
         var platformVersion = getPlatformVersion(context);
