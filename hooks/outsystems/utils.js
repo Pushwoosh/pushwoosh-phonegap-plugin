@@ -53,9 +53,8 @@ function getWwwPath(context) {
     var wwwfolder;
     if (platform === "android") {
         var platformVersion = getPlatformVersion(context);
-        var platformVersionSplit = platformVersion.split(".")[0];
-        console.log("platformVersionSplit: ", platformVersionSplit);
-        if (platformVersion >= "7") { 
+        var majorPlatformVersion = platformVersion.split(".")[0];
+        if (parseInt(majorPlatformVersion) >= 7) { 
             wwwfolder = "app/src/main/assets/www";
         } else {
             wwwfolder = "assets/www";
