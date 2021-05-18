@@ -16,6 +16,7 @@
 #import "PWGDPRManager.h"
 #import "PWInAppManager.h"
 #import "PWBackward.h"
+#import "Pushwoosh.h"
 
 #import "AppDelegate.h"
 
@@ -43,10 +44,11 @@
 
 @end
 
-@interface PushNotification()
+@interface PushNotification() <PWMessagingDelegate>
 
 @property (nonatomic, retain) NSMutableDictionary *callbackIds;
 @property (nonatomic, retain) PushNotificationManager *pushManager;
+@property (nonatomic, retain) Pushwoosh *pushwoosh;
 @property (nonatomic, copy) NSDictionary *startPushData;
 @property (nonatomic, assign) BOOL startPushCleared;
 @property (nonatomic, assign) BOOL deviceReady;
@@ -98,6 +100,14 @@ static PushNotification *pw_PushNotificationPlugin;
     return _pushManager;
 }
 
+- (Pushwoosh *)pushwoosh {
+    if (_pushwoosh == nil) {
+        _pushwoosh = [Pushwoosh sharedInstance];
+        _pushwoosh.delegate = self;
+    }
+    return _pushwoosh;
+}
+
 - (void)getPushToken:(CDVInvokedUrlCommand *)command {
     NSString *token = [[PushNotificationManager pushManager] getPushToken];
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:token];
@@ -141,8 +151,8 @@ static PushNotification *pw_PushNotificationPlugin;
     
     _deviceReady = YES;
 	
-	if (self.pushManager.launchNotification) {
-        NSDictionary *notification = [self createNotificationDataForPush:self.pushManager.launchNotification onStart:YES];
+	if (self.pushwoosh.launchNotification) {
+        NSDictionary *notification = [self createNotificationDataForPush:self.pushwoosh.launchNotification onStart:YES];
         [self dispatchPushReceive:notification];
         [self dispatchPushAccept:notification];
 	}
