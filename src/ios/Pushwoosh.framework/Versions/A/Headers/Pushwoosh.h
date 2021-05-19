@@ -18,8 +18,7 @@
 
 #endif
 
-
-#define PUSHWOOSH_VERSION @"6.1.1"
+#define PUSHWOOSH_VERSION @"6.2.0"
 
 
 @class Pushwoosh, PWMessage, PWNotificationCenterDelegateProxy;
@@ -392,15 +391,6 @@ Unregisters from push notifications.
 - (void)setUser:(NSString *)userId email:(NSString *)email completion:(void(^)(NSError * error))completion;
 
 /**
- Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
- This allows data and events to be matched across multiple user devices.
- 
- @param userId user identifier
- @param email user's email string
- */
-- (void)setUser:(NSString *)userId email:(NSString *)email;
-
-/**
  Register emails list associated to the current user.
  If setEmails succeeds competion is called with nil argument. If setEmails fails completion is called with error.
  
@@ -445,15 +435,20 @@ Unregisters from push notifications.
 
  @param url Deep Link URL
 */
+#if TARGET_OS_IOS || TARGET_OS_WATCH
 - (BOOL)handleOpenURL:(NSURL *)url;
+#endif
 
 @end
 
 /**
 `PWNotificationCenterDelegateProxy` class handles notifications on iOS 10 and forwards methods of UNUserNotificationCenterDelegate to all added delegates.
 */
+#if TARGET_OS_IOS || TARGET_OS_WATCH
 @interface PWNotificationCenterDelegateProxy : NSObject <UNUserNotificationCenterDelegate>
-
+#elif TARGET_OS_OSX
+@interface PWNotificationCenterDelegateProxy : NSObject <NSUserNotificationCenterDelegate>
+#endif
 /**
  Returns UNUserNotificationCenterDelegate that handles foreground push notifications on iOS10
 */
@@ -466,8 +461,9 @@ Unregisters from push notifications.
 /**
  Adds extra UNUserNotificationCenterDelegate that handles foreground push notifications on iOS10.
 */
+#if TARGET_OS_IOS || TARGET_OS_WATCH
 - (void)addNotificationCenterDelegate:(id<UNUserNotificationCenterDelegate>)delegate;
-
+#endif
 @end
 
 
