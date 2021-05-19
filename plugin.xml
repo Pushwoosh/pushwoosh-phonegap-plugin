@@ -109,6 +109,7 @@
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWInAppManager.h" target-dir="ios"/>
 		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWGDPRManager.h" target-dir="ios"/>
 		<header-file src="src/ios/PWLog.h" target-dir="ios"/>
+        <header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/Pushwoosh.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PushwooshInboxUI.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxStyle.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxUI.h" target-dir="ios"/>
