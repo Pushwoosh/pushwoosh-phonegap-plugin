@@ -61,7 +61,7 @@
 			target-dir="src/com/pushwoosh/plugin/internal" />
 
 		<framework src="libs/android/googleservices-build.gradle" custom="true" type="gradleReference" />
-		<dependency id="cordova-androidx-build" url="https://github.com/Pushwoosh/cordova-androidx-build.git#1.1-OS" />
+		<dependency id="cordova-androidx-build" url="https://github.com/Pushwoosh/cordova-androidx-build.git" />
 	</platform>
 
 	<!-- ios -->
