@@ -653,6 +653,12 @@ public class PushNotifications extends CordovaPlugin {
 		return false;
 	}
 
+	@CordovaMethod
+	public boolean enableHuaweiPushNotifications(JSONArray data, final CallbackContext callbackContext) {
+		Pushwoosh.getInstance().enableHuaweiPushNotifications();
+		return true;
+	}
+
 
 	@Override
 	public boolean execute(String action, JSONArray data, CallbackContext callbackId)
