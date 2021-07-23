@@ -18,7 +18,7 @@
 
 #endif
 
-#define PUSHWOOSH_VERSION @"6.2.0"
+#define PUSHWOOSH_VERSION @"6.2.4"
 
 
 @class Pushwoosh, PWMessage, PWNotificationCenterDelegateProxy;
@@ -429,6 +429,16 @@ Unregisters from push notifications.
  @param completion callback
  */
 - (void)mergeUserId:(NSString *)oldUserId to:(NSString *)newUserId doMerge:(BOOL)doMerge completion:(void (^)(NSError *error))completion;
+
+/**
+ Starts communication with Pushwoosh server.
+ */
+- (void)startServerCommunication;
+
+/**
+ Stops communication with Pushwoosh server.
+*/
+- (void)stopServerCommunication;
 
 /**
  Process URL of some deep link. Primarly used for register test devices.

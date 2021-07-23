@@ -26,6 +26,9 @@ typedef NSString * (^PWIDateFormatterBlock)(NSDate *date, NSObject *owner);
 //! The default text color
 @property (nonatomic, readwrite) UIColor *defaultTextColor;
 
+//! The text color of a read notification
+@property (nonatomic, readwrite) UIColor *readTextColor;
+
 //! The default background color
 @property (nonatomic, readwrite) UIColor *backgroundColor;
 
@@ -52,6 +55,9 @@ typedef NSString * (^PWIDateFormatterBlock)(NSDate *date, NSObject *owner);
 
 //! The color of message titles
 @property (nonatomic, readwrite) UIColor *titleColor;
+
+//! The title color for read notifications
+@property (nonatomic, readwrite) UIColor *readTitleColor;
 
 //! The color of messages descriptions
 @property (nonatomic, readwrite) UIColor *descriptionColor;

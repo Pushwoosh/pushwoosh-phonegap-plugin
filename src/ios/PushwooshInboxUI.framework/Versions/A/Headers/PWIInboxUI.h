@@ -31,4 +31,9 @@
  */
 + (PWIInboxViewController *)createInboxControllerWithStyle:(PWIInboxStyle *)style;
 
+/**
+ @return PWIInboxViewController with a specified style and height of table view
+ */
++ (PWIInboxViewController *)createInboxControllerWithStyle:(PWIInboxStyle *)style andContentHeight:(CGFloat)contentHeight;
+
 @end
