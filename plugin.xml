@@ -55,8 +55,8 @@
 		<source-file src="src/android/src/com/pushwoosh/plugin/internal/PhonegapPluginProvider.java"
 			target-dir="src/com/pushwoosh/plugin/internal" />
 
-		<framework src="com.google.firebase:firebase-core:(+,17.0.0)" />
-		<framework src="com.google.firebase:firebase-messaging:(+,19.0.0)" />
+		<framework src="com.google.firebase:firebase-core:(+,19.0.99]" />
+		<framework src="com.google.firebase:firebase-messaging:(+,22.0.99]" />
 
 		<framework src="com.android.support:support-v4:27.+" />
         <framework src="com.android.support:appcompat-v7:27.+" />
@@ -65,13 +65,13 @@
         <framework src="com.android.support.constraint:constraint-layout:1.0.2" />
         <framework src="com.github.bumptech.glide:glide:4.7.1" />
         <framework src="org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60" />
-        <framework src="com.pushwoosh:pushwoosh:6.3.0"/>
-		<framework src="com.pushwoosh:pushwoosh-amazon:6.3.0"/>
-        <framework src="com.pushwoosh:pushwoosh-firebase:6.3.0"/>
-		<framework src="com.pushwoosh:pushwoosh-badge:6.3.0"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox:6.3.0"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox-ui:6.3.0"/>
-		<framework src="com.pushwoosh:pushwoosh-huawei:6.3.0"/>
+        <framework src="com.pushwoosh:pushwoosh:6.3.2"/>
+		<framework src="com.pushwoosh:pushwoosh-amazon:6.3.2"/>
+        <framework src="com.pushwoosh:pushwoosh-firebase:6.3.2"/>
+		<framework src="com.pushwoosh:pushwoosh-badge:6.3.2"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox:6.3.2"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox-ui:6.3.2"/>
+		<framework src="com.pushwoosh:pushwoosh-huawei:6.3.2"/>
 	</platform>
 
 	<!-- ios -->
