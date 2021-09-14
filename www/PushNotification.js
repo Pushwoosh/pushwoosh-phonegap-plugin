@@ -564,4 +564,9 @@ PushNotification.prototype.isAvailableGDPR = function(success) {
 	return exec(success, null, "PushNotification", "isAvailableGDPR", []);
 };
 
+// Enable Huawei push notifications in Android
+PushNotification.prototype.enableHuaweiPushNotifications = function() {
+	exec(null, null, "PushNotification", "enableHuaweiPushNotifications", []);
+}
+
 module.exports = new PushNotification();

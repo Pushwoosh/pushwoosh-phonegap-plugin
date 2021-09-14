@@ -16,6 +16,7 @@
 #import "PWGDPRManager.h"
 #import "PWInAppManager.h"
 #import "PWBackward.h"
+#import "Pushwoosh.h"
 
 #import "AppDelegate.h"
 
@@ -45,10 +46,11 @@
 
 @end
 
-@interface PushNotification()
+@interface PushNotification() <PWMessagingDelegate>
 
 @property (nonatomic, retain) NSMutableDictionary *callbackIds;
 @property (nonatomic, retain) PushNotificationManager *pushManager;
+@property (nonatomic, retain) Pushwoosh *pushwoosh;
 @property (nonatomic, copy) NSDictionary *startPushData;
 @property (nonatomic, assign) BOOL startPushCleared;
 @property (nonatomic, assign) BOOL deviceReady;
@@ -98,6 +100,14 @@ static PushNotification *pw_PushNotificationPlugin;
         _pushManager.delegate = self;
     }
     return _pushManager;
+}
+
+- (Pushwoosh *)pushwoosh {
+    if (_pushwoosh == nil) {
+        _pushwoosh = [Pushwoosh sharedInstance];
+        _pushwoosh.delegate = self;
+    }
+    return _pushwoosh;
 }
 
 - (void)getPushToken:(CDVInvokedUrlCommand *)command {
@@ -150,8 +160,8 @@ static PushNotification *pw_PushNotificationPlugin;
     // The launchNotification is only defined when the app is launched by a notification. 
     // The startPushData is a private field with the data of launchNotification and it's created for the dispatch.
     // This means that if the startPushData is null, the launchNotification hasn't been dispatched.
-    if (self.pushManager.launchNotification && !self.startPushData) {
-        NSDictionary *notification = [self createNotificationDataForPush:self.pushManager.launchNotification onStart:YES];
+	if (self.pushwoosh.launchNotification) {
+        NSDictionary *notification = [self createNotificationDataForPush:self.pushwoosh.launchNotification onStart:YES];
         [self dispatchPushReceive:notification];
         [self dispatchPushAccept:notification];
 	}
@@ -489,6 +499,13 @@ static PushNotification *pw_PushNotificationPlugin;
 
 - (void)isAvailableGDPR:(CDVInvokedUrlCommand *)command {
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[PWGDPRManager sharedManager] isAvailable]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)enableHuaweiPushNotifications:(CDVInvokedUrlCommand *)command {
+    // Stub
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 

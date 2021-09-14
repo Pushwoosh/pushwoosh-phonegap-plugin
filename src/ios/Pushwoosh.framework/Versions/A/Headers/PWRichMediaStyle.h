@@ -5,7 +5,10 @@
 //
 
 #import <Foundation/Foundation.h>
+
+#if TARGET_OS_IOS || TARGET_OS_WATCH
 #import <UIKit/UIKit.h>
+#endif
 
 FOUNDATION_EXPORT NSTimeInterval const PWRichMediaStyleDefaultAnimationDuration;
 
@@ -17,13 +20,14 @@ FOUNDATION_EXPORT NSTimeInterval const PWRichMediaStyleDefaultAnimationDuration;
 /**
  This method can be used to animate Rich Media presenting view.
  */
+#if TARGET_OS_IOS || TARGET_OS_WATCH
 - (void)runPresentingAnimationWithContentView:(UIView *)contentView parentView:(UIView *)parentView completion:(dispatch_block_t)completion;
 
 /**
  This method can be used to animate Rich Media dismissing view.
  */
 - (void)runDismissingAnimationWithContentView:(UIView *)contentView parentView:(UIView *)parentView completion:(dispatch_block_t)completion;
-
+#endif
 @end
 
 /**
@@ -52,6 +56,7 @@ FOUNDATION_EXPORT NSTimeInterval const PWRichMediaStyleDefaultAnimationDuration;
 /**
  Custom Rich Media loading view. It is shown while Rich Media is loading.
  */
+#if TARGET_OS_IOS || TARGET_OS_WATCH
 @interface PWLoadingView : UIView
 
 @property (nonatomic) IBOutlet UIActivityIndicatorView *activityIndicatorView;
@@ -59,10 +64,8 @@ FOUNDATION_EXPORT NSTimeInterval const PWRichMediaStyleDefaultAnimationDuration;
 
 @end
 
-
 typedef PWLoadingView *(^PWRichMediaLoadingViewBlock)(void);
-
-
+#endif
 /**
  'PWRichMediaStyle' class allows customizing the appearance of Rich Media pages.
  */
@@ -71,7 +74,11 @@ typedef PWLoadingView *(^PWRichMediaLoadingViewBlock)(void);
 /**
  Background color of Rich Media pages.
  */
+#if TARGET_OS_IOS || TARGET_OS_WATCH
 @property (nonatomic) UIColor *backgroundColor;
+#elif TARGET_OS_OSX
+@property (nonatomic) NSColor *backgroundColor;
+#endif
 
 /**
  Delegate to manage Rich Media presenting animation.
@@ -88,8 +95,9 @@ typedef PWLoadingView *(^PWRichMediaLoadingViewBlock)(void);
  };
  @endcode
  */
+#if TARGET_OS_IOS
 @property (nonatomic) PWRichMediaLoadingViewBlock loadingViewBlock;
-
+#endif
 /**
  Delay of the close button presenting in seconds.
  */
