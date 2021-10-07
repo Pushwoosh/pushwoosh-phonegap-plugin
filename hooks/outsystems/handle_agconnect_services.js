@@ -2,16 +2,14 @@ var path = require("path");
 var fs = require("fs");
 var AdmZip = require("adm-zip");
 var utils = require("./utils");
+var FSUtils = require("../huawei/FSUtils");
 
-/**
- * Searches the resources folder for a zip file with the specified name and returns an 
- * absolute path to it.
- *
- * @param {String} resourcesFolder - the absolute path to the expected resources folder
- * @param {String} prefZipFilename - the expected name of the zip file
- * @returns {string} absolute path to the zip file
- *
- */
+var ROOT_BUILD_GRADLE_FILE = "platforms/android/build.gradle";
+var ROOT_REPOSITORIES_GRADLE_FILE = "platforms/android/repositories.gradle";
+var APP_REPOSITORIES_GRADLE_FILE = "platforms/android/app/repositories.gradle";
+var COMMENT = "//This line is added by cordova-plugin-hms-push plugin";
+var NEW_LINE = "\n";
+
 function getZipFile(resourcesFolder, prefZipFilename) {
     console.log("getZipFile resourcesFolder value:", resourcesFolder);
     console.log("getZipFile prefZipFilename value:", prefZipFilename);
@@ -36,15 +34,6 @@ function getZipFile(resourcesFolder, prefZipFilename) {
     }
 }
 
-/**
- * Attempts to unzip the zip file
- * @param {string} zipFile Absolute path to the etracted zip
- * @param {string} unzippedTargetDir Absolutepath to where the
- * uncompressed content is going to be placed
- * @param {string} prefZipFilename The name of the zip file
- * @returns {string} Absolute path to the folder containing
- * the uncompressed content of the zip file
- */
 function unzip(zipFile, unzippedTargetDir, prefZipFilename) {
     var zip = new AdmZip(zipFile);
     var targetDir = path.join(unzippedTargetDir, prefZipFilename);
@@ -52,13 +41,6 @@ function unzip(zipFile, unzippedTargetDir, prefZipFilename) {
     return targetDir;
 }
 
-/**
- * Get the absolute path to the location that AGConnect Services
- * file should be placed, depending on the platform.
- * @param {object} context Cordova context
- * @returns {string} Absolute path to the location agconnect
- * services file must be placed
- */
 function getServiceFileTargetDir(context) {
     var platformPath = utils.getPlatformPath(context);
     var platform = context.opts.plugin.platform;
@@ -79,20 +61,12 @@ function getServiceFileTargetDir(context) {
     }
 }
 
-/**
- * Attempts to copy google service files (json/plist) from the source directory
- * (the unziped folder under www) to the required target directory, depending on the platform
- * @param {string} sourceDir source directory containing google services files (json/plist)
- * @param {string} targetDir target directory where google service file will be placed
- * @param {string} platform the platform (android or ios) on which the plugin is being installed
- * @returns {boolean} Whether copy finished with success
- */
 function copyServiceFile(sourceDir, targetDir, platform) {
     switch (platform) {
         case "android":
-            return copyGoogleServiceOnAndroid(sourceDir, targetDir);
+            return copyServiceOnAndroid(sourceDir, targetDir);
         case "ios":
-            return copyGoogleServiceOnIos(sourceDir, targetDir);
+            return true;
         default:
             return false;
     }
@@ -100,8 +74,8 @@ function copyServiceFile(sourceDir, targetDir, platform) {
 
 function copyServiceOnAndroid(sourceDir, targetDir) {
     try {
-        var sourceFilePath = path.join(sourceDir, "google-services.json");
-        var targetFilePath = path.join(targetDir, "google-services.json");
+        var sourceFilePath = path.join(sourceDir, "agconnect-services.json");
+        var targetFilePath = path.join(targetDir, "agconnect-services.json");
         fs.copyFileSync(sourceFilePath, targetFilePath);
         return true;
     } catch (error) {
@@ -109,17 +83,60 @@ function copyServiceOnAndroid(sourceDir, targetDir) {
     }
 }
 
-function copyGoogleServiceOnIos(sourceDir, targetDir) {
-    try {
-        var sourceFilePath = path.join(sourceDir, "GoogleService-Info.plist");
-        var targetFilePath = path.join(targetDir, "GoogleService-Info.plist");
-        fs.copyFileSync(sourceFilePath, targetFilePath);
-        return true;
-    } catch (error) {
-        return false;
+function addAGConnectDependency(lines) {
+    var AG_CONNECT_DEPENDENCY = "classpath 'com.huawei.agconnect:agcp:1.5.2.300' " + COMMENT;
+    var pattern = /(\s*)classpath(\s+)\'com.android.tools.build:gradle:([0-9-\.\:]+)/m;
+    var index;
+
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (pattern.test(line)) {
+            index = i;
+            break;
+        }
     }
+
+    lines.splice(index + 1, 0, AG_CONNECT_DEPENDENCY);
+    return lines;
 }
 
+function addHuaweiRepo(lines) {
+    var HUAWEI_REPO = "maven { url 'https://developer.huawei.com/repo/' } " + COMMENT;
+    var pattern = /(\s*)jcenter\(\)/m;
+    var indexList = [];
+
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (pattern.test(line)) {
+            indexList.push(i);
+        }
+    }
+
+    for (var i = 0; i < indexList.length; i++) {
+        lines.splice(indexList[i] + 1, 0, HUAWEI_REPO);
+        if (i < indexList.length - 1) {
+            indexList[i + 1] = indexList[i + 1] + 1;
+        }
+    }
+
+    return lines;
+}
+
+function updateRepositoriesGradle(file) {
+    if (FSUtils.exists(file)) {
+        var repoGradleContent = FSUtils.readFile(file, "UTF-8");
+        if (repoGradleContent.indexOf("developer.huawei.com/repo") === -1) {
+            var lastIndexOfCurlyBracket = repoGradleContent.lastIndexOf("}");
+
+            repoGradleContent =
+                repoGradleContent.substring(0, lastIndexOfCurlyBracket) +
+                "    maven { url 'https://developer.huawei.com/repo/' }\n}" +
+                repoGradleContent.substring(lastIndexOfCurlyBracket + 1);
+
+            FSUtils.writeFile(file, repoGradleContent);
+        }
+    }
+}
 
 module.exports = function(context) {
     return new Promise(function(resolve, reject) {
@@ -135,7 +152,7 @@ module.exports = function(context) {
             console.log(error);
         }
 
-        var configPath = path.join(wwwpath, "google-services");
+        var configPath = path.join(wwwpath, "agconnect-services");
 
         console.log("configPath value:");
         console.log(configPath);
@@ -146,11 +163,8 @@ module.exports = function(context) {
         var prefZipFilename = "agconnect-services";
         var zipFile = getZipFile(configPath, prefZipFilename);
 
-        // if zip file is present, lets unzip it!
         if (!zipFile) {
-            return reject(
-                "Failed to install Pushwoosh plugin. Reason: Configuration zip file not found."
-            );
+            console.log("agconnect-services.zip not found. Skipping Huawei initialization.");
         }
         var unzipedResourcesDir = unzip(zipFile, configPath, prefZipFilename);
         var platform = context.opts.plugin.platform;
@@ -161,10 +175,21 @@ module.exports = function(context) {
             platform
         );
 
-        if (!copyWithSuccess) {
-            return reject(
-                "Failed to install pushwoosh plugin. Reason: Unable to copy google services file to project."
-            );
+        if (copyWithSuccess) {
+            if (!FSUtils.exists(ROOT_BUILD_GRADLE_FILE)) {
+                console.log("root gradle file does not exist. Huawei integration cannot be proceeded.");
+            }
+        
+            var rootGradleContent = FSUtils.readFile(ROOT_BUILD_GRADLE_FILE, "UTF-8");
+            var lines = rootGradleContent.split(NEW_LINE);
+        
+            var depAddedLines = addAGConnectDependency(lines);
+            var repoAddedLines = addHuaweiRepo(depAddedLines);
+        
+            FSUtils.writeFile(ROOT_BUILD_GRADLE_FILE, repoAddedLines.join(NEW_LINE));
+        
+            updateRepositoriesGradle(ROOT_REPOSITORIES_GRADLE_FILE);
+            updateRepositoriesGradle(APP_REPOSITORIES_GRADLE_FILE);
         }
         return resolve();
     });

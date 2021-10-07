@@ -149,7 +149,7 @@ public class PushNotifications extends CordovaPlugin {
 
 			Pushwoosh.getInstance().setAppId(appid);
 			Pushwoosh.getInstance().setSenderId(params.getString("projectid"));
-
+			Pushwoosh.getInstance().enableHuaweiPushNotifications();
 
 			synchronized (sStartPushLock) {
 				if (sReceivedPushData != null) {
