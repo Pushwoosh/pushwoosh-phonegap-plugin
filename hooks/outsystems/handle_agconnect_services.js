@@ -137,12 +137,9 @@ function updateRepositoriesGradle(file) {
 function updateAppBuildGradle(file) {
     if (FSUtils.exists(file)) {
         var appGradleContent = FSUtils.readFile(file, "UTF-8");
-
         if (appGradleContent.indexOf(APPLY_PLUGIN) === -1) {
-
             appGradleContent = appGradleContent + NEW_LINE + APPLY_PLUGIN;
-
-            FSUtils.writeFile(file, repoGradleContent);
+            FSUtils.writeFile(file, appGradleContent);
         }
     }
 }
