@@ -37,6 +37,7 @@ cdvPluginPostBuildExtras.push({
     implementation "com.pushwoosh:pushwoosh-inbox:6.3.3"
     implementation "com.pushwoosh:pushwoosh-inbox-ui:6.3.3"
     implementation "com.pushwoosh:pushwoosh-huawei:6.3.3"
+    implementation "com.huawei.hms:push:5.3.0.304"
   }
 })
 
