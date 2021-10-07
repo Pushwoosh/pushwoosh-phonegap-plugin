@@ -9,14 +9,12 @@ var ROOT_REPOSITORIES_GRADLE_FILE = "platforms/android/repositories.gradle";
 var APP_REPOSITORIES_GRADLE_FILE = "platforms/android/app/repositories.gradle";
 var COMMENT = "//This line is added by cordova-plugin-hms-push plugin";
 var NEW_LINE = "\n";
+var APP_BUILD_GRADLE_FILE = "platforms/android/app/build.gradle";
+var APPLY_PLUGIN = "apply plugin: 'com.huawei.agconnect'"
 
 function getZipFile(resourcesFolder, prefZipFilename) {
-    console.log("getZipFile resourcesFolder value:", resourcesFolder);
-    console.log("getZipFile prefZipFilename value:", prefZipFilename);
     try {
         var dirFiles = fs.readdirSync(resourcesFolder);
-        console.log("dirFiles value:");
-        console.log(dirFiles);
         var zipFile;
         dirFiles.forEach(function(file) {
             if (file.match(/\.zip$/)) {
@@ -28,8 +26,6 @@ function getZipFile(resourcesFolder, prefZipFilename) {
         });
         return zipFile;
     } catch (error) {
-        console.log("getZipFile error:");
-        console.log(error);
         return undefined;
     }
 }
@@ -138,27 +134,24 @@ function updateRepositoriesGradle(file) {
     }
 }
 
+function updateAppBuildGradle(file) {
+    if (FSUtils.exists(file)) {
+        var appGradleContent = FSUtils.readFile(file, "UTF-8");
+
+        if (appGradleContent.indexOf(APPLY_PLUGIN) === -1) {
+
+            appGradleContent = appGradleContent + NEW_LINE + APPLY_PLUGIN;
+
+            FSUtils.writeFile(file, repoGradleContent);
+        }
+    }
+}
+
 module.exports = function(context) {
     return new Promise(function(resolve, reject) {
-        console.log("context: ", context);
         var wwwpath = utils.getWwwPath(context);
-        console.log("wwwpath value:");
-        console.log(wwwpath);
-        console.log("wwwpath dir contents:");
-        try {
-            console.log(fs.readdirSync(wwwpath));
-        } catch (error) {
-            console.log("error getting wwwpath dir contents:");
-            console.log(error);
-        }
 
         var configPath = path.join(wwwpath, "agconnect-services");
-
-        console.log("configPath value:");
-        console.log(configPath);
-        var platformVersion = utils.getPlatformVersion(context);
-        console.log("platform version:");
-        console.log(platformVersion);
 
         var prefZipFilename = "agconnect-services";
         var zipFile = getZipFile(configPath, prefZipFilename);
@@ -177,7 +170,17 @@ module.exports = function(context) {
 
         if (copyWithSuccess) {
             if (!FSUtils.exists(ROOT_BUILD_GRADLE_FILE)) {
-                console.log("root gradle file does not exist. Huawei integration cannot be proceeded.");
+                console.log(
+                    "root build.gradle file does not exist. Huawei integration cannot be proceeded."
+                );
+                return resolve();
+            }
+
+            if (!FSUtils.exists(APP_BUILD_GRADLE_FILE)) {
+                console.log(
+                    "app/build.gradle file does not exist. Huawei integration cannot be proceeded."
+                );
+                return resolve();
             }
         
             var rootGradleContent = FSUtils.readFile(ROOT_BUILD_GRADLE_FILE, "UTF-8");
@@ -190,6 +193,8 @@ module.exports = function(context) {
         
             updateRepositoriesGradle(ROOT_REPOSITORIES_GRADLE_FILE);
             updateRepositoriesGradle(APP_REPOSITORIES_GRADLE_FILE);
+            updateAppBuildGradle(APP_BUILD_GRADLE_FILE);
+
         }
         return resolve();
     });
