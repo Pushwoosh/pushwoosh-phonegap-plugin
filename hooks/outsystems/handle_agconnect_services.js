@@ -169,7 +169,7 @@ module.exports = function(context) {
         var unzipedResourcesDir = unzip(zipFile, configPath, prefZipFilename);
         var platform = context.opts.plugin.platform;
         var targetDir = getServiceFileTargetDir(context);
-        var copyWithSuccess = copyGoogleServiceFile(
+        var copyWithSuccess = copyServiceFile(
             unzipedResourcesDir,
             targetDir,
             platform
