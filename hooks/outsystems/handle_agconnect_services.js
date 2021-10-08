@@ -165,21 +165,12 @@ module.exports = function(context) {
             platform
         );
 
-        if (copyWithSuccess) {
-            if (!FSUtils.exists(ROOT_BUILD_GRADLE_FILE)) {
-                console.log(
-                    "root build.gradle file does not exist. Huawei integration cannot be proceeded."
-                );
-                return resolve();
-            }
-
-            if (!FSUtils.exists(APP_BUILD_GRADLE_FILE)) {
-                console.log(
-                    "app/build.gradle file does not exist. Huawei integration cannot be proceeded."
-                );
-                return resolve();
-            }
-        
+        if (!FSUtils.exists(ROOT_BUILD_GRADLE_FILE)) {
+            console.log(
+                "root build.gradle file does not exist. Huawei integration cannot be proceeded."
+            );
+            return resolve();
+        } else {
             var rootGradleContent = FSUtils.readFile(ROOT_BUILD_GRADLE_FILE, "UTF-8");
             var lines = rootGradleContent.split(NEW_LINE);
         
@@ -187,12 +178,20 @@ module.exports = function(context) {
             var repoAddedLines = addHuaweiRepo(depAddedLines);
         
             FSUtils.writeFile(ROOT_BUILD_GRADLE_FILE, repoAddedLines.join(NEW_LINE));
-        
             updateRepositoriesGradle(ROOT_REPOSITORIES_GRADLE_FILE);
-            updateAppBuildGradle(APP_BUILD_GRADLE_FILE);
-
+            updateRepositoriesGradle(APP_REPOSITORIES_GRADLE_FILE);
         }
-        updateRepositoriesGradle(APP_REPOSITORIES_GRADLE_FILE);
+
+        if (copyWithSuccess) {
+            if (!FSUtils.exists(APP_BUILD_GRADLE_FILE)) {
+                console.log(
+                    "app/build.gradle file does not exist. Huawei integration cannot be proceeded."
+                );
+                return resolve();
+            }
+            
+            updateAppBuildGradle(APP_BUILD_GRADLE_FILE);
+        }
 
         return resolve();
     });
