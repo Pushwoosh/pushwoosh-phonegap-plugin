@@ -143,13 +143,14 @@ function updateAppBuildGradle(file) {
             FSUtils.writeFile(file, appGradleContent);
         }
         if (appGradleContent.indexOf("com.huawei.hms:push") === -1) {
-            var dependenciesLastIndex = appGradleContent.lastIndexOf("dependencies {");
+            var dependenciesLastIndex = appGradleContent.lastIndexOf("// SUB-PROJECT DEPENDENCIES START");
 
             appGradleContent = 
-                appGradleContent.substring(0, dependenciesLastIndex + 14) + 
+                appGradleContent.substring(0, dependenciesLastIndex + 33) + 
                 NEW_LINE + 
                 HUAWEI_PUSH_KIT_DEPENDENCY +
-                appGradleContent.substring(dependenciesLastIndex + 15);
+                NEW_LINE + 
+                appGradleContent.substring(dependenciesLastIndex + 34);
             
                 console.log(appGradleContent);
             FSUtils.writeFile(file, appGradleContent);
