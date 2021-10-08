@@ -11,6 +11,7 @@ var COMMENT = "//This line is added by cordova-plugin-hms-push plugin";
 var NEW_LINE = "\n";
 var APP_BUILD_GRADLE_FILE = "platforms/android/app/build.gradle";
 var APPLY_PLUGIN = "apply plugin: 'com.huawei.agconnect'"
+var HUAWEI_PUSH_KIT_DEPENDENCY = "implementation \"com.huawei.hms:push:5.3.0.304\""
 
 function getZipFile(resourcesFolder, prefZipFilename) {
     try {
@@ -141,6 +142,17 @@ function updateAppBuildGradle(file) {
             appGradleContent = appGradleContent + NEW_LINE + APPLY_PLUGIN;
             FSUtils.writeFile(file, appGradleContent);
         }
+        if (appGradleContent.indexOf("com.huawei.hms:push") === -1) {
+            var dependenciesLastIndex = appGradleContent.lastIndexOf("dependencies {");
+
+            appGradleContent = 
+                appGradleContent.substring(0, dependenciesLastIndex + 14) + 
+                NEW_LINE + 
+                HUAWEI_PUSH_KIT_DEPENDENCY +
+                appGradleContent.substring(dependenciesLastIndex + 15);
+            
+            FSUtils.writeFile(file, appGradleContent);
+        }
     }
 }
 
@@ -165,12 +177,21 @@ module.exports = function(context) {
             platform
         );
 
-        if (!FSUtils.exists(ROOT_BUILD_GRADLE_FILE)) {
-            console.log(
-                "root build.gradle file does not exist. Huawei integration cannot be proceeded."
-            );
-            return resolve();
-        } else {
+        if (copyWithSuccess) {
+            if (!FSUtils.exists(ROOT_BUILD_GRADLE_FILE)) {
+                console.log(
+                    "root build.gradle file does not exist. Huawei integration cannot be proceeded."
+                );
+                return resolve();
+            }
+
+            if (!FSUtils.exists(APP_BUILD_GRADLE_FILE)) {
+                console.log(
+                    "app/build.gradle file does not exist. Huawei integration cannot be proceeded."
+                );
+                return resolve();
+            }
+        
             var rootGradleContent = FSUtils.readFile(ROOT_BUILD_GRADLE_FILE, "UTF-8");
             var lines = rootGradleContent.split(NEW_LINE);
         
@@ -178,21 +199,12 @@ module.exports = function(context) {
             var repoAddedLines = addHuaweiRepo(depAddedLines);
         
             FSUtils.writeFile(ROOT_BUILD_GRADLE_FILE, repoAddedLines.join(NEW_LINE));
+        
             updateRepositoriesGradle(ROOT_REPOSITORIES_GRADLE_FILE);
             updateRepositoriesGradle(APP_REPOSITORIES_GRADLE_FILE);
-        }
-
-        if (copyWithSuccess) {
-            if (!FSUtils.exists(APP_BUILD_GRADLE_FILE)) {
-                console.log(
-                    "app/build.gradle file does not exist. Huawei integration cannot be proceeded."
-                );
-                return resolve();
-            }
-            
             updateAppBuildGradle(APP_BUILD_GRADLE_FILE);
-        }
 
+        }
         return resolve();
     });
 };
