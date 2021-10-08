@@ -11,7 +11,7 @@ var COMMENT = "//This line is added by cordova-plugin-hms-push plugin";
 var NEW_LINE = "\n";
 var APP_BUILD_GRADLE_FILE = "platforms/android/app/build.gradle";
 var APPLY_PLUGIN = "apply plugin: 'com.huawei.agconnect'"
-var PLUGIN_BUILD_GRADLE_FILE = "libs/android/googleservices-build.gradle";
+var PLUGIN_BUILD_GRADLE_FILE = "plugins/pushwoosh-cordova-plugin/libs/android/googleservices-build.gradle";
 var HUAWEI_PUSH_KIT_DEPENDENCY = "implementation \"com.huawei.hms:push:5.3.0.304\""
 
 function getZipFile(resourcesFolder, prefZipFilename) {

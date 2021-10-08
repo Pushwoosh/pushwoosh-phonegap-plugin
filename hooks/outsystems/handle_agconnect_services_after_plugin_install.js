@@ -4,7 +4,7 @@ var utils = require("./utils");
 var FSUtils = require("../huawei/FSUtils");
 
 var NEW_LINE = "\n";
-var PLUGIN_BUILD_GRADLE_FILE = "libs/android/googleservices-build.gradle";
+var PLUGIN_BUILD_GRADLE_FILE = "plugins/pushwoosh-cordova-plugin/libs/android/googleservices-build.gradle";
 var HUAWEI_PUSH_KIT_DEPENDENCY = "implementation \"com.huawei.hms:push:5.3.0.304\""
 
 function getZipFile(resourcesFolder, prefZipFilename) {
