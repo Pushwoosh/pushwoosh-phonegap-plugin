@@ -151,6 +151,7 @@ function updateAppBuildGradle(file) {
                 HUAWEI_PUSH_KIT_DEPENDENCY +
                 appGradleContent.substring(dependenciesLastIndex + 15);
             
+                console.log(appGradleContent);
             FSUtils.writeFile(file, appGradleContent);
         }
     }
