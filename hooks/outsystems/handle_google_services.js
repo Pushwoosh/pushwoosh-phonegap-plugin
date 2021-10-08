@@ -15,12 +15,8 @@ var utils = require("./utils");
  *
  */
 function getZipFile(resourcesFolder, prefZipFilename) {
-    console.log("getZipFile resourcesFolder value:", resourcesFolder);
-    console.log("getZipFile prefZipFilename value:", prefZipFilename);
     try {
         var dirFiles = fs.readdirSync(resourcesFolder);
-        console.log("dirFiles value:");
-        console.log(dirFiles);
         var zipFile;
         dirFiles.forEach(function(file) {
             if (file.match(/\.zip$/)) {
@@ -32,8 +28,6 @@ function getZipFile(resourcesFolder, prefZipFilename) {
         });
         return zipFile;
     } catch (error) {
-        console.log("getZipFile error:");
-        console.log(error);
         return undefined;
     }
 }
@@ -125,25 +119,9 @@ function copyGoogleServiceOnIos(sourceDir, targetDir) {
 
 module.exports = function(context) {
     return new Promise(function(resolve, reject) {
-        console.log("context: ", context);
         var wwwpath = utils.getWwwPath(context);
-        console.log("wwwpath value:");
-        console.log(wwwpath);
-        console.log("wwwpath dir contents:");
-        try {
-            console.log(fs.readdirSync(wwwpath));
-        } catch (error) {
-            console.log("error getting wwwpath dir contents:");
-            console.log(error);
-        }
-
         var configPath = path.join(wwwpath, "google-services");
 
-        console.log("configPath value:");
-        console.log(configPath);
-        var platformVersion = utils.getPlatformVersion(context);
-        console.log("platform version:");
-        console.log(platformVersion);
 
         var prefZipFilename = "google-services";
         var zipFile = getZipFile(configPath, prefZipFilename);

@@ -160,11 +160,8 @@ function updatePluginBuildGradle(file) {
                 NEW_LINE + 
                 pluginGradleContent.substring(dependenciesLastIndex + 15);
 
-            console.log(pluginGradleContent);
             FSUtils.writeFile(file, pluginGradleContent);
         }
-    } else {
-        console.log(file + " " + "does not exist");
     }
 }
 
