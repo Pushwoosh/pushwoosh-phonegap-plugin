@@ -141,7 +141,7 @@ function updateAppBuildGradle(file) {
         var appGradleContent = FSUtils.readFile(file, "UTF-8");
         if (appGradleContent.indexOf(APPLY_PLUGIN) === -1) {
             appGradleContent = appGradleContent + NEW_LINE + APPLY_PLUGIN;
-            
+
             FSUtils.writeFile(file, appGradleContent);
         }
     }
@@ -163,6 +163,8 @@ function updatePluginBuildGradle(file) {
             console.log(pluginGradleContent);
             FSUtils.writeFile(file, pluginGradleContent);
         }
+    } else {
+        console.log(file + " " + "does not exist");
     }
 }
 
