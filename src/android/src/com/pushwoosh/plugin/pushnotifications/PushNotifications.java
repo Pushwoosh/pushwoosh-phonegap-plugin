@@ -150,6 +150,7 @@ public class PushNotifications extends CordovaPlugin {
 			Pushwoosh.getInstance().setAppId(appid);
 			Pushwoosh.getInstance().setSenderId(params.getString("projectid"));
 
+			
 			synchronized (sStartPushLock) {
 				if (sReceivedPushData != null) {
 					doOnPushReceived(sReceivedPushData);
