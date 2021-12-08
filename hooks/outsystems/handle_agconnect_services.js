@@ -206,8 +206,10 @@ module.exports = function(context) {
         
             var depAddedLines = addAGConnectDependency(lines);
             var repoAddedLines = addHuaweiRepo(depAddedLines);
-        
             FSUtils.writeFile(ROOT_BUILD_GRADLE_FILE, repoAddedLines.join(NEW_LINE));
+
+            // debug
+            console.log(repoAddedLines.join(NEW_LINE));
         
             updateRepositoriesGradle(ROOT_REPOSITORIES_GRADLE_FILE);
             updateRepositoriesGradle(APP_REPOSITORIES_GRADLE_FILE);
