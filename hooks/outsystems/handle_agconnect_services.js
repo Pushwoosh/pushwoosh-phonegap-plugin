@@ -132,6 +132,8 @@ function updateRepositoriesGradle(file) {
                 repoGradleContent.substring(lastIndexOfCurlyBracket + 1);
 
             FSUtils.writeFile(file, repoGradleContent);
+            // debug
+            console.log(repoGradleContent);
         }
     }
 }
@@ -143,6 +145,8 @@ function updateAppBuildGradle(file) {
             appGradleContent = appGradleContent + NEW_LINE + APPLY_PLUGIN;
 
             FSUtils.writeFile(file, appGradleContent);
+            // debug
+            console.log(appGradleContent);
         }
     }
 }
@@ -161,6 +165,9 @@ function updatePluginBuildGradle(file) {
                 pluginGradleContent.substring(dependenciesLastIndex + 15);
 
             FSUtils.writeFile(file, pluginGradleContent);
+
+            // debug
+            console.log(pluginGradleContent);
         }
     }
 }
