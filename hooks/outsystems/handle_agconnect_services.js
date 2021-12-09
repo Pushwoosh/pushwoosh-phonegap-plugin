@@ -132,8 +132,6 @@ function updateRepositoriesGradle(file) {
                 repoGradleContent.substring(lastIndexOfCurlyBracket + 1);
 
             FSUtils.writeFile(file, repoGradleContent);
-            // debug
-            console.log(repoGradleContent);
         }
     }
 }
@@ -145,8 +143,6 @@ function updateAppBuildGradle(file) {
             appGradleContent = appGradleContent + NEW_LINE + APPLY_PLUGIN;
 
             FSUtils.writeFile(file, appGradleContent);
-            // debug
-            console.log(appGradleContent);
         }
     }
 }
@@ -165,9 +161,6 @@ function updatePluginBuildGradle(file) {
                 pluginGradleContent.substring(dependenciesLastIndex + 15);
 
             FSUtils.writeFile(file, pluginGradleContent);
-
-            // debug
-            console.log(pluginGradleContent);
         }
     }
 }
@@ -214,9 +207,6 @@ module.exports = function(context) {
             var depAddedLines = addAGConnectDependency(lines);
             var repoAddedLines = addHuaweiRepo(depAddedLines);
             FSUtils.writeFile(ROOT_BUILD_GRADLE_FILE, repoAddedLines.join(NEW_LINE));
-
-            // debug
-            console.log(repoAddedLines.join(NEW_LINE));
         
             updateRepositoriesGradle(ROOT_REPOSITORIES_GRADLE_FILE);
             updateRepositoriesGradle(APP_REPOSITORIES_GRADLE_FILE);
