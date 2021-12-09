@@ -16,6 +16,8 @@ String getVersion() {
   return compileSdkVersion >= 28 ? "28.0.0" : "27.+" 
 }
 
+ext.pushwoosh = "6.3.7"
+
 // Defer the definition of the dependencies to the end
 // of the "configuration" phase from the app build.gradle file
 // so that we can inquire the proper compile sdk version being used.
@@ -31,13 +33,13 @@ cdvPluginPostBuildExtras.push({
     implementation "com.android.support.constraint:constraint-layout:1.0.2"
     implementation "com.github.bumptech.glide:glide:4.7.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60"
-    implementation "com.pushwoosh:pushwoosh:6.3.6"
-    implementation "com.pushwoosh:pushwoosh-firebase:6.3.6"
-    implementation "com.pushwoosh:pushwoosh-amazon:6.3.6"
-    implementation "com.pushwoosh:pushwoosh-badge:6.3.6"
-    implementation "com.pushwoosh:pushwoosh-inbox:6.3.6"
-    implementation "com.pushwoosh:pushwoosh-inbox-ui:6.3.6"
-    implementation "com.pushwoosh:pushwoosh-huawei:6.3.6"
+    implementation "com.pushwoosh:pushwoosh:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-firebase:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-amazon:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-badge:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-inbox:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-inbox-ui:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-huawei:${pushwoosh}"
   }
 })
 
