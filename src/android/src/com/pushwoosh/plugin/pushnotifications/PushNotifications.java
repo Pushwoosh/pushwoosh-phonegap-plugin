@@ -300,14 +300,12 @@ public class PushNotifications extends CordovaPlugin {
 			if (message == null) {
 				return false;
 			}
-
-			String userData = params.getString("userData");
-
+			
 			Bundle extras = new Bundle();
-			if (userData != null) {
-				extras.putString("u", userData);
+			if (params.has("userData")) {
+				extras.putString("u", params.getString("userData"));
 			}
-
+			
 			LocalNotification notification = new LocalNotification.Builder()
 					.setMessage(message)
 					.setDelay(seconds)
