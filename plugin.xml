@@ -26,7 +26,10 @@
 
 	<!-- android -->
 	<platform name="android">
-		<framework src="build.gradle" custom="true" type="gradleReference" />
+        <config-file target="config.xml" parent="/*">
+            <preference name="GradlePluginGoogleServicesEnabled" value="true" />
+            <preference name="GradlePluginGoogleServicesVersion" value="4.3.10" />
+        </config-file>
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<meta-data android:name="com.pushwoosh.log_level" android:value="$LOG_LEVEL" />
