@@ -6,7 +6,7 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.pushwoosh.firebase.PushwooshFcmHelper;
 
-public class MyFirebaseMessagingService extends FirebaseMessagingService {
+public class CustomFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         if (PushwooshFcmHelper.isPushwooshMessage(remoteMessage)){
