@@ -89,6 +89,26 @@ PushNotification.prototype.registerDevice = function(success, fail) {
 	exec(success, fail, "PushNotification", "registerDevice", []);
 };
 
+//Function: additionalAuthorizationOptions
+//[ios] Authorization options in addition to UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCarPlay. 
+//Should be called before registering for pushes
+//
+//Parameters:
+// "options.UNAuthorizationOptionCriticalAlert" - adds UNAuthorizationOptionCriticalAlert option
+// "options.UNAuthorizationOptionProvisional" - adds UNAuthorizationOptionProvisional option
+// "options.UNAuthorizationOptionProvidesAppNotificationSettings" - adds UNAuthorizationOptionProvidesAppNotificationSettings option
+//
+//Example:
+//(start code)
+//	pushwoosh.additionalAuthorizationOptions({ 
+//		"UNAuthorizationOptionCriticalAlert" : 1,
+//		"UNAuthorizationOptionProvisional": 0 // set 0 or don't specify the option if you don't want to add it to your app. 
+//	});
+//(end)
+PushNotification.prototype.additionalAuthorizationOptions = function(options) {
+	exec(null, null, "PushNotification", "additionalAuthorizationOptions", options ? [options] : []);
+}
+
 //Function: unregisterDevice
 //[android, ios, wp8, windows] Unregister device form receiving push notifications
 //

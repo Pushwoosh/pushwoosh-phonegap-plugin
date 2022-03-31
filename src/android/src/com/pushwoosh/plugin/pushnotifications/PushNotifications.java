@@ -172,6 +172,12 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@CordovaMethod
+	private boolean additionalAuthorizationOptions(JSONArray data, CallbackContext callbackContext) {
+		// Stub, this is iOS only method
+		return true;
+	}
+
+	@CordovaMethod
 	private boolean registerDevice(JSONArray data, CallbackContext callbackContext) {
 		try {
 			callbackIds.put("registerDevice", callbackContext);

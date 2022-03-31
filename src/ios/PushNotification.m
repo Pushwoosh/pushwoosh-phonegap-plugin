@@ -169,6 +169,28 @@ static PushNotification *pw_PushNotificationPlugin;
 	[[NSUserDefaults standardUserDefaults] synchronize];
 }
 
+// Authorization options in addition to UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCarPlay. Should be called before registering for pushes
+- (void)additionalAuthorizationOptions:(CDVInvokedUrlCommand *)command {
+    NSDictionary *options = [command.arguments firstObject];
+    NSString* critical = options[@"UNAuthorizationOptionCriticalAlert"];
+    NSString* provisional = options[@"UNAuthorizationOptionProvisional"];
+    NSString* providesSettings = options[@"UNAuthorizationOptionProvidesAppNotificationSettings"];
+    
+    UNAuthorizationOptions authOptions = 0;
+    if (@available(iOS 12.0, *)) {
+        if (critical) {
+            authOptions |= UNAuthorizationOptionCriticalAlert;
+        }
+        if (provisional) {
+            authOptions |= UNAuthorizationOptionProvisional;
+        }
+        if (providesSettings) {
+            authOptions |= UNAuthorizationOptionProvidesAppNotificationSettings;
+        }
+        [Pushwoosh sharedInstance].additionalAuthorizationOptions = authOptions;
+    }
+}
+
 - (void)dispatchPushReceive:(NSDictionary *)pushData {
     NSData *json = [NSJSONSerialization dataWithJSONObject:pushData options:NSJSONWritingPrettyPrinted error:nil];
     NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
