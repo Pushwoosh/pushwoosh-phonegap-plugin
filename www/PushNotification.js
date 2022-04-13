@@ -9,7 +9,7 @@
 //
 // MIT Licensed
 
-var exec = require('cordova/exec');
+var exec = window.cordova.exec;
 
 //Class: PushNotification
 //Class to interact with Pushwoosh Push Notifications plugin
