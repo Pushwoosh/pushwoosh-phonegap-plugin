@@ -41,7 +41,7 @@ export interface PushNotification {
 	cancelAllLocalNotifications(success?: (callback: any) => void): void;
 	pushReceivedCallback(notification: Object): void;
 	notificationCallback(notification: Object): void;
-	presentInboxUI(params: Object): void;
+	presentInboxUI(params?: Object): void;
 	showGDPRConsentUI(): void;
 	showGDPRDeletionUI(): void;
 	setCommunicationEnabled(enable: boolean, success?: (callback: any) => void, fail?: (callback: any) => void): void;
@@ -50,4 +50,11 @@ export interface PushNotification {
 	isDeviceDataRemoved(success: (removed: boolean) => void): void;
 	isAvailableGDPR(success: (isAvailable: boolean) => void): void;
 	enableHuaweiPushNotifications(): void;
+	setSoundType(type: string, success?: (callback: any) => void, fail?: (callback: any) => void): void;
+	setVibrateType(type: string, success?: (callback: any) => void, fail?: (callback: any) => void): void;
+	setLightScreenOnNotification(on: boolean, success?: (callback: any) => void, fail?: (callback: any) => void): void;
+	setEnableLED(on: boolean, success?: (callback: any) => void, fail?: (callback: any) => void): void;
+	setColorLED(color: string, success?: (callback: any) => void, fail?: (callback: any) => void): void;
+	getPushHistory(success?: (pushHistory: Object) => void): void;
+	clearPushHistory(callback: (result: any) => void): void;
 }
