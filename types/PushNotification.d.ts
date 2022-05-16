@@ -14,24 +14,32 @@ type LocalNotification = {
 	userData?: Object;
 }
 
+type AuthOptions = Record<string, number|string>
+
+type RemoteNotificationStatus = Record<string,string|number|boolean>
+
+interface PushwooshTags {
+	[index: string]: string | number | string[] | number[]
+}
+
 export interface PushNotification {
 	onDeviceReady(config: PushwooshConfig): void;
 	onAppActivated(config: Object): void;
 	registerDevice(success?: (callback: SuccessRegistrationCallback) => void, fail?: (error: Error|string) => void): void;
-	unregisterDevice(success?: (callback?: Object) => void, fail?: (error?: Error|string) => void): void;
-	additionalAuthorizationOptions(options: Object): void;
-	setTags(config: Object, success?: (tags?: Object) => void, fail?: (error?: Error|string) => void): void;
-	getTags(success?: (tags: Object) => void, fail?: (error?: Error|string) => void): void;
+	unregisterDevice(success?: (callback?: string) => void, fail?: (error?: Error|string) => void): void;
+	additionalAuthorizationOptions(options: AuthOptions): void;
+	setTags(config: PushwooshTags, success?: (tags?: Record<string,PushwooshTags>) => void, fail?: (error?: Error|string) => void): void;
+	getTags(success?: (tags: PushwooshTags) => void, fail?: (error?: Error|string) => void): void;
 	getPushToken(success?: (pushToken: string) => void): void;
 	getPushwooshHWID(success?: (hwid: string) => void): void;
-	getRemoteNotificationStatus(success?: (status: Object) => void, fail?: (error: Error|string) => void): void;
+	getRemoteNotificationStatus(success?: (status: RemoteNotificationStatus) => void, fail?: (error: Error|string) => void): void;
 	setApplicationIconBadgeNumber(badge: number): void;
 	getApplicationIconBadgeNumber(success?: (badge: number) => void): void;
 	addToApplicationIconBadgeNumber(badge: number|string): void;
 	getLaunchNotification(success?: (notification: string) => void): void;
 	clearLaunchNotification(success?: () => void): void;
 	setUserId(userId: string): void;
-	postEvent(event: string, attributes?: Object): void;
+	postEvent(event: string, attributes?: Record<string, string>): void;
 	addJavaScriptInterface(bridgeName: string): void;
 	createLocalNotification(notification: LocalNotification, success?: () => void, fail?: () => void): void;
 	clearLocalNotification(): void;
@@ -41,7 +49,7 @@ export interface PushNotification {
 	cancelAllLocalNotifications(success?: () => void): void;
 	pushReceivedCallback(notification: string): void;
 	notificationCallback(notification: string): void;
-	presentInboxUI(params?: Object): void;
+	presentInboxUI(params?: Record<string,any>): void;
 	showGDPRConsentUI(): void;
 	showGDPRDeletionUI(): void;
 	setCommunicationEnabled(enable: boolean, success?: () => void, fail?: (callback: Error|string) => void): void;
