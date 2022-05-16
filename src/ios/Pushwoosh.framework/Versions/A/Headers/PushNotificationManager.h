@@ -385,14 +385,6 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 - (void)sendAppOpen;
 
-/**
- Sends current badge value to server. Called internally by SDK Runtime when `UIApplication` `setApplicationBadgeNumber:` is set. This function is used for "auto-incremeting" badges to work.
- This way Pushwoosh server can know what current badge value is set for the application.
- 
- @param badge Current badge value.
- */
-- (void)sendBadges:(NSInteger)badge __API_AVAILABLE(macos(10.10), ios(8.0));
-
 + (NSString *)pushwooshVersion;
 
 #if TARGET_OS_IOS

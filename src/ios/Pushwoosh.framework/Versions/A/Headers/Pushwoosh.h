@@ -18,7 +18,7 @@
 
 #endif
 
-#define PUSHWOOSH_VERSION @"6.3.5"
+#define PUSHWOOSH_VERSION @"6.4.2"
 
 
 @class Pushwoosh, PWMessage, PWNotificationCenterDelegateProxy;
@@ -80,6 +80,11 @@ Tells the delegate that the user has pressed on the push notification banner.
  Badge number of the push message.
 */
 @property (nonatomic, readonly) NSUInteger badge;
+
+/**
+ Extension badge number of the push message.
+*/
+@property (nonatomic, readonly) NSUInteger badgeExtension;
 
 /**
  Remote URL or deeplink from the push message.
