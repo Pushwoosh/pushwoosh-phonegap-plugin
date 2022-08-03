@@ -20,6 +20,7 @@ import android.webkit.JavascriptInterface;
 
 import com.pushwoosh.GDPRManager;
 import com.pushwoosh.Pushwoosh;
+import com.pushwoosh.RegisterForPushNotificationsResultData;
 import com.pushwoosh.badge.PushwooshBadge;
 import com.pushwoosh.exception.GetTagsException;
 import com.pushwoosh.exception.PushwooshException;
@@ -175,11 +176,11 @@ public class PushNotifications extends CordovaPlugin {
 	private boolean registerDevice(JSONArray data, CallbackContext callbackContext) {
 		try {
 			callbackIds.put("registerDevice", callbackContext);
-			Pushwoosh.getInstance().registerForPushNotifications(new Callback<String, RegisterForPushNotificationsException>() {
+			Pushwoosh.getInstance().registerForPushNotifications(new Callback<RegisterForPushNotificationsResultData, RegisterForPushNotificationsException>() {
 				@Override
-				public void process(@NonNull final Result<String, RegisterForPushNotificationsException> result) {
-					if (result.isSuccess()) {
-						doOnRegistered(result.getData());
+				public void process(@NonNull final Result<RegisterForPushNotificationsResultData, RegisterForPushNotificationsException> result) {
+					if (result.isSuccess() && result.getData != null) {
+						doOnRegistered(result.getData().getToken());
 					} else if (result.getException() != null) {
 						doOnRegisteredError(result.getException().getMessage());
 					}
