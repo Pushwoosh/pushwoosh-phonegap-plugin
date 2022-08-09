@@ -118,16 +118,22 @@
 		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
         <header-file src="src/ios/PWBackward.h" target-dir="ios"/>
         <source-file src="src/ios/PWBackward.m" target-dir="ios"/>
-		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PushNotificationManager.h" target-dir="ios"/>
-		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWInAppManager.h" target-dir="ios"/>
-		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWGDPRManager.h" target-dir="ios"/>
+        
+        <podspec>
+            <config>
+                <source url="https://cdn.cocoapods.org/"/>
+            </config>
+            <pods use-frameworks="true">
+                <pod name="PushwooshXCFramework" spec="6.4.4" />
+            </pods>
+        </podspec>
+
 		<header-file src="src/ios/PWLog.h" target-dir="ios"/>
         <header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/Pushwoosh.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PushwooshInboxUI.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxStyle.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxUI.h" target-dir="ios"/>
         
-		<source-file src="src/ios/Pushwoosh.framework/Versions/A/libPushwoosh.a" framework="true"/>
         <source-file src="src/ios/PushwooshInboxUI.framework/Versions/A/libPushwooshInboxUI.a" framework="true"/>
         <resource-file src="src/ios/PushwooshInboxBundle.bundle" />
 	</platform>
