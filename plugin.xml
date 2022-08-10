@@ -98,6 +98,12 @@
 				<param name="ios-package" value="PushNotification"/>
 			</feature>
 		</config-file>
+        
+        <config-file target="*-Info.plist" parent="UIBackgroundModes">
+          <array>
+            <string>remote-notification</string>
+          </array>
+        </config-file>
 
 		<config-file target="*-Info.plist" parent="Pushwoosh_LOG_LEVEL">
 			<string>$LOG_LEVEL</string>
@@ -113,23 +119,23 @@
 		<config-file parent="aps-environment" target="*/Entitlements-Release.plist">
 			<string>production</string>
 		</config-file>
-
-		<header-file src="src/ios/PushNotification.h" target-dir="ios"/>
-		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
-        <header-file src="src/ios/PWBackward.h" target-dir="ios"/>
-        <source-file src="src/ios/PWBackward.m" target-dir="ios"/>
         
         <podspec>
             <config>
                 <source url="https://cdn.cocoapods.org/"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="PushwooshXCFramework" spec="6.4.4" />
+                <pod name="PushwooshXCFramework" />
             </pods>
         </podspec>
+        <framework src="Pods/PushwooshXCFramework/XCFramework/Pushwoosh.xcframework" embed="true" />
+
+		<header-file src="src/ios/PushNotification.h" target-dir="ios"/>
+		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
+        <header-file src="src/ios/PWBackward.h" target-dir="ios"/>
+        <source-file src="src/ios/PWBackward.m" target-dir="ios"/>
 
 		<header-file src="src/ios/PWLog.h" target-dir="ios"/>
-        <header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/Pushwoosh.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PushwooshInboxUI.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxStyle.h" target-dir="ios"/>
         <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxUI.h" target-dir="ios"/>
