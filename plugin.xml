@@ -134,14 +134,7 @@
 		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
         <header-file src="src/ios/PWBackward.h" target-dir="ios"/>
         <source-file src="src/ios/PWBackward.m" target-dir="ios"/>
-
-		<header-file src="src/ios/PWLog.h" target-dir="ios"/>
-        <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PushwooshInboxUI.h" target-dir="ios"/>
-        <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxStyle.h" target-dir="ios"/>
-        <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxUI.h" target-dir="ios"/>
-        
-        <source-file src="src/ios/PushwooshInboxUI.framework/Versions/A/libPushwooshInboxUI.a" framework="true"/>
-        <resource-file src="src/ios/PushwooshInboxBundle.bundle" />
+        <resource-file src="src/ios/" />
 	</platform>
 
 	<!-- wp8 -->
