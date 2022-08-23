@@ -98,6 +98,12 @@
 				<param name="ios-package" value="PushNotification"/>
 			</feature>
 		</config-file>
+        
+        <config-file target="*-Info.plist" parent="UIBackgroundModes">
+          <array>
+            <string>remote-notification</string>
+          </array>
+        </config-file>
 
 		<config-file target="*-Info.plist" parent="Pushwoosh_LOG_LEVEL">
 			<string>$LOG_LEVEL</string>
@@ -113,23 +119,22 @@
 		<config-file parent="aps-environment" target="*/Entitlements-Release.plist">
 			<string>production</string>
 		</config-file>
+        
+        <podspec>
+            <config>
+                <source url="https://github.com/CocoaPods/Specs.git"/>
+            </config>
+            <pods use-frameworks="true">
+                <pod name="PushwooshXCFramework" />
+            </pods>
+        </podspec>
+        <framework src="Pods/PushwooshXCFramework/XCFramework/Pushwoosh.xcframework" embed="true" />
 
 		<header-file src="src/ios/PushNotification.h" target-dir="ios"/>
 		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
         <header-file src="src/ios/PWBackward.h" target-dir="ios"/>
         <source-file src="src/ios/PWBackward.m" target-dir="ios"/>
-		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PushNotificationManager.h" target-dir="ios"/>
-		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWInAppManager.h" target-dir="ios"/>
-		<header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/PWGDPRManager.h" target-dir="ios"/>
-		<header-file src="src/ios/PWLog.h" target-dir="ios"/>
-        <header-file src="src/ios/Pushwoosh.framework/Versions/A/Headers/Pushwoosh.h" target-dir="ios"/>
-        <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PushwooshInboxUI.h" target-dir="ios"/>
-        <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxStyle.h" target-dir="ios"/>
-        <header-file src="src/ios/PushwooshInboxUI.framework/Versions/A/Headers/PWIInboxUI.h" target-dir="ios"/>
-        
-		<source-file src="src/ios/Pushwoosh.framework/Versions/A/libPushwoosh.a" framework="true"/>
-        <source-file src="src/ios/PushwooshInboxUI.framework/Versions/A/libPushwooshInboxUI.a" framework="true"/>
-        <resource-file src="src/ios/PushwooshInboxBundle.bundle" />
+        <resource-file src="src/ios/" />
 	</platform>
 
 	<!-- wp8 -->

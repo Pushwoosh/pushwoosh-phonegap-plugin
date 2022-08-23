@@ -12,7 +12,8 @@
 #import <Foundation/Foundation.h>
 #import <Cordova/CDV.h>
 #import <Cordova/CDVPlugin.h>
-#import "PushNotificationManager.h"
+#import <Pushwoosh/Pushwoosh.h>
+#import <Pushwoosh/PushNotificationManager.h>
 
 @interface PushNotification : CDVPlugin <PushNotificationDelegate> 
 
