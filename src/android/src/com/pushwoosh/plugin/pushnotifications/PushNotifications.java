@@ -179,7 +179,7 @@ public class PushNotifications extends CordovaPlugin {
 			Pushwoosh.getInstance().registerForPushNotifications(new Callback<RegisterForPushNotificationsResultData, RegisterForPushNotificationsException>() {
 				@Override
 				public void process(@NonNull final Result<RegisterForPushNotificationsResultData, RegisterForPushNotificationsException> result) {
-					if (result.isSuccess() && result.getData != null) {
+					if (result.isSuccess() && result.getData() != null) {
 						doOnRegistered(result.getData().getToken());
 					} else if (result.getException() != null) {
 						doOnRegisteredError(result.getException().getMessage());
