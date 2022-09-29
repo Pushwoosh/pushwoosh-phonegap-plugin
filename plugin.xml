@@ -131,12 +131,11 @@
         </podspec>
         <framework src="Pods/PushwooshXCFramework/XCFramework/Pushwoosh.xcframework" embed="true" />
 
-		<header-file src="src/ios/PushNotification.h" target-dir="ios"/>
-		<source-file src="src/ios/PushNotification.m" target-dir="ios"/>
-        <header-file src="src/ios/PWBackward.h" target-dir="ios"/>
-        <source-file src="src/ios/PWBackward.m" target-dir="ios"/>
-        <header-file src="src/ios/PWLog.h" target-dir="ios"/>
-        <resource-file src="src/ios/" />
+		<header-file src="src/ios/PushNotification.h" />
+		<source-file src="src/ios/PushNotification.m" />
+        <header-file src="src/ios/PWBackward.h" />
+        <source-file src="src/ios/PWBackward.m" />
+        <header-file src="src/ios/PWLog.h" />
 	</platform>
 
 	<!-- wp8 -->
