@@ -129,7 +129,6 @@
                 <pod name="PushwooshInboxUIXCFramework" spec="6.1.1" />
             </pods>
         </podspec>
-        <framework src="Pods/PushwooshXCFramework/XCFramework/Pushwoosh.xcframework" embed="true" />
 
 		<header-file src="src/ios/PushNotification.h" />
 		<source-file src="src/ios/PushNotification.m" />
