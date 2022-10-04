@@ -1,6 +1,0 @@
-framework module Pushwoosh {
-  umbrella header "PWMessaging.h"
-
-  export *
-  module * { export * }
-}
