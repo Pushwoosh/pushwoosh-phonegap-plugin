@@ -39,11 +39,11 @@
 
 			<meta-data android:name="com.pushwoosh.internal.plugin_provider"	android:value="com.pushwoosh.plugin.internal.PhonegapPluginProvider" />
             
-<!--            <service android:name="com.pushwoosh.plugin.pushnotifications.CustomFirebaseMessagingService" android:exported="false">-->
-<!--                <intent-filter>-->
-<!--                    <action android:name="com.google.firebase.MESSAGING_EVENT"/>-->
-<!--                </intent-filter>-->
-<!--            </service>-->
+            <service android:name="com.pushwoosh.plugin.pushnotifications.CustomFirebaseMessagingService" android:exported="false">
+                <intent-filter>
+                    <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                </intent-filter>
+            </service>
 		</config-file>
 
 		<config-file target="res/xml/config.xml" parent="/*">
@@ -67,8 +67,7 @@
 		<source-file src="src/android/src/com/pushwoosh/plugin/internal/PhonegapPluginProvider.java"
 			target-dir="src/com/pushwoosh/plugin/internal" />
 
-		<framework src="com.google.firebase:firebase-core:(+,19.0.99]" />
-		<framework src="com.google.firebase:firebase-messaging:(+,22.0.99]" />
+        <framework src="build-extras-pushwoosh.gradle" custom="true" type="gradleReference" />
 
 		<framework src="com.android.support:support-v4:27.+" />
         <framework src="com.android.support:appcompat-v7:27.+" />
