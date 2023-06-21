@@ -74,7 +74,7 @@
         <framework src="androidx.appcompat:appcompat:1.4.0" />
         <framework src="androidx.recyclerview:recyclerview:1.2.1" />
         <framework src="androidx.swiperefreshlayout:swiperefreshlayout:1.1.0" />
-        <framework src="com.github.bumptech.glide:glide:4.7.1" />
+        <framework src="com.github.bumptech.glide:glide:4.10.0" />
         <framework src="org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60" />
 
         <framework src="com.pushwoosh:pushwoosh:6.6.11"/>
