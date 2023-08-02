@@ -1,0 +1,8 @@
+repositories {
+   maven { url 'https://maven.google.com' }
+}
+
+dependencies {
+    implementation 'com.google.firebase:firebase-core:(+,21.0.99]'
+    implementation 'com.google.firebase:firebase-messaging:(+,23.0.99]'
+}
