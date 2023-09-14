@@ -28,7 +28,7 @@
 	<platform name="android">
         <config-file target="config.xml" parent="/*">
             <preference name="GradlePluginGoogleServicesEnabled" value="true" />
-            <preference name="GradlePluginGoogleServicesVersion" value="4.3.10" />
+            <preference name="GradlePluginGoogleServicesVersion" value="4.3.15" />
         </config-file>
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
@@ -77,13 +77,13 @@
         <framework src="com.github.bumptech.glide:glide:4.10.0" />
         <framework src="org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60" />
 
-        <framework src="com.pushwoosh:pushwoosh:6.6.14"/>
-		<framework src="com.pushwoosh:pushwoosh-amazon:6.6.14"/>
-        <framework src="com.pushwoosh:pushwoosh-firebase:6.6.14"/>
-		<framework src="com.pushwoosh:pushwoosh-badge:6.6.14"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox:6.6.14"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox-ui:6.6.14"/>
-		<framework src="com.pushwoosh:pushwoosh-huawei:6.6.14"/>
+        <framework src="com.pushwoosh:pushwoosh:6.6.16"/>
+		<framework src="com.pushwoosh:pushwoosh-amazon:6.6.16"/>
+        <framework src="com.pushwoosh:pushwoosh-firebase:6.6.16"/>
+		<framework src="com.pushwoosh:pushwoosh-badge:6.6.16"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox:6.6.16"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox-ui:6.6.16"/>
+		<framework src="com.pushwoosh:pushwoosh-huawei:6.6.16"/>
 	</platform>
 
 	<!-- ios -->
@@ -125,7 +125,7 @@
                 <source url="https://github.com/CocoaPods/Specs.git"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="PushwooshXCFramework" spec="6.4.5" />
+                <pod name="PushwooshXCFramework" spec="6.5.1" />
                 <pod name="PushwooshInboxUIXCFramework" spec="6.1.1" />
             </pods>
         </podspec>
