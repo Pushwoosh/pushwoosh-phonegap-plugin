@@ -239,6 +239,11 @@ static PushNotification *pw_PushNotificationPlugin;
     }];
 }
 
+- (void)setLanguage:(CDVInvokedUrlCommand *)command {
+    NSString *language = command.arguments[0];
+    [[Pushwoosh sharedInstance] setLanguage:language];
+}
+
 - (void)startBeaconPushes:(CDVInvokedUrlCommand *)command {
 	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:@{ @"error" : @"Beacon tracking is not supported" }];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
