@@ -220,6 +220,21 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@CordovaMethod
+	private boolean setLanguage(JSONArray data, final CallbackContext callbackContext)
+	{
+		try
+		{
+			String language = data.getString(0);
+			Pushwoosh.getInstance().setLanguage(language);
+		}
+		catch (JSONException e)
+		{
+			PWLog.error(TAG, "No parameters passed (missing parameters)", e);
+		}
+		return true;
+	}
+
+	@CordovaMethod
 	private boolean setTags(JSONArray data, final CallbackContext callbackContext) {
 		JSONObject params;
 		try {

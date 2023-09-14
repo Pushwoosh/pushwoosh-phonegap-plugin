@@ -273,6 +273,17 @@ PushNotification.prototype.clearLaunchNotification = function(callback) {
 	exec(callback, callback, "PushNotification", "clearLaunchNotification", []);
 };
 
+//Function: setLanguage
+//[android, ios] Set custom application language (as opposed to the default system language).
+//This allows sending localized push messages
+//
+//Parameters:
+// "language" - string containing language code, i.e. "en", "fr"
+//
+PushNotification.prototype.setLanguage = function(language) {
+	exec(null, null, "PushNotification", "setLanguage", [language]);
+};
+
 //Function: setUserId
 //[android, ios] Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
 //This allows data and events to be matched across multiple user devices.
