@@ -82,7 +82,7 @@ function copyServiceOnAndroid(sourceDir, targetDir) {
 }
 
 function addAGConnectDependency(lines) {
-    var AG_CONNECT_DEPENDENCY = "classpath 'com.huawei.agconnect:agcp:1.6.2.300' " + COMMENT;
+    var AG_CONNECT_DEPENDENCY = "classpath 'com.huawei.agconnect:agcp:1.9.1.300' " + COMMENT;
     var pattern = /(\s*)classpath(\s+)[\',\"]com.android.tools.build:gradle.*[^\]\n]/m;
     var index;
 
