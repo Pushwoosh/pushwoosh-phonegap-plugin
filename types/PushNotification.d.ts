@@ -53,6 +53,7 @@ export interface PushNotification {
 	getLaunchNotification(success?: (notification: string) => void): void;
 	clearLaunchNotification(success?: () => void): void;
 	setUserId(userId: string): void;
+	setLanguage(language: string): void;
 	postEvent(event: string, attributes?: Record<string, string>): void;
 	addJavaScriptInterface(bridgeName: string): void;
 	createLocalNotification(notification: LocalNotification, success?: () => void, fail?: () => void): void;
