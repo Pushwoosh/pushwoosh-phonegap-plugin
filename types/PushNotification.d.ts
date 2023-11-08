@@ -14,6 +14,20 @@ type LocalNotification = {
 	userData?: Object;
 }
 
+type InboxNotification = {
+	code: string;
+	title?: string;
+	message?: string;
+	imageUrl?: string;
+	sendDate?: string;
+	type?: number;
+	bannerUrl?: string;
+	customData?: Object;
+	isRead?: boolean;
+	actionParams?: Object;
+	isActionPerformed?: boolean;
+}
+
 type AuthOptions = Record<string, number|string>
 
 type RemoteNotificationStatus = Record<string,string|number|boolean>
@@ -39,6 +53,7 @@ export interface PushNotification {
 	getLaunchNotification(success?: (notification: string) => void): void;
 	clearLaunchNotification(success?: () => void): void;
 	setUserId(userId: string): void;
+	setLanguage(language: string): void;
 	postEvent(event: string, attributes?: Record<string, string>): void;
 	addJavaScriptInterface(bridgeName: string): void;
 	createLocalNotification(notification: LocalNotification, success?: () => void, fail?: () => void): void;
@@ -50,6 +65,13 @@ export interface PushNotification {
 	pushReceivedCallback(notification: string): void;
 	notificationCallback(notification: string): void;
 	presentInboxUI(params?: Record<string,any>): void;
+	loadMessages(success?: (messages: InboxNotification[]) =>void, fail?: (error?: Error|string) => void): void;
+	messagesWithNoActionPerformedCount(callback: (result: number) => void): void;
+    unreadMessagesCount(callback: (result: number) => void): void;
+    messagesCount(callback: (result: number) => void): void;
+    readMessage(id: string): void;
+    deleteMessage(id: string): void;
+    performAction(id: string): void;
 	showGDPRConsentUI(): void;
 	showGDPRDeletionUI(): void;
 	setCommunicationEnabled(enable: boolean, success?: () => void, fail?: (callback: Error|string) => void): void;

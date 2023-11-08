@@ -29,8 +29,12 @@ import com.pushwoosh.exception.UnregisterForPushNotificationException;
 import com.pushwoosh.function.Callback;
 import com.pushwoosh.function.Result;
 import com.pushwoosh.inapp.PushwooshInApp;
+import com.pushwoosh.inbox.PushwooshInbox;
+import com.pushwoosh.inbox.data.InboxMessage;
+import com.pushwoosh.inbox.exception.InboxMessagesException;
 import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
 import com.pushwoosh.internal.platform.utils.GeneralUtils;
+import com.pushwoosh.internal.utils.JsonUtils;
 import com.pushwoosh.internal.utils.PWLog;
 import com.pushwoosh.notification.LocalNotification;
 import com.pushwoosh.notification.LocalNotificationReceiver;
@@ -43,7 +47,6 @@ import com.pushwoosh.tags.TagsBundle;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.CordovaWebView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,6 +55,7 @@ import java.lang.annotation.Retention;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -328,12 +332,12 @@ public class PushNotifications extends CordovaPlugin {
 			if (message == null) {
 				return false;
 			}
-			
+
 			Bundle extras = new Bundle();
 			if (params.has("userData")) {
 				extras.putString("u", params.getString("userData"));
 			}
-			
+
 			LocalNotification notification = new LocalNotification.Builder()
 					.setMessage(message)
 					.setDelay(seconds)
@@ -608,6 +612,156 @@ public class PushNotifications extends CordovaPlugin {
         this.cordova.getActivity().startActivity(new Intent(this.cordova.getActivity(), InboxActivity.class));
         return true;
     }
+
+	@CordovaMethod
+	private boolean loadMessages(JSONArray data, final CallbackContext callbackContext) {
+		try {
+			callbackIds.put("loadMessages", callbackContext);
+			PushwooshInbox.loadMessages(new Callback<Collection<InboxMessage>, InboxMessagesException>() {
+				@Override
+				public void process(@NonNull Result<Collection<InboxMessage>, InboxMessagesException> result) {
+					CallbackContext callback = callbackIds.get("loadMessages");
+					if (callback == null)
+						return;
+
+					if(result.isSuccess() && result.getData() != null) {
+						ArrayList<InboxMessage> messagesList = new ArrayList<>(result.getData());
+						JSONArray jsonArray = new JSONArray();
+						for (InboxMessage message : messagesList){
+							jsonArray.put(inboxMessageToJson(message));
+						}
+						callback.success(jsonArray);
+					} else if (result.getException() != null){
+						callback.error(result.getException().getMessage());
+					}
+				}
+			});
+		} catch (java.lang.RuntimeException e) {
+			callbackIds.remove("loadMessages");
+			PWLog.error(TAG, "Failed to load inbox messages", e);
+
+			callbackContext.error(e.getMessage());
+		}
+
+		return true;
+	}
+
+	@CordovaMethod
+	public boolean messagesWithNoActionPerformedCount(JSONArray data, final CallbackContext callbackContext) {
+		try {
+			callbackIds.put("messagesWithNoActionPerformedCount", callbackContext);
+			PushwooshInbox.messagesWithNoActionPerformedCount(new Callback<Integer, InboxMessagesException>() {
+				@Override
+				public void process(@NonNull Result<Integer, InboxMessagesException> result) {
+					CallbackContext callback = callbackIds.get("messagesWithNoActionPerformedCount");
+					if (callback == null)
+						return;
+
+					if(result.isSuccess() && result.getData() != null) {
+						callback.success(result.getData());
+					} else if (result.getException() != null){
+						callback.error(result.getException().getMessage());
+					}
+				}
+			});
+		} catch (java.lang.RuntimeException e) {
+			callbackIds.remove("messagesWithNoActionPerformedCount");
+			PWLog.error(TAG, "Failed to get number of messages with no action", e);
+
+			callbackContext.error(e.getMessage());
+		}
+
+		return true;
+	}
+
+	@CordovaMethod
+	public boolean unreadMessagesCount(JSONArray data, final CallbackContext callbackContext) {
+		try {
+			callbackIds.put("unreadMessagesCount", callbackContext);
+			PushwooshInbox.unreadMessagesCount(new Callback<Integer, InboxMessagesException>() {
+				@Override
+				public void process(@NonNull Result<Integer, InboxMessagesException> result) {
+					CallbackContext callback = callbackIds.get("unreadMessagesCount");
+					if (callback == null)
+						return;
+
+					if(result.isSuccess() && result.getData() != null) {
+						callback.success(result.getData());
+					} else if (result.getException() != null){
+						callback.error(result.getException().getMessage());
+					}
+				}
+			});
+		} catch (java.lang.RuntimeException e) {
+			callbackIds.remove(" unreadMessagesCount");
+			PWLog.error(TAG, "Failed to get number of unread messages", e);
+
+			callbackContext.error(e.getMessage());
+		}
+
+		return true;
+	}
+
+	@CordovaMethod
+	public boolean messagesCount(JSONArray data, final CallbackContext callbackContext) {
+		try {
+			callbackIds.put("messagesCount", callbackContext);
+			PushwooshInbox.messagesCount(new Callback<Integer, InboxMessagesException>() {
+				@Override
+				public void process(@NonNull Result<Integer, InboxMessagesException> result) {
+					CallbackContext callback = callbackIds.get("messagesCount");
+					if (callback == null)
+						return;
+
+					if(result.isSuccess() && result.getData() != null) {
+						callback.success(result.getData());
+					} else if (result.getException() != null){
+						callback.error(result.getException().getMessage());
+					}
+				}
+			});
+		} catch (java.lang.RuntimeException e) {
+			callbackIds.remove(" messagesCount");
+			PWLog.error(TAG, "Failed to get total number of inbox messages", e);
+
+			callbackContext.error(e.getMessage());
+		}
+
+		return true;
+	}
+
+	@CordovaMethod
+	public boolean readMessage(JSONArray data, final CallbackContext callbackContext) {
+		try {
+			PushwooshInbox.readMessage(data.getString(0));
+			return true;
+		} catch (JSONException e) {
+			PWLog.error(TAG, "Failed to mark inbox message as read", e);
+			return false;
+		}
+	}
+
+	@CordovaMethod
+	public boolean deleteMessage(JSONArray data, final CallbackContext callbackContext) {
+		try {
+			PushwooshInbox.deleteMessage(data.getString(0));
+			return true;
+		} catch (JSONException e) {
+			PWLog.error(TAG, "Failed to delete inbox message", e);
+			return false;
+		}
+	}
+
+	@CordovaMethod
+	public boolean performAction(JSONArray data, final CallbackContext callbackContext) {
+		try {
+			PushwooshInbox.performAction(data.getString(0));
+			return true;
+		} catch (JSONException e) {
+			PWLog.error(TAG, "Failed to perform action for inbox message", e);
+			return false;
+		}
+	}
 
 	@CordovaMethod
 	public boolean showGDPRConsentUI(JSONArray data, final CallbackContext callbackContext){
@@ -891,6 +1045,31 @@ public class PushNotifications extends CordovaPlugin {
 		}
 
 		return true;
+	}
+
+	private static JSONObject inboxMessageToJson(InboxMessage message) {
+		JSONObject object = new JSONObject();
+		try {
+			object.put("code", message.getCode())
+					.put("title", message.getTitle())
+					.put("imageUrl", message.getImageUrl())
+					.put("message",message.getMessage())
+					.put("sendDate",message.getISO8601SendDate())
+					.put("type", message.getType().getCode())
+					.put("bannerUrl", message.getBannerUrl())
+					.put("isRead",message.isRead())
+					.put("actionParams",message.getActionParams())
+					.put("isActionPerformed",message.isActionPerformed());
+
+			Bundle bundle = JsonUtils.jsonStringToBundle( message.getActionParams());
+			String customData = bundle.getString("u");
+			if (customData != null) {
+				object.put("customData", customData);
+			}
+		} catch (JSONException e) {
+			PWLog.error("PushwooshInbox", "Failed to fetch inbox message :" + e.getMessage());
+		}
+		return object;
 	}
 
 }
