@@ -572,12 +572,17 @@ PushNotification.prototype.messagesCount = function(success) {
 	exec(success, null,"PushNotification", "messagesCount", []);
 }
 
+// Mark inbox message as read
 PushNotification.prototype.readMessage = function(number) {
 	exec(null, null, "PushNotification", "readMessage", [number]);
 }
+
+// Delete message from inbox
 PushNotification.prototype.deleteMessage = function(number) {
 	exec(null, null, "PushNotification", "deleteMessage", [number]);
 }
+
+// Perform action for specified inbox message (i.e. open URL)
 PushNotification.prototype.performAction = function(number) {
 	exec(null, null, "PushNotification", "performAction", [number]);
 }
