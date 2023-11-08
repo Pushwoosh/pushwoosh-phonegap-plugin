@@ -552,6 +552,41 @@ PushNotification.prototype.presentInboxUI = function(params) {
 	exec(null, null, "PushNotification", "presentInboxUI", [ params ]);
 }
 
+// Load an array of InboxNotification objects
+PushNotification.prototype.loadMessages = function(success, fail) {
+	exec(success, fail, "PushNotification", "loadMessages", []);
+}
+
+// Get number of inbox messages with no action performed
+PushNotification.prototype.messagesWithNoActionPerformedCount = function(success) {
+	exec(success, null, "PushNotification", "messagesWithNoActionPerformedCount", []);
+}
+
+// Get number of unread inbox messages
+PushNotification.prototype.unreadMessagesCount = function(success) {
+	exec(success, null,"PushNotification", "unreadMessagesCount", []);
+}
+
+// Get total number of inbox messages
+PushNotification.prototype.messagesCount = function(success) {
+	exec(success, null,"PushNotification", "messagesCount", []);
+}
+
+// Mark inbox message as read
+PushNotification.prototype.readMessage = function(number) {
+	exec(null, null, "PushNotification", "readMessage", [number]);
+}
+
+// Delete message from inbox
+PushNotification.prototype.deleteMessage = function(number) {
+	exec(null, null, "PushNotification", "deleteMessage", [number]);
+}
+
+// Perform action for specified inbox message (i.e. open URL)
+PushNotification.prototype.performAction = function(number) {
+	exec(null, null, "PushNotification", "performAction", [number]);
+}
+
 // Show inApp for change setting Enable/disable all communication with Pushwoosh
 PushNotification.prototype.showGDPRConsentUI = function() {
 	exec(null, null, "PushNotification", "showGDPRConsentUI", []);

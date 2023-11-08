@@ -15,6 +15,7 @@
 #import <PushwooshInboxUI/PushwooshInboxUI.h>
 #import <Pushwoosh/PWGDPRManager.h>
 #import <Pushwoosh/PWInAppManager.h>
+#import <Pushwoosh/PWInbox.h>
 #import "PWBackward.h"
 
 #import "AppDelegate.h"
@@ -273,6 +274,83 @@ static PushNotification *pw_PushNotificationPlugin;
 		[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"getTags"]];
 	}];
 }
+
+- (void)loadMessages:(CDVInvokedUrlCommand *)command {
+    // The first argument in the arguments parameter is the callbackID.
+    self.callbackIds[@"loadMessages"] = command.callbackId;
+    [PWInbox loadMessagesWithCompletion:^(NSArray<NSObject<PWInboxMessageProtocol> *> *messages, NSError *error) {
+        if (!error) {
+            NSMutableArray* array = [[NSMutableArray alloc] init];
+            for (NSObject<PWInboxMessageProtocol>* message in messages) {
+                NSDictionary* dict = [self inboxMessageToDictionary:message];
+                [array addObject:dict];
+            }
+            
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:array];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"loadMessages"]];
+        } else {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"loadMessages"]];
+        }
+    }];
+}
+
+- (void)unreadMessagesCount:(CDVInvokedUrlCommand *)command {
+    // The first argument in the arguments parameter is the callbackID.
+    self.callbackIds[@"unreadMessagesCount"] = command.callbackId;
+    [PWInbox unreadMessagesCountWithCompletion:^(NSInteger count, NSError *error) {
+        if (!error) {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)count];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"unreadMessagesCount"]];
+        }
+    }];
+}
+
+- (void)messagesWithNoActionPerformedCount:(CDVInvokedUrlCommand *)command {
+    // The first argument in the arguments parameter is the callbackID.
+    self.callbackIds[@"messagesWithNoActionPerformedCount"] = command.callbackId;
+    [PWInbox messagesWithNoActionPerformedCountWithCompletion:^(NSInteger count, NSError *error) {
+        if (!error) {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)count];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"messagesWithNoActionPerformedCount"]];
+        }
+    }];
+}
+
+- (void)messagesCount:(CDVInvokedUrlCommand *)command {
+    // The first argument in the arguments parameter is the callbackID.
+    self.callbackIds[@"messagesCount"] = command.callbackId;
+    [PWInbox messagesCountWithCompletion:^(NSInteger count, NSError *error) {
+        if (!error) {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)count];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"messagesCount"]];
+        }
+    }];
+}
+
+- (void)readMessage:(CDVInvokedUrlCommand *)command {
+    NSString *messageCode = command.arguments[0];
+    if (messageCode.length != 0) {
+        NSArray *array = [NSArray arrayWithObject:messageCode];
+        [PWInbox readMessagesWithCodes:array];
+    }
+}
+
+- (void)deleteMessage:(CDVInvokedUrlCommand *)command {
+    NSString *messageCode = command.arguments[0];
+    if (messageCode.length != 0) {
+        NSArray *array = [NSArray arrayWithObject:messageCode];
+        [PWInbox deleteMessagesWithCodes:array];
+    }
+}
+
+- (void)performAction:(CDVInvokedUrlCommand *)command {
+    NSString *messageCode = command.arguments[0];
+    if (messageCode.length != 0) {
+        [PWInbox performActionForMessageWithCode:messageCode];
+    }
+}
+
 
 - (void)createLocalNotification:(CDVInvokedUrlCommand *)command {
     NSDictionary *params = command.arguments[0];
@@ -659,6 +737,35 @@ BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id applicat
 	appDelegateClass = [delegate class];
 	
 	pushwoosh_swizzle([delegate class], @selector(application:didRegisterUserNotificationSettings:), @selector(application:pwplugin_didRegisterUserNotificationSettings:), (IMP)pwplugin_didRegisterUserNotificationSettings, "v@:::");
+}
+
+- (NSDictionary*)inboxMessageToDictionary:(NSObject<PWInboxMessageProtocol>*) message {
+    NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] init];
+    [dictionary setValue:@(message.type) forKey:@"type"];
+    [dictionary setValue:[self stringOrEmpty: message.imageUrl] forKey:@"imageUrl"];
+    [dictionary setValue:[self stringOrEmpty: message.code] forKey:@"code"];
+    [dictionary setValue:[self stringOrEmpty: message.title] forKey:@"title"];
+    [dictionary setValue:[self stringOrEmpty: message.message] forKey:@"message"];
+    [dictionary setValue:[self stringOrEmpty: [self dateToString:message.sendDate]] forKey:@"sendDate"];
+    [dictionary setValue:@(message.isRead) forKey:@"isRead"];
+    [dictionary setValue:@(message.isActionPerformed) forKey:@"isActionPerformed"];
+    
+    NSDictionary* actionParams = [NSDictionary dictionaryWithDictionary:message.actionParams];
+    NSData* customData = [actionParams valueForKey:@"u"];
+    [dictionary setValue:customData forKey:@"customData"];
+    
+    NSDictionary* result = [NSDictionary dictionaryWithDictionary:dictionary];
+    return result;
+}
+
+- (NSString *)stringOrEmpty:(NSString *)string {
+    return string != nil ? string : @"";
+}
+
+- (NSString*)dateToString:(NSDate*)date {
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"yyyy-MM-dd'T'H:mm:ssZ"];
+    return [formatter stringFromDate:date];
 }
 
 - (void)dealloc {
