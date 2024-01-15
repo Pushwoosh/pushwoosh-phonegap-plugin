@@ -192,6 +192,7 @@ static PushNotification *pw_PushNotificationPlugin;
 }
 
 - (void)dispatchPushReceive:(NSDictionary *)pushData {
+    PWLogDebug(@"dispatchPushReceive called: %@", pushData);
     NSData *json = [NSJSONSerialization dataWithJSONObject:pushData options:NSJSONWritingPrettyPrinted error:nil];
     NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
         
@@ -201,6 +202,7 @@ static PushNotification *pw_PushNotificationPlugin;
 }
 
 - (void)dispatchPushAccept:(NSDictionary *)pushData {
+    PWLogDebug(@"dispatchPushAccept called: %@", pushData);
     NSData *json = [NSJSONSerialization dataWithJSONObject:pushData options:NSJSONWritingPrettyPrinted error:nil];
     NSString *jsonString = [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding];
     
@@ -449,7 +451,7 @@ static PushNotification *pw_PushNotificationPlugin;
     
     notification[@"ios"] = pushNotification;
     
-    PWLogDebug(@"Notification opened: %@", notification);
+    PWLogDebug(@"Create Notification data for push: %@", notification);
     
     if (onStart) {
         //keep the start push
@@ -462,6 +464,7 @@ static PushNotification *pw_PushNotificationPlugin;
 
 - (void)onPushReceived:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
     if (_deviceReady) {
+        PWLogDebug(@"onPushReceived called: %@", pushNotification);
         NSDictionary *notification = [self createNotificationDataForPush:pushNotification onStart:onStart];
         //send it to the webview
         [self dispatchPushReceive:notification];
@@ -470,6 +473,7 @@ static PushNotification *pw_PushNotificationPlugin;
 
 - (void)onPushAccepted:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
     if (_deviceReady) {
+        PWLogDebug(@"onPushAccepted called: %@", pushNotification);
         NSDictionary *notification = [self createNotificationDataForPush:pushNotification onStart:onStart];
         //send it to the webview
         [self dispatchPushAccept:notification];
