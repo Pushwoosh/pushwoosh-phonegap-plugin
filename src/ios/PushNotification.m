@@ -206,18 +206,6 @@ API_AVAILABLE(ios(10))
 API_AVAILABLE(ios(10.0)) {
     
     if ([self isRemoteNotification:notification] && [PWMessage isPushwooshMessage:notification.request.content.userInfo]) {
-        UNMutableNotificationContent *content = notification.request.content.mutableCopy;
-        
-        NSMutableDictionary *userInfo = content.userInfo.mutableCopy;
-        userInfo[@"pw_push"] = @(YES);
-        
-        content.userInfo = userInfo;
-        
-        //newsstand push
-        if (![self isContentAvailablePush:userInfo]) {
-            [[Pushwoosh sharedInstance] handlePushReceived:[self pushPayloadFromContent:content]];
-        }
-        
         completionHandler(UNNotificationPresentationOptionNone);
     } else if ([PushNotificationManager pushManager].showPushnotificationAlert || [notification.request.content.userInfo objectForKey:@"pw_push"] == nil) {
         completionHandler(UNNotificationPresentationOptionBadge | UNNotificationPresentationOptionAlert | UNNotificationPresentationOptionSound);
