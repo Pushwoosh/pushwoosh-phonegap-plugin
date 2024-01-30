@@ -28,7 +28,6 @@ ext.pushwoosh = "6.7.1"
 cdvPluginPostBuildExtras.push({
   dependencies {
     def supportVersion = getVersion()
-    implementation "com.google.firebase:firebase-core:(+,21.0.99]"
     implementation "com.google.firebase:firebase-messaging:(+,23.0.99]"
     implementation "com.android.support:support-v4:${supportVersion}"
     implementation "com.android.support:appcompat-v7:${supportVersion}"
