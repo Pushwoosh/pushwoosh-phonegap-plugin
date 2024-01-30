@@ -15,6 +15,7 @@
 #import <PushwooshInboxUI/PushwooshInboxUI.h>
 #import <Pushwoosh/PWGDPRManager.h>
 #import <Pushwoosh/PWInAppManager.h>
+#import <Pushwoosh/PushNotificationManager.h>
 #import <Pushwoosh/PWInbox.h>
 #import "PWBackward.h"
 
@@ -80,6 +81,15 @@ static PushNotification *pw_PushNotificationPlugin;
 
 @implementation PushNotification
 
+API_AVAILABLE(ios(10))
+__weak id<UNUserNotificationCenterDelegate> _originalNotificationCenterDelegate;
+API_AVAILABLE(ios(10))
+  struct {
+    unsigned int willPresentNotification : 1;
+    unsigned int didReceiveNotificationResponse : 1;
+    unsigned int openSettingsForNotification : 1;
+  } _originalNotificationCenterDelegateResponds;
+
 #pragma clang diagnostic pop
 
 - (void)pluginInitialize {
@@ -143,7 +153,33 @@ static PushNotification *pw_PushNotificationPlugin;
 		[PushNotificationManager initializeWithAppCode:appid appName:appname];
 	}
     
-	[UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
+    if (@available(iOS 10, *)) {
+        BOOL shouldReplaceDelegate = YES;
+        UNUserNotificationCenter *notificationCenter = [UNUserNotificationCenter currentNotificationCenter];
+        
+        if (notificationCenter.delegate != nil) {
+            if (shouldReplaceDelegate) {
+                _originalNotificationCenterDelegate = notificationCenter.delegate;
+                _originalNotificationCenterDelegateResponds.openSettingsForNotification =
+                (unsigned int)[_originalNotificationCenterDelegate
+                               respondsToSelector:@selector(userNotificationCenter:openSettingsForNotification:)];
+                _originalNotificationCenterDelegateResponds.willPresentNotification =
+                (unsigned int)[_originalNotificationCenterDelegate
+                               respondsToSelector:@selector(userNotificationCenter:
+                                                            willPresentNotification:withCompletionHandler:)];
+                _originalNotificationCenterDelegateResponds.didReceiveNotificationResponse =
+                (unsigned int)[_originalNotificationCenterDelegate
+                               respondsToSelector:@selector(userNotificationCenter:
+                                                            didReceiveNotificationResponse:withCompletionHandler:)];
+            }
+        }
+        
+        if (shouldReplaceDelegate) {
+            __strong PushNotification<UNUserNotificationCenterDelegate> *strongSelf = (PushNotification<UNUserNotificationCenterDelegate> *)self;
+            notificationCenter.delegate = (id<UNUserNotificationCenterDelegate>)strongSelf;
+        }
+    }
+    
 	[self.pushManager sendAppOpen];
 
 	NSString * alertTypeString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_ALERT_TYPE"];
@@ -167,6 +203,98 @@ static PushNotification *pw_PushNotificationPlugin;
 	}
 
 	[[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+#pragma mark - UNUserNotificationCenter Delegate Methods
+#pragma mark -
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+       willPresentNotification:(UNNotification *)notification
+         withCompletionHandler:
+(void (^)(UNNotificationPresentationOptions options))completionHandler
+API_AVAILABLE(ios(10.0)) {
+    
+    if ([self isRemoteNotification:notification] && [PWMessage isPushwooshMessage:notification.request.content.userInfo]) {
+        completionHandler(UNNotificationPresentationOptionNone);
+    } else if ([PushNotificationManager pushManager].showPushnotificationAlert || [notification.request.content.userInfo objectForKey:@"pw_push"] == nil) {
+        completionHandler(UNNotificationPresentationOptionBadge | UNNotificationPresentationOptionAlert | UNNotificationPresentationOptionSound);
+    } else {
+        completionHandler(UNNotificationPresentationOptionNone);
+    }
+    
+    if (_originalNotificationCenterDelegate != nil &&
+        _originalNotificationCenterDelegateResponds.willPresentNotification) {
+        [_originalNotificationCenterDelegate userNotificationCenter:center
+                                            willPresentNotification:notification
+                                              withCompletionHandler:completionHandler];
+    }
+}
+
+- (BOOL)isContentAvailablePush:(NSDictionary *)userInfo {
+    NSDictionary *apsDict = userInfo[@"aps"];
+    return apsDict[@"content-available"] != nil;
+}
+
+- (NSDictionary *)pushPayloadFromContent:(UNNotificationContent *)content {
+    return [[content.userInfo objectForKey:@"pw_push"] isKindOfClass:[NSDictionary class]] ? [content.userInfo objectForKey:@"pw_push"] : content.userInfo;
+}
+
+- (BOOL)isRemoteNotification:(UNNotification *)notification {
+    return [notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]];
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+didReceiveNotificationResponse:(UNNotificationResponse *)response
+         withCompletionHandler:(void (^)(void))completionHandler
+API_AVAILABLE(ios(10.0)) {
+    dispatch_block_t handlePushAcceptanceBlock = ^{
+        if (![response.actionIdentifier isEqualToString:UNNotificationDismissActionIdentifier]) {
+            if (![response.actionIdentifier isEqualToString:UNNotificationDefaultActionIdentifier] && [[PushNotificationManager pushManager].delegate respondsToSelector:@selector(onActionIdentifierReceived:withNotification:)]) {
+                [[PushNotificationManager pushManager].delegate onActionIdentifierReceived:response.actionIdentifier withNotification:[self pushPayloadFromContent:response.notification.request.content]];
+            }
+
+            [[Pushwoosh sharedInstance] handlePushReceived:[self pushPayloadFromContent:response.notification.request.content]];
+        }
+    };
+    
+    if ([self isRemoteNotification:response.notification]  && [PWMessage isPushwooshMessage:response.notification.request.content.userInfo]) {
+        if (![self isContentAvailablePush:response.notification.request.content.userInfo]) {
+            [[Pushwoosh sharedInstance] handlePushReceived:[self pushPayloadFromContent:response.notification.request.content]];
+        }
+        
+        handlePushAcceptanceBlock();
+    } else if ([response.notification.request.content.userInfo objectForKey:@"pw_push"]) {
+        handlePushAcceptanceBlock();
+    }
+
+    if (_originalNotificationCenterDelegate != nil &&
+        _originalNotificationCenterDelegateResponds.didReceiveNotificationResponse) {
+        [_originalNotificationCenterDelegate userNotificationCenter:center
+                                     didReceiveNotificationResponse:response
+                                              withCompletionHandler:completionHandler];
+    } else {
+        completionHandler();
+    }
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+   openSettingsForNotification:(nullable UNNotification *)notification
+API_AVAILABLE(ios(10.0)) {
+    if ([[PushNotificationManager pushManager].delegate respondsToSelector:@selector(pushManager:openSettingsForNotification:)]) {
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wpartial-availability"
+        [[PushNotificationManager pushManager].delegate pushManager:[PushNotificationManager pushManager] openSettingsForNotification:notification];
+        #pragma clang diagnostic pop
+    }
+
+    if (_originalNotificationCenterDelegate != nil &&
+        _originalNotificationCenterDelegateResponds.openSettingsForNotification) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+        [_originalNotificationCenterDelegate userNotificationCenter:center
+                                        openSettingsForNotification:notification];
+#pragma clang diagnostic pop
+    }
 }
 
 // Authorization options in addition to UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCarPlay. Should be called before registering for pushes
