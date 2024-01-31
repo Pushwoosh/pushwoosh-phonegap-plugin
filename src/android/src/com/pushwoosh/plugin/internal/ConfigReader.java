@@ -1,4 +1,4 @@
-package com.pushwoosh.plugin.pushnotifications;
+package com.pushwoosh.plugin.internal;
 
 import org.json.JSONObject;
 import java.nio.file.Files;

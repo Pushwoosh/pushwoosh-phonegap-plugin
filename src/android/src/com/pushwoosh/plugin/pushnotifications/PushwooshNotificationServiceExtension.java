@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import com.pushwoosh.internal.utils.PWLog;
 import com.pushwoosh.notification.NotificationServiceExtension;
 import com.pushwoosh.notification.PushMessage;
+import com.pushwoosh.plugin.internal.ConfigReader;
 
 public class PushwooshNotificationServiceExtension extends NotificationServiceExtension {
 	private boolean showForegroundPush;
