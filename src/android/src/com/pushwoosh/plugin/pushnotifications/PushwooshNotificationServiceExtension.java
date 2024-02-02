@@ -35,4 +35,9 @@ public class PushwooshNotificationServiceExtension extends NotificationServiceEx
 	protected void onMessageOpened(PushMessage pushMessage) {
 		PushNotifications.openPush(pushMessage.toJson().toString());
 	}
+
+	@Override
+	protected boolean preHandleNotificationsWithUrl() {
+		return false;
+	}
 }
