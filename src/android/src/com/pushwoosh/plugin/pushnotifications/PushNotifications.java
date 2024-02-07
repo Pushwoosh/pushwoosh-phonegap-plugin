@@ -77,6 +77,8 @@ public class PushNotifications extends CordovaPlugin {
 
 	private static final Map<String, Method> exportedMethods;
 
+	public static boolean showPushnotificationAlert;
+
 	@Retention(RUNTIME)
 	@interface CordovaMethod {
 
@@ -230,6 +232,25 @@ public class PushNotifications extends CordovaPlugin {
 		{
 			String language = data.getString(0);
 			Pushwoosh.getInstance().setLanguage(language);
+		}
+		catch (JSONException e)
+		{
+			PWLog.error(TAG, "No parameters passed (missing parameters)", e);
+		}
+		return true;
+	}
+
+	@CordovaMethod
+	public static boolean isShowPushnotificationAlert() {
+		return PushNotifications.showPushnotificationAlert;
+	}
+
+	@CordovaMethod
+	private boolean setShowPushnotificationAlert(JSONArray data, final CallbackContext callbackContext) {
+		try
+		{
+			boolean showAlert = data.getBoolean(0);
+			PushNotifications.showPushnotificationAlert = showAlert;
 		}
 		catch (JSONException e)
 		{
