@@ -156,6 +156,12 @@ API_AVAILABLE(ios(10))
         UNUserNotificationCenter *notificationCenter = [UNUserNotificationCenter currentNotificationCenter];
         
         if (notificationCenter.delegate != nil) {
+            if ([notificationCenter.delegate conformsToProtocol:@protocol(PushNotificationDelegate)]) {
+                shouldReplaceDelegate = NO;
+            }
+        }
+        
+        if (notificationCenter.delegate != nil) {
             if (shouldReplaceDelegate) {
                 _originalNotificationCenterDelegate = notificationCenter.delegate;
                 _originalNotificationCenterDelegateResponds.openSettingsForNotification =
