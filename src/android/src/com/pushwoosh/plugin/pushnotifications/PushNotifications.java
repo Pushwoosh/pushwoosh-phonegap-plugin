@@ -77,8 +77,6 @@ public class PushNotifications extends CordovaPlugin {
 
 	private static final Map<String, Method> exportedMethods;
 
-	public static boolean showPushnotificationAlert;
-
 	@Retention(RUNTIME)
 	@interface CordovaMethod {
 
@@ -241,16 +239,11 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@CordovaMethod
-	public static boolean isShowPushnotificationAlert() {
-		return PushNotifications.showPushnotificationAlert;
-	}
-
-	@CordovaMethod
 	private boolean setShowPushnotificationAlert(JSONArray data, final CallbackContext callbackContext) {
 		try
 		{
 			boolean showAlert = data.getBoolean(0);
-			PushNotifications.showPushnotificationAlert = showAlert;
+			Pushwoosh.getInstance().setShowPushnotificationAlert(showAlert);
 		}
 		catch (JSONException e)
 		{
