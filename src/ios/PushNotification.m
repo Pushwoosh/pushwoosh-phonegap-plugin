@@ -370,6 +370,11 @@ API_AVAILABLE(ios(10.0)) {
     [[Pushwoosh sharedInstance] setLanguage:language];
 }
 
+- (void)setShowPushnotificationAlert:(CDVInvokedUrlCommand *)command {
+    BOOL showPushnotificationAlert = command.arguments[0];
+    self.pushManager.showPushnotificationAlert = showPushnotificationAlert;
+}
+
 - (void)startBeaconPushes:(CDVInvokedUrlCommand *)command {
 	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:@{ @"error" : @"Beacon tracking is not supported" }];
 	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

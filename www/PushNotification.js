@@ -284,6 +284,18 @@ PushNotification.prototype.setLanguage = function(language) {
 	exec(null, null, "PushNotification", "setLanguage", [language]);
 };
 
+//Function: setShowPushnotificationAlert
+//[android, ios] Configure custom foreground push notification settings distinct from the default system configuration.
+//This allows show foreground push notifications
+//
+//Parameters:
+// "showPushnotificationAlert" - bool value
+//
+
+PushNotification.prototype.setShowPushnotificationAlert = function(showPushnotificationAlert) {
+	exec(null, null, "PushNotification", "setShowPushnotificationAlert", [showPushnotificationAlert]);
+};
+
 //Function: setUserId
 //[android, ios] Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
 //This allows data and events to be matched across multiple user devices.

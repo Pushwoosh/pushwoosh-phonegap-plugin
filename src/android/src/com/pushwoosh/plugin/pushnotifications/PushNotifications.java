@@ -239,6 +239,20 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@CordovaMethod
+	private boolean setShowPushnotificationAlert(JSONArray data, final CallbackContext callbackContext) {
+		try
+		{
+			boolean showAlert = data.getBoolean(0);
+			Pushwoosh.getInstance().setShowPushnotificationAlert(showAlert);
+		}
+		catch (JSONException e)
+		{
+			PWLog.error(TAG, "No parameters passed (missing parameters)", e);
+		}
+		return true;
+	}
+
+	@CordovaMethod
 	private boolean setTags(JSONArray data, final CallbackContext callbackContext) {
 		JSONObject params;
 		try {
