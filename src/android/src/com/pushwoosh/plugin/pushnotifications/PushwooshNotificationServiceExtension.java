@@ -28,7 +28,7 @@ public class PushwooshNotificationServiceExtension extends NotificationServiceEx
 	@Override
 	protected boolean onMessageReceived(final PushMessage pushMessage) {
 		PushNotifications.messageReceived(pushMessage.toJson().toString());
-		return (!showForegroundPush && super.onMessageReceived(pushMessage) && isAppOnForeground());
+		return (!showForegroundPush && !super.onMessageReceived(pushMessage) && isAppOnForeground());
 	}
 
 	@Override
