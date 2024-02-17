@@ -20,7 +20,7 @@ String getVersion() {
   return compileSdkVersion >= 28 ? "28.0.0" : "27.+" 
 }
 
-ext.pushwoosh = "6.7.1"
+ext.pushwoosh = "6.7.4"
 
 // Defer the definition of the dependencies to the end
 // of the "configuration" phase from the app build.gradle file
