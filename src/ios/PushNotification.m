@@ -158,6 +158,12 @@ API_AVAILABLE(ios(10))
         UNUserNotificationCenter *notificationCenter = [UNUserNotificationCenter currentNotificationCenter];
         
         if (notificationCenter.delegate != nil) {
+            if ([notificationCenter.delegate conformsToProtocol:@protocol(PushNotificationDelegate)]) {
+                shouldReplaceDelegate = NO;
+            }
+        }
+        
+        if (notificationCenter.delegate != nil) {
             if (shouldReplaceDelegate) {
                 _originalNotificationCenterDelegate = notificationCenter.delegate;
                 _originalNotificationCenterDelegateResponds.openSettingsForNotification =
@@ -373,6 +379,11 @@ API_AVAILABLE(ios(10.0)) {
 - (void)setLanguage:(CDVInvokedUrlCommand *)command {
     NSString *language = command.arguments[0];
     [[Pushwoosh sharedInstance] setLanguage:language];
+}
+
+- (void)setShowPushnotificationAlert:(CDVInvokedUrlCommand *)command {
+    BOOL showPushnotificationAlert = command.arguments[0];
+    self.pushManager.showPushnotificationAlert = showPushnotificationAlert;
 }
 
 - (void)startBeaconPushes:(CDVInvokedUrlCommand *)command {
