@@ -45,7 +45,7 @@
 
 @end
 
-@interface PushNotification() <PWMessagingDelegate>
+@interface PushNotification() <PWMessagingDelegate, UIApplicationDelegate>
 
 @property (nonatomic, retain) NSMutableDictionary *callbackIds;
 @property (nonatomic, retain) PushNotificationManager *pushManager;
@@ -55,6 +55,7 @@
 @property (nonatomic, assign) BOOL deviceReady;
 
 - (BOOL) application:(UIApplication *)application pwplugin_didRegisterUserNotificationSettings:(UIUserNotificationSettings *)settings;
+- (void) application:(UIApplication *)application pwplugin_didRegisterWithDeviceToken:(NSData *)deviceToken;
 
 @end
 
@@ -827,6 +828,14 @@ API_AVAILABLE(ios(10.0)) {
     }
 }
 
+void pwplugin_didRegisterWithDeviceToken(id self, SEL _cmd, id application, NSData *deviceToken) {
+    if ([self respondsToSelector:@selector(application: pwplugin_didRegisterWithDeviceToken:)]) {
+        [self application:application pwplugin_didRegisterWithDeviceToken:deviceToken];
+    }
+    
+    [[Pushwoosh sharedInstance] handlePushRegistration:deviceToken];
+}
+
 BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id application, id notificationSettings) {
 	PushNotification *pushHandler = pw_PushNotificationPlugin;
 	
@@ -876,6 +885,7 @@ BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id applicat
 	appDelegateClass = [delegate class];
 	
 	pushwoosh_swizzle([delegate class], @selector(application:didRegisterUserNotificationSettings:), @selector(application:pwplugin_didRegisterUserNotificationSettings:), (IMP)pwplugin_didRegisterUserNotificationSettings, "v@:::");
+    pushwoosh_swizzle([delegate class], @selector(application:didRegisterForRemoteNotificationsWithDeviceToken:), @selector(application:pwplugin_didRegisterWithDeviceToken:), (IMP)pwplugin_didRegisterWithDeviceToken, "v@:::");
 }
 
 - (NSDictionary*)inboxMessageToDictionary:(NSObject<PWInboxMessageProtocol>*) message {
