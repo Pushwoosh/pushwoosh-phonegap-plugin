@@ -12,7 +12,7 @@ var NEW_LINE = "\n";
 var APP_BUILD_GRADLE_FILE = "platforms/android/app/build.gradle";
 var APPLY_PLUGIN = "apply plugin: 'com.huawei.agconnect'"
 var PLUGIN_BUILD_GRADLE_FILE = "plugins/pushwoosh-cordova-plugin/libs/android/googleservices-build.gradle";
-var HUAWEI_PUSH_KIT_DEPENDENCY = "implementation \"com.huawei.hms:push:6.1.0.300\""
+var HUAWEI_PUSH_KIT_DEPENDENCY = "implementation \"com.huawei.hms:push:6.12.0.300\""
 
 function getZipFile(resourcesFolder, prefZipFilename) {
     try {
