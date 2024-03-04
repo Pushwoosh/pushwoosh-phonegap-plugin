@@ -261,16 +261,10 @@ API_AVAILABLE(ios(10.0)) {
             if (![response.actionIdentifier isEqualToString:UNNotificationDefaultActionIdentifier] && [[PushNotificationManager pushManager].delegate respondsToSelector:@selector(onActionIdentifierReceived:withNotification:)]) {
                 [[PushNotificationManager pushManager].delegate onActionIdentifierReceived:response.actionIdentifier withNotification:[self pushPayloadFromContent:response.notification.request.content]];
             }
-
-            [[Pushwoosh sharedInstance] handlePushReceived:[self pushPayloadFromContent:response.notification.request.content]];
         }
     };
     
     if ([self isRemoteNotification:response.notification]  && [PWMessage isPushwooshMessage:response.notification.request.content.userInfo]) {
-        if (![self isContentAvailablePush:response.notification.request.content.userInfo]) {
-            [[Pushwoosh sharedInstance] handlePushReceived:[self pushPayloadFromContent:response.notification.request.content]];
-        }
-        
         handlePushAcceptanceBlock();
     } else if ([response.notification.request.content.userInfo objectForKey:@"pw_push"]) {
         handlePushAcceptanceBlock();

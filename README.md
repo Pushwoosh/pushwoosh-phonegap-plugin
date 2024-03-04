@@ -15,13 +15,13 @@ Cross-Platform push notifications by Pushwoosh for Cordova / PhoneGap
 Using npm (requires cordova 7.0+):
 
 ```
-cordova plugin add pushwoosh-cordova-plugin@8.3.24
+cordova plugin add pushwoosh-cordova-plugin@8.3.25
 ```
 
 Using git:
 
 ```
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.24
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.25
 ```
 
 #### Phonegap
@@ -29,7 +29,7 @@ cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.
 Using npm (requires phonegap 7.1+):
 
 ```
-cordova plugin add pushwoosh-cordova-plugin@8.3.24
+cordova plugin add pushwoosh-cordova-plugin@8.3.25
 ```
 
 ### Guide
