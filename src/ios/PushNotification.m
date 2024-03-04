@@ -206,11 +206,11 @@ API_AVAILABLE(ios(10))
     // The launchNotification is only defined when the app is launched by a notification. 
     // The startPushData is a private field with the data of launchNotification and it's created for the dispatch.
     // This means that if the startPushData is null, the launchNotification hasn't been dispatched.
-        PWLogDebug(@"launch notification cleared: %d", launchNotificationCleared);
+        PWLogDebug(@"launch notification cleared: %d", _launchNotificationCleared);
 
 	if (self.pushwoosh.launchNotification && !self.launchNotificationCleared) {
         self.launchNotificationCleared = YES;
-                PWLogDebug(@"launch notification cleared and changed: %d", launchNotificationCleared);
+        PWLogDebug(@"launch notification cleared and changed: %d", _launchNotificationCleared);
 
         NSDictionary *notification = [self createNotificationDataForPush:self.pushwoosh.launchNotification onStart:YES];
         [self dispatchPushReceive:notification];
