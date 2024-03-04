@@ -17,6 +17,7 @@
 
 	<preference name="LOG_LEVEL" default="DEBUG" />
 	<preference name="IOS_FOREGROUND_ALERT_TYPE" default="NONE" />
+	<preference name="PREHANDLE_URL_NOTIFICATIONS" default="YES" />
 	<preference name="ANDROID_FOREGROUND_PUSH" default="false" />
 
 	<js-module src="www/PushNotification.js" name="PushNotification">
@@ -96,6 +97,11 @@
 			<string>$IOS_FOREGROUND_ALERT_TYPE</string>
 		</config-file>
 
+		<config-file target="*-Info.plist" parent="Pushwoosh_PREHANDLE_URL_NOTIFICATIONS">
+			<string>$PREHANDLE_URL_NOTIFICATIONS</string>
+		</config-file>
+		
+
 		<config-file parent="aps-environment" target="*/Entitlements-Debug.plist">
 			<string>development</string>
 		</config-file>
@@ -108,7 +114,7 @@
                 <source url="https://github.com/CocoaPods/Specs.git"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="PushwooshXCFramework" spec="6.5.8" />
+                <pod name="PushwooshXCFramework" spec="6.5.9" />
                 <pod name="PushwooshInboxUIXCFramework" spec="6.1.2" />
             </pods>
         </podspec>
