@@ -17,7 +17,7 @@
 
 	<preference name="LOG_LEVEL" default="DEBUG" />
 	<preference name="IOS_FOREGROUND_ALERT_TYPE" default="NONE" />
-	<preference name="PREHANDLE_URL_NOTIFICATIONS" default="YES" />
+	<preference name="PREHANDLE_URL_NOTIFICATIONS" default="NO" />
 	<preference name="ANDROID_FOREGROUND_PUSH" default="false" />
 
 	<js-module src="www/PushNotification.js" name="PushNotification">
