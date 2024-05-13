@@ -72,6 +72,8 @@ function getPackageName(context) {
     let data = fs.readFileSync(config_xml).toString();
     let etree = et.parse(data);
     let appId = etree.getroot().attrib.id ;
+    console.log("[PUSHWOOSH HELPER] App Identifier detected: " + appId);
+
     return appId;
 }
 
