@@ -23,6 +23,8 @@ function getZipFile(resourcesFolder, prefZipFilename) {
                 var filename = path.basename(file, ".zip");
                 if (filename === prefZipFilename) {
                     zipFile = path.join(resourcesFolder, file);
+                } else if (filename === "google-services.zip") {
+                    zipFile = path.join(resourcesFolder, file);
                 }
             }
         });
@@ -116,6 +118,12 @@ function copyGoogleServiceOnIos(sourceDir, targetDir) {
     }
 }
 
+// we expect to have google services file with the package name prefix in case there are multiple files
+function getExpectedGoogleServicesFile(context) {
+    var packageName = getPackageName(context);
+    return packageName + ".google-services";
+}
+
 
 module.exports = function(context) {
     return new Promise(function(resolve, reject) {
@@ -123,7 +131,7 @@ module.exports = function(context) {
         var configPath = path.join(wwwpath, "google-services");
 
 
-        var prefZipFilename = "google-services";
+        var prefZipFilename = getGoogleServicesFile(context);
         var zipFile = getZipFile(configPath, prefZipFilename);
 
         // if zip file is present, lets unzip it!
