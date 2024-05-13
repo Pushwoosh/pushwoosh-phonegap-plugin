@@ -39,13 +39,12 @@ function getZipFile(resourcesFolder, prefZipFilename) {
  * @param {string} zipFile Absolute path to the etracted zip
  * @param {string} unzippedTargetDir Absolutepath to where the
  * uncompressed content is going to be placed
- * @param {string} prefZipFilename The name of the zip file
  * @returns {string} Absolute path to the folder containing
  * the uncompressed content of the zip file
  */
-function unzip(zipFile, unzippedTargetDir, prefZipFilename) {
+function unzip(zipFile, unzippedTargetDir) {
     var zip = new AdmZip(zipFile);
-    var targetDir = path.join(unzippedTargetDir, prefZipFilename);
+    var targetDir = path.join(unzippedTargetDir, "google-services");
     zip.extractAllTo(targetDir, true);
     return targetDir;
 }
@@ -140,7 +139,7 @@ module.exports = function(context) {
                 "Failed to install Pushwoosh plugin. Reason: Configuration zip file not found."
             );
         }
-        var unzipedResourcesDir = unzip(zipFile, configPath, prefZipFilename);
+        var unzipedResourcesDir = unzip(zipFile, configPath);
         var platform = context.opts.plugin.platform;
         var targetDir = getGoogleServiceTargetDir(context);
         var copyWithSuccess = copyGoogleServiceFile(
