@@ -131,7 +131,7 @@ module.exports = function(context) {
         var configPath = path.join(wwwpath, "google-services");
 
 
-        var prefZipFilename = getGoogleServicesFile(context);
+        var prefZipFilename = getExpectedGoogleServicesFile(context);
         var zipFile = getZipFile(configPath, prefZipFilename);
 
         // if zip file is present, lets unzip it!
