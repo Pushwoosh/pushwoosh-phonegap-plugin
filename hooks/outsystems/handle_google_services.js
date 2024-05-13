@@ -120,7 +120,7 @@ function copyGoogleServiceOnIos(sourceDir, targetDir) {
 
 // we expect to have google services file with the package name prefix in case there are multiple files
 function getExpectedGoogleServicesFile(context) {
-    var packageName = getPackageName(context);
+    var packageName = utils.getPackageName(context);
     return packageName + ".google-services";
 }
 
