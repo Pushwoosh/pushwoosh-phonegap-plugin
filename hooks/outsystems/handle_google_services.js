@@ -116,12 +116,18 @@ function copyGoogleServiceOnIos(sourceDir, targetDir) {
     }
 }
 
+function extractAppId() {
+  const configFile = "config.xml";
+  const xmlData = fs.readFileSync(configFile, "utf8");
+  const match = xmlData.match(/id="([^"]+)"/);
+  return match ? match[1] : null;
+}
 
 module.exports = function(context) {
     return new Promise(function(resolve, reject) {
         var wwwpath = utils.getWwwPath(context);
         var configPath = path.join(wwwpath, "google-services");
-
+        var appId = extractAppId();
 
         var prefZipFilename = "google-services";
         var zipFile = getZipFile(configPath, prefZipFilename);
