@@ -16,19 +16,28 @@ var utils = require("./utils");
  */
 function getZipFile(resourcesFolder, prefZipFilename) {
     try {
-        var dirFiles = fs.readdirSync(resourcesFolder);
-        var zipFile;
-        dirFiles.forEach(function(file) {
+        var dirAppSpecific = path.join(resourcesFolder, extractAppId());
+        var dirAppSpecificFiles = fs.readdirSync(dirAppSpecific);
+        var zipFile == null;   
+        dirAppSpecificFiles.forEach(function(file) {
             if (file.match(/\.zip$/)) {
                 var filename = path.basename(file, ".zip");
                 if (filename === prefZipFilename) {
-                    zipFile = path.join(resourcesFolder, file);
-                } else if (filename === "google-services.zip") {
-                    zipFile = path.join(resourcesFolder, file);
+                    zipFile = path.join(dirAppSpecific, file);
                 }
             }
-        });
-        console.log("[Pushwoosh Helper] Zip file location is: " + zipFile);
+        })
+        if (zipFile == null) {
+            var dirFiles = fs.readdirSync(resourcesFolder);
+            dirFiles.forEach(function(file) {
+                if (file.match(/\.zip$/)) {
+                    var filename = path.basename(file, ".zip");
+                    if (filename === prefZipFilename) {
+                        zipFile = path.join(resourcesFolder, file);
+                    }
+                }
+            });
+        }
         return zipFile;
     } catch (error) {
         return undefined;
@@ -40,14 +49,14 @@ function getZipFile(resourcesFolder, prefZipFilename) {
  * @param {string} zipFile Absolute path to the etracted zip
  * @param {string} unzippedTargetDir Absolutepath to where the
  * uncompressed content is going to be placed
+ * @param {string} prefZipFilename The name of the zip file
  * @returns {string} Absolute path to the folder containing
  * the uncompressed content of the zip file
  */
-function unzip(zipFile, unzippedTargetDir) {
+function unzip(zipFile, unzippedTargetDir, prefZipFilename) {
     var zip = new AdmZip(zipFile);
-    var targetDir = path.join(unzippedTargetDir, "google-services");
+    var targetDir = path.join(unzippedTargetDir, prefZipFilename);
     zip.extractAllTo(targetDir, true);
-    console.log("[Pushwoosh Helper] Unzipped file " + zipFile + " to: " + targetDir);
     return targetDir;
 }
 
@@ -119,12 +128,17 @@ function copyGoogleServiceOnIos(sourceDir, targetDir) {
     }
 }
 
-// we expect to have google services file with the package name prefix in case there are multiple files
-function getExpectedGoogleServicesFile(context) {
-    var packageName = utils.getPackageName(context);
-    return packageName + ".google-services";
+/**
+ * Extracts the App Identifier from the config.xml file using a regular expression.
+ *
+ * @returns {string|null} The App Identifier or null if not found.
+ */
+function extractAppId() {
+  const configFile = "config.xml";
+  const xmlData = fs.readFileSync(configFile, "utf8");
+  const match = xmlData.match(/id="([^"]+)"/);
+  return match ? match[1] : null;
 }
-
 
 module.exports = function(context) {
     return new Promise(function(resolve, reject) {
@@ -132,8 +146,7 @@ module.exports = function(context) {
         var configPath = path.join(wwwpath, "google-services");
 
 
-        var prefZipFilename = getExpectedGoogleServicesFile(context);
-        console.log("[Pushwoosh Helper] Expected zip file name is: " + prefZipFilename);
+        var prefZipFilename = "google-services";
         var zipFile = getZipFile(configPath, prefZipFilename);
 
         // if zip file is present, lets unzip it!
@@ -142,11 +155,9 @@ module.exports = function(context) {
                 "Failed to install Pushwoosh plugin. Reason: Configuration zip file not found."
             );
         }
-        console.log("Attempting to unzip " + zipFile + " to " + configPath);
-        var unzipedResourcesDir = unzip(zipFile, configPath);
+        var unzipedResourcesDir = unzip(zipFile, configPath, prefZipFilename);
         var platform = context.opts.plugin.platform;
         var targetDir = getGoogleServiceTargetDir(context);
-        console.log("[Pushwoosh Helper] Google services targetDir is: " + targetDir);
         var copyWithSuccess = copyGoogleServiceFile(
             unzipedResourcesDir,
             targetDir,

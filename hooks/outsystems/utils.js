@@ -1,7 +1,5 @@
 var path = require("path");
 var fs = require("fs");
-let et = require('elementtree');
-
 const { log } = require("console");
 /**
  * Get the platform version for the current execution
@@ -67,21 +65,10 @@ function getWwwPath(context) {
     return path.join(platformPath, wwwfolder);
 }
 
-function getPackageName(context) {
-    let config_xml = path.join(context.opts.projectRoot, 'config.xml');
-    let data = fs.readFileSync(config_xml).toString();
-    let etree = et.parse(data);
-    let appId = etree.getroot().attrib.id ;
-    console.log("[PUSHWOOSH HELPER] App Identifier detected: " + appId);
-
-    return appId;
-}
-
 
 module.exports = {
     getPlatformVersion: getPlatformVersion,
     rmNonEmptyDir: rmNonEmptyDir,
     getPlatformPath: getPlatformPath,
     getWwwPath: getWwwPath,
-    getPackageName: getPackageName,
 };
