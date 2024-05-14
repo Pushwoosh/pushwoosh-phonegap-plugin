@@ -16,10 +16,11 @@ var utils = require("./utils");
  */
 function getZipFile(resourcesFolder, prefZipFilename) {
     try {
+        var zipFile;   
         var dirAppSpecific = path.join(resourcesFolder, extractAppId());
-        var dirAppSpecificFiles = fs.readdirSync(dirAppSpecific);
-        var zipFile = null;   
-        dirAppSpecificFiles.forEach(function(file) {
+        if (fs.existsSync(dirAppSpecific)){
+            var dirAppSpecificFiles = fs.readdirSync(dirAppSpecific);
+            dirAppSpecificFiles.forEach(function(file) {
             if (file.match(/\.zip$/)) {
                 var filename = path.basename(file, ".zip");
                 if (filename === prefZipFilename) {
@@ -27,7 +28,9 @@ function getZipFile(resourcesFolder, prefZipFilename) {
                 }
             }
         });
-        if (zipFile == null) {
+        }
+        
+        if (zipFile === undefined) {
             var dirFiles = fs.readdirSync(resourcesFolder);
             dirFiles.forEach(function(file) {
                 if (file.match(/\.zip$/)) {
