@@ -18,7 +18,7 @@ function getZipFile(resourcesFolder, prefZipFilename) {
     try {
         var dirAppSpecific = path.join(resourcesFolder, extractAppId());
         var dirAppSpecificFiles = fs.readdirSync(dirAppSpecific);
-        var zipFile == null;   
+        var zipFile = null;   
         dirAppSpecificFiles.forEach(function(file) {
             if (file.match(/\.zip$/)) {
                 var filename = path.basename(file, ".zip");
