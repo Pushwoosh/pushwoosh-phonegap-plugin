@@ -16,16 +16,28 @@ var utils = require("./utils");
  */
 function getZipFile(resourcesFolder, prefZipFilename) {
     try {
-        var dirFiles = fs.readdirSync(resourcesFolder);
-        var zipFile;
-        dirFiles.forEach(function(file) {
+        var dirAppSpecific = path.join(resourcesFolder, extractAppId());
+        var dirAppSpecificFiles = fs.readdirSync(dirAppSpecific);
+        var zipFile == null;   
+        dirAppSpecificFiles.forEach(function(file) {
             if (file.match(/\.zip$/)) {
                 var filename = path.basename(file, ".zip");
                 if (filename === prefZipFilename) {
-                    zipFile = path.join(resourcesFolder, file);
+                    zipFile = path.join(dirAppSpecific, file);
                 }
             }
         });
+        if (zipFile == null) {
+            var dirFiles = fs.readdirSync(resourcesFolder);
+            dirFiles.forEach(function(file) {
+                if (file.match(/\.zip$/)) {
+                    var filename = path.basename(file, ".zip");
+                    if (filename === prefZipFilename) {
+                        zipFile = path.join(resourcesFolder, file);
+                    }
+                }
+            });
+        }
         return zipFile;
     } catch (error) {
         return undefined;
@@ -127,7 +139,6 @@ module.exports = function(context) {
     return new Promise(function(resolve, reject) {
         var wwwpath = utils.getWwwPath(context);
         var configPath = path.join(wwwpath, "google-services");
-        var appId = extractAppId();
 
         var prefZipFilename = "google-services";
         var zipFile = getZipFile(configPath, prefZipFilename);
