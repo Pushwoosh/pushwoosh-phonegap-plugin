@@ -16,28 +16,16 @@ var utils = require("./utils");
  */
 function getZipFile(resourcesFolder, prefZipFilename) {
     try {
-        var dirAppSpecific = path.join(resourcesFolder, extractAppId());
-        var dirAppSpecificFiles = fs.readdirSync(dirAppSpecific);
-        var zipFile == null;   
-        dirAppSpecificFiles.forEach(function(file) {
+        var dirFiles = fs.readdirSync(resourcesFolder);
+        var zipFile;
+        dirFiles.forEach(function(file) {
             if (file.match(/\.zip$/)) {
                 var filename = path.basename(file, ".zip");
                 if (filename === prefZipFilename) {
-                    zipFile = path.join(dirAppSpecific, file);
+                    zipFile = path.join(resourcesFolder, file);
                 }
             }
-        })
-        if (zipFile == null) {
-            var dirFiles = fs.readdirSync(resourcesFolder);
-            dirFiles.forEach(function(file) {
-                if (file.match(/\.zip$/)) {
-                    var filename = path.basename(file, ".zip");
-                    if (filename === prefZipFilename) {
-                        zipFile = path.join(resourcesFolder, file);
-                    }
-                }
-            });
-        }
+        });
         return zipFile;
     } catch (error) {
         return undefined;
@@ -128,17 +116,6 @@ function copyGoogleServiceOnIos(sourceDir, targetDir) {
     }
 }
 
-/**
- * Extracts the App Identifier from the config.xml file using a regular expression.
- *
- * @returns {string|null} The App Identifier or null if not found.
- */
-function extractAppId() {
-  const configFile = "config.xml";
-  const xmlData = fs.readFileSync(configFile, "utf8");
-  const match = xmlData.match(/id="([^"]+)"/);
-  return match ? match[1] : null;
-}
 
 module.exports = function(context) {
     return new Promise(function(resolve, reject) {
