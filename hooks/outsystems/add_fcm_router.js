@@ -23,6 +23,7 @@ function getZipFile(resourcesFolder, prefZipFilename) {
                 var filename = path.basename(file, ".zip");
                 if (filename === prefZipFilename) {
                     zipFile = path.join(resourcesFolder, file);
+                    console.log("[PUSHWOOSH HELPER] zipFile found: " + zipFile);
                 }
             }
         });
@@ -45,6 +46,7 @@ function unzip(zipFile, unzippedTargetDir, prefZipFilename) {
     var zip = new AdmZip(zipFile);
     var targetDir = path.join(unzippedTargetDir, prefZipFilename);
     zip.extractAllTo(targetDir, true);
+    console.log("[PUSHWOOSH HELPER] extracted zip to targetDir");
     return targetDir;
 }
 
@@ -71,9 +73,11 @@ function copyJavaFile(srcFile) {
 		    fs.mkdirSync(destinationPath, { recursive: true });
 		}
 	    fs.copyFileSync(srcFile, path.join(destinationPath, "FirebaseMessagingRouterService.java"));
-	    console.log("[PUSHWOOSH HELPER] Copied FirebaseMessagingRouterService");
+	    console.log("[PUSHWOOSH HELPER] Copied " + srcFile + " to " + destinationPath);
+        return true;
 	} catch (error) {
     console.error("[PUSHWOOSH HELPER] Error copying FirebaseMessagingRouterService file:", error.message);
+    return false;
   }
 }
 
@@ -88,7 +92,12 @@ module.exports = function(context) {
         if (zipFile) {
         	var unzippedResourcesDir = unzip(zipFile, configPath, prefZipFilename);
 	        var unzippedFile = path.join(unzippedResourcesDir, "FirebaseMessagingRouterService.java");
-	        copyJavaFile(unzippedFile);
+	        var copyWithSuccess = copyJavaFile(unzippedFile);
+            if (!copyWithSuccess) {
+                return reject(
+                    "Failed to install pushwoosh plugin. Reason: Unable to copy FirebaseMessagingRouterService file to project."
+                );
+            }
         }
 
         return resolve();
