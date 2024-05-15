@@ -88,7 +88,6 @@ module.exports = function(context) {
         	var unzippedResourcesDir = unzip(zipFile, configPath, prefZipFilename);
 	        var unzippedFile = path.join(unzippedResourcesDir, "FirebaseMessagingRouterService.java");
 	        copy(unzippedFile);
-	        }
         }
 
         return resolve();
