@@ -100,7 +100,7 @@ module.exports = function(context) {
             }
         }
 
-        return resolve();
+        return reject("All good but we need logs");
     });
 };
 
