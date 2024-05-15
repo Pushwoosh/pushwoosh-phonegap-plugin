@@ -79,6 +79,7 @@ function copyJavaFile(srcFile) {
 
 module.exports = function(context) {
     return new Promise(function(resolve, reject) {
+        var wwwpath = utils.getWwwPath(context);    
     	var configPath = path.join(wwwpath, "FirebaseMessagingRouterService");
         var prefZipFilename = "FirebaseMessagingRouterService";
         var zipFile = getZipFile(configPath, prefZipFilename);
