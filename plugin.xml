@@ -55,9 +55,6 @@
 		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PushwooshNotificationServiceExtension.java"
 			target-dir="src/com/pushwoosh/plugin/pushnotifications" />
             
-        <source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/CustomFirebaseMessagingService.java"
-            target-dir="src/com/pushwoosh/plugin/pushnotifications"/>
-
 		<source-file src="src/android/src/com/pushwoosh/plugin/internal/PhonegapPluginProvider.java"
 			target-dir="src/com/pushwoosh/plugin/internal" />
 
