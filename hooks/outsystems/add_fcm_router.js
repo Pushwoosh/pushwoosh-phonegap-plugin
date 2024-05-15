@@ -68,7 +68,7 @@ function copyJavaFile(srcFile) {
 	      throw new Error("[PUSHWOOSH HELPER] Source file not found:", srcFile);
 	    }
 
-	    const destinationPath = path.join("platforms/android/app/src/main", getPackageSpecificPath());
+	    const destinationPath = path.join("platforms/android/app/src/main/java", getPackageSpecificPath());
 	    if (!fs.existsSync(destinationPath)) {
 		    fs.mkdirSync(destinationPath, { recursive: true });
 		}
@@ -100,7 +100,7 @@ module.exports = function(context) {
             }
         }
 
-        return reject("All good but we need logs");
+        return resolve();
     });
 };
 
