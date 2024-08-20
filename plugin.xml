@@ -17,8 +17,8 @@
 	<issue>https://github.com/Pushwoosh/pushwoosh-phonegap-plugin/issues</issue>
 
 	<preference name="LOG_LEVEL" default="DEBUG" />
-	<preference name="IOS_FOREGROUND_ALERT_TYPE" default="NONE" />
-	<preference name="ANDROID_FOREGROUND_PUSH" default="false" />
+	<preference name="IOS_FOREGROUND_ALERT_TYPE" default="ALERT" />
+	<preference name="ANDROID_FOREGROUND_PUSH" default="true" />
 
 	<js-module src="www/PushNotification.js" name="PushNotification">
 		<clobbers target="plugins.pushNotification" />

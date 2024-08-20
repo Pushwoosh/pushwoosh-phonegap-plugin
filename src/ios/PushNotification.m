@@ -368,8 +368,8 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)setShowPushnotificationAlert:(CDVInvokedUrlCommand *)command {
-    BOOL showPushnotificationAlert = command.arguments[0];
-    self.pushManager.showPushnotificationAlert = showPushnotificationAlert;
+    id showPushnotificationAlert = command.arguments[0];
+    self.pushManager.showPushnotificationAlert = [showPushnotificationAlert boolValue];
 }
 
 - (void)startBeaconPushes:(CDVInvokedUrlCommand *)command {
