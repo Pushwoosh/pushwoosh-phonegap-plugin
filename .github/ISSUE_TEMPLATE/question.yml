@@ -1,0 +1,28 @@
+name: "❓ Question"
+description: "Ask us a question"
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your question!
+        
+        This form is for Cordova (PhoneGap) Plugin only. If this is a question for another platform or framework — please create it in the corresponded [repository](https://github.com/orgs/Pushwoosh/repositories). We appreciate your cooperation!
+
+  - type: checkboxes
+    id: rtfm
+    attributes:
+      label: Documentation
+      description: "Have you checked the relevant integration guide: [Integrating Cordova Plugin](https://docs.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/cordova/integrating-cordova-plugin) which describes implementation process of the Pushwoosh SDK to your app and follow all the necessary steps?"
+      options:
+        - label: I've checked the guide, but I didn't find the information I needed there.
+          required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: How can we help you? Do you have any questions about the integration of the SDK or how it works? You can add screenshots and screencast to illustrate your request.
+    validations:
+      required: true

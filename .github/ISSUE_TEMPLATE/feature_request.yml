@@ -1,0 +1,31 @@
+name: "💡 Feature request"
+description: "Suggest us a good idea or improvement"
+title: "[Feature]: "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to create this request.
+        
+        This form is for Cordova (PhoneGap) Plugin only. If this is a feature for another platform or framework — please create it in the corresponded [repository](https://github.com/orgs/Pushwoosh/repositories). We appreciate your cooperation!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please tell us what's on your mind. You can add screenshots and screencast to illustrate your request.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: Sugeestions
+      description: |
+        If you know how you can achieve what you want or you have any information that may help us to achieve this, you can add it here.
+        For example, links to repositories, discussion threads, documentation, code samples, etc.
+
+  - type: markdown
+    attributes:
+      value: Thank you for your feedback!
