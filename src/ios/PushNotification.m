@@ -214,9 +214,11 @@ API_AVAILABLE(ios(10))
 (void (^)(UNNotificationPresentationOptions options))completionHandler
 API_AVAILABLE(ios(10.0)) {
     
-    if ([self isRemoteNotification:notification] && [PWMessage isPushwooshMessage:notification.request.content.userInfo]) {
+    if ([PushNotificationManager pushManager].showPushnotificationAlert) {
+        completionHandler(UNNotificationPresentationOptionBadge | UNNotificationPresentationOptionAlert | UNNotificationPresentationOptionSound);
+    } else if ([self isRemoteNotification:notification] && [PWMessage isPushwooshMessage:notification.request.content.userInfo]) {
         completionHandler(UNNotificationPresentationOptionNone);
-    } else if ([PushNotificationManager pushManager].showPushnotificationAlert || [notification.request.content.userInfo objectForKey:@"pw_push"] == nil) {
+    } else if ([notification.request.content.userInfo objectForKey:@"pw_push"] == nil) {
         completionHandler(UNNotificationPresentationOptionBadge | UNNotificationPresentationOptionAlert | UNNotificationPresentationOptionSound);
     } else {
         completionHandler(UNNotificationPresentationOptionNone);
