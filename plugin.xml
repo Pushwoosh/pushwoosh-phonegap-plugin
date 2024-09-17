@@ -125,7 +125,7 @@
                 <source url="https://github.com/CocoaPods/Specs.git"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="PushwooshXCFramework" spec="6.7.0" />
+                <pod name="PushwooshXCFramework" spec="6.6.1" />
                 <pod name="PushwooshInboxUIXCFramework" spec="6.1.2" />
             </pods>
         </podspec>
