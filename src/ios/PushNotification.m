@@ -13,10 +13,10 @@
 #import "PushNotification.h"
 #import "PWLog.h"
 #import <PushwooshInboxUI/PushwooshInboxUI.h>
-#import <Pushwoosh/PWGDPRManager.h>
-#import <Pushwoosh/PWInAppManager.h>
-#import <Pushwoosh/PushNotificationManager.h>
-#import <Pushwoosh/PWInbox.h>
+#import <PushwooshFramework/PWGDPRManager.h>
+#import <PushwooshFramework/PWInAppManager.h>
+#import <PushwooshFramework/PushNotificationManager.h>
+#import <PushwooshFramework/PWInbox.h>
 #import "PWBackward.h"
 
 #import "AppDelegate.h"
