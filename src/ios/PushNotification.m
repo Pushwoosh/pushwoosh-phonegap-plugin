@@ -154,39 +154,7 @@ API_AVAILABLE(ios(10))
 		[PushNotificationManager initializeWithAppCode:appid appName:appname];
 	}
     
-    if (@available(iOS 10, *)) {
-        BOOL shouldReplaceDelegate = YES;
-        UNUserNotificationCenter *notificationCenter = [UNUserNotificationCenter currentNotificationCenter];
-        
-        if (notificationCenter.delegate != nil) {
-            if ([notificationCenter.delegate conformsToProtocol:@protocol(PushNotificationDelegate)]) {
-                shouldReplaceDelegate = NO;
-            }
-        }
-        
-        if (notificationCenter.delegate != nil) {
-            if (shouldReplaceDelegate) {
-                _originalNotificationCenterDelegate = notificationCenter.delegate;
-                _originalNotificationCenterDelegateResponds.openSettingsForNotification =
-                (unsigned int)[_originalNotificationCenterDelegate
-                               respondsToSelector:@selector(userNotificationCenter:openSettingsForNotification:)];
-                _originalNotificationCenterDelegateResponds.willPresentNotification =
-                (unsigned int)[_originalNotificationCenterDelegate
-                               respondsToSelector:@selector(userNotificationCenter:
-                                                            willPresentNotification:withCompletionHandler:)];
-                _originalNotificationCenterDelegateResponds.didReceiveNotificationResponse =
-                (unsigned int)[_originalNotificationCenterDelegate
-                               respondsToSelector:@selector(userNotificationCenter:
-                                                            didReceiveNotificationResponse:withCompletionHandler:)];
-            }
-        }
-        
-        if (shouldReplaceDelegate) {
-            __strong PushNotification<UNUserNotificationCenterDelegate> *strongSelf = (PushNotification<UNUserNotificationCenterDelegate> *)self;
-            notificationCenter.delegate = (id<UNUserNotificationCenterDelegate>)strongSelf;
-        }
-    }
-    
+    [UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
 	[self.pushManager sendAppOpen];
 
 	NSString * alertTypeString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_ALERT_TYPE"];
