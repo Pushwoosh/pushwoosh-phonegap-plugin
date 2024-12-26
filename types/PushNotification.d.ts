@@ -87,4 +87,9 @@ export interface PushNotification {
 	setColorLED(color: string, success?: () => void, fail?: () => void): void;
 	getPushHistory(success?: (pushHistory: Object) => void): void;
 	clearPushHistory(callback: () => void): void;
+	setEmail(email: string, success?: () => void, fail?: (error: Error|string) => void): void;
+	setEmails(emails: string[], success?: () => void, fail?: (error: Error|string) => void): void;
+	setUserEmails(userId: string, emails: string[], success?: () => void, fail?: (error: Error|string) => void): void;
+	registerSMSNumber(phoneNumber: string, success?: () => void, fail?: (error: Error|string) => void): void;
+	registerWhatsappNumber(phoneNumber: string, success?: () => void, fail?: (error: Error|string) => void): void;
 }

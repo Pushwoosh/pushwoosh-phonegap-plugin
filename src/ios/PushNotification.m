@@ -674,6 +674,64 @@ API_AVAILABLE(ios(10.0)) {
     }];
 }
 
+- (void)setEmail:(CDVInvokedUrlCommand *)command {
+    NSString *email = command.arguments[0];
+    [[Pushwoosh sharedInstance] setEmail:email completion:^(NSError *error) {
+        CDVPluginResult *pluginResult;
+        if (!error) {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        } else {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to set email"];
+        }
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }];
+}
+
+- (void)setEmails:(CDVInvokedUrlCommand *)command {
+    NSArray *emailsArray = command.arguments[0];
+    for (NSString *email in emailsArray) {
+        [[Pushwoosh sharedInstance] setEmail:email completion:^(NSError *error) {
+            CDVPluginResult *pluginResult;
+            if (!error) {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            } else {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to set emails"];
+            }
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        }];
+    }
+}
+
+- (void)setUserEmails:(CDVInvokedUrlCommand *)command {
+    NSString *userId = command.arguments[0];
+    NSArray *emailsArray = command.arguments[1];
+    for (NSString *email in emailsArray) {
+        [[Pushwoosh sharedInstance] setUser:userId emails:@[email] completion:^(NSError *error) {
+            CDVPluginResult *pluginResult;
+            if (!error) {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            } else {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to set user emails"];
+            }
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        }];
+    }
+}
+
+- (void)registerSMSNumber:(CDVInvokedUrlCommand *)command {
+    NSString *phoneNumber = command.arguments[0];
+    [[Pushwoosh sharedInstance] registerSmsNumber:phoneNumber];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)registerWhatsappNumber:(CDVInvokedUrlCommand *)command {
+    NSString *phoneNumber = command.arguments[0];
+    [[Pushwoosh sharedInstance] registerWhatsappNumber:phoneNumber];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 - (void)removeAllDeviceData:(CDVInvokedUrlCommand *)command {
     self.callbackIds[@"removeAllDeviceData"] = command.callbackId;
     
