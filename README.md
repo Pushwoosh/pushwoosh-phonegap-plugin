@@ -31,6 +31,17 @@ https://www.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/
 
 https://www.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/cordova/cordova-plugin-api-reference
 
+### Sample App
+
+To run the Pushwoosh Sample App, navigate to the example/newdemo directory and execute the following command:
+
+```
+cordova plugin add ../.. --link &&\
+cordova prepare
+
+```
+After this, the Pushwoosh Sample App will be linked locally with the plugin sources and will use the local version of the plugin.
+
 ### Acknowledgments
 Plugman support by Platogo
 
