@@ -31,7 +31,7 @@ https://www.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/
 
 https://www.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/cordova/cordova-plugin-api-reference
 
-### Sample App
+### Pushwoosh Sample App
 
 To run the Pushwoosh Sample App, navigate to the example/newdemo directory and execute the following command:
 
