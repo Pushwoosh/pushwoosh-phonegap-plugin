@@ -1,0 +1,33 @@
+{
+  "name": "com.pushwoosh.newdemo",
+  "displayName": "newdemo",
+  "version": "1.0.0",
+  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "Apache Cordova Team",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "cordova-android": "^12.0.1",
+    "cordova-ios": "^7.1.0",
+    "pushwoosh-cordova-plugin": "file:../.."
+  },
+  "cordova": {
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "plugins": {
+      "pushwoosh-cordova-plugin": {
+        "LOG_LEVEL": "DEBUG",
+        "IOS_FOREGROUND_ALERT_TYPE": "NONE",
+        "ANDROID_FOREGROUND_PUSH": "false"
+      }
+    }
+  }
+}
