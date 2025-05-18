@@ -1,0 +1,156 @@
+.scroll-view {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+.scroll-content {
+    width: 100%;
+    padding: 0px;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    margin-top: 150px;
+}
+
+.container_enabled {
+    display: flex;
+    align-items: center;
+}
+
+.container_lang {
+    display: flex;
+    align-items: center;
+}
+
+.container_userId {
+    display: flex;
+    align-items: center;
+}
+
+.container_postEvent {
+    display: flex;
+    align-items: center;
+}
+
+.container_btns {
+    display: flex;
+    align-items: center;
+}
+
+.input-gap {
+    width: 5px;
+}
+
+.input-container {
+    flex: 1; 
+    margin-right: 18px; 
+    margin-left: 18px;
+}
+
+#textField1 {
+    width: 100%; 
+    height: 23px;
+}
+
+#textField2 {
+    width: 100%; 
+    height: 23px;
+}
+
+#textField3 {
+    width: 100%; 
+    height: 23px;
+}
+
+#textField4 {
+    width: 100%; 
+    height: 23px;
+}
+
+#textField5 {
+    width: 100%; 
+    height: 23px;
+}
+
+.btn {
+    width: 120px;
+    height: 35px;
+}
+
+.btn_get {
+    width: 100%;
+    height: 35px;
+    background-color: #003175;
+    border-radius: 14px;
+    font-weight: bold; 
+    color: white;
+}
+
+.container_setTags {
+    display: flex;
+    align-items: center;
+}
+
+.container_setTags input[type="text"] {
+    width: auto;
+}
+
+.label {
+    margin-right: 10px;
+    font-weight: bold;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+}
+
+.container_setLanguage {
+    margin-top: 0px;
+    display: flex;
+    align-items: center;
+}
+
+.gap {
+    margin-bottom: 20px; 
+}
+
+.top-image {
+    width: 70px;
+    height: 70px;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 70px;
+    border-radius: 14px;
+}
+
+.ios-switch {
+    position: relative;
+    width: 50px;
+    height: 28px;
+    border-radius: 14px;
+    background-color: #c0c0c0;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+.ios-switch input[type="checkbox"] {
+    display: none;
+}
+
+.ios-switch label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background-color: #363636;
+    border-radius: 14px;
+    transition: left 0.3s ease;
+}
+
+.ios-switch input[type="checkbox"]:checked + label {
+    left: 50%;
+    background-color: #4CAF50;
+}

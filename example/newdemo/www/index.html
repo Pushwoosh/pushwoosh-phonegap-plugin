@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="css/index.css">
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .label {
+            flex-grow: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <div id="deviceready" class="blink">
+            <div class="scroll-view">
+                <div class="scroll-content" id="scroll-content">
+                    <img src="img/logo.png" alt="Your Image" class="top-image">
+
+                    <div class="container">
+                        <label class="label" for="switcher">REGISTER FOR NOTIFICATIONS:</label>
+                        <div class="ios-switch">
+                            <input type="checkbox" id="switcher">
+                            <label for="switcher"></label>
+                        </div>
+                    </div>
+
+                    <div class="gap"></div>
+
+                    <div class="container_enabled">
+                            <input type="text" id="textField1" placeholder="KEY">
+                            <div class="input-gap"></div>
+                            <input type="text" id="textField2" placeholder="VALUE">
+                    </div>
+
+                    <div class="gap"></div>
+
+                    <div class="container_setTags">
+                        <button class="btn_get" id="setTags">SET TAGS</button>
+                    </div>
+
+                    <div class="gap"></div>
+
+                    <div class="container_lang">
+                        <button class="btn" id="setLangBtn">SET LANGUAGE</button>
+                        <div class="input-container">
+                            <input type="text" id="textField3" placeholder="'en'">
+                        </div>
+                    </div>
+
+                    <div class="gap"></div>
+
+                    <div class="container_userId">
+                        <button class="btn" id="setUserBtn">SET USER ID</button>
+                        <div class="input-container">
+                            <input type="text" id="textField4" placeholder="USER ID">
+                        </div>
+                    </div>
+
+                    <div class="gap"></div>
+
+                    <div class="container_postEvent">
+                        <button class="btn" id="setPostEventBtn">POST EVENT</button>
+                        <div class="input-container">
+                            <input type="text" id="textField5" placeholder="EVENT NAME">
+                        </div>
+                    </div>
+
+                    <div class="gap"></div>
+
+                    <div class="container_btns">
+                        <button class="btn_get" id="getTags">GET TAGS</button>
+                    </div>
+
+                    <div class="gap"></div>
+
+                    <div class="container_btns">
+                        <button class="btn_get" id="getPushToken">GET PUSH TOKEN</button>
+                    </div>
+
+                    <div class="gap"></div>
+
+                    <div class="container_btns">
+                        <button class="btn_get" id="getHwid">GET HWID</button>
+                    </div>
+
+                    <div class="gap"></div>
+
+                    <div class="container_btns">
+                        <button class="btn_get" id="resetBadges">RESET BADGES</button>
+                    </div>
+
+                    <div class="gap"></div>
+
+                    <div class="container_btns">
+                        <button class="btn_get" id="localNotification">SEND LOCAL NOTIFICATION</button>
+                    </div>
+
+                    <div class="gap"></div>
+
+                    <div class="container_btns">
+                        <button class="btn_get" id="clearNotificationCenter">CLEAR NOTIFICATION CENTER</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="cordova.js"></script>
+    <script src="js/index.js"></script>
+</body>
+
+</html>

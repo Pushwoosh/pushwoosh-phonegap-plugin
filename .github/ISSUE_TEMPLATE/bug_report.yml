@@ -1,0 +1,141 @@
+name: "🐞 Bug Report"
+description: "Report us a bug"
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to create this issue.
+
+        The more detailed information filled below will help us to investigate the root cause of the issue faster and fix it.
+        This form is for Cordova (PhoneGap) plugin only. If this is a bug for another platform or framework — please create the issue in the corresponded [repository](https://github.com/orgs/Pushwoosh/repositories). We appreciate your cooperation!
+  - type: checkboxes
+    id: rtfm
+    attributes:
+      label: Documentation
+      description: "Have you checked the relevant integration guide: [Integrating Cordova plugin](https://docs.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/cordova/integrating-cordova-plugin) which describes implementation process of the Pushwoosh SDK to your app and follow all the necessary steps?"
+      options:
+        - label: I've checked the guide, but it doesn't help me to resolve the issue.
+          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Short description of the issue. You can add screenshots and screencast to illustrate it.
+      placeholder: "Example: When receiving a push with Rich Media in a closed app, Rich Media is not shown."
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Bug severity
+      description: |
+        How do you rate the severity of this bug?
+        For an objective assessment, please take into account how often this bug occurs in everyday app interaction, how serious the consequences of its occurrence (crash, warning, etc.), number of affected users, enviroment where it occurs (stage, production. etc.).
+      options:
+        - Low
+        - Normal
+        - High
+        - Urgent
+    validations:
+      required: true
+  - type: textarea
+    id: repro-steps
+    attributes:
+      label: Steps to Reproduce
+      description: Describe all the steps needed to reproduce the issue. If an issue is only reproducible under particular circumstances, put all required details here. E.g., if a push is not shown only for a specific API request, provide the full request body. Or, if an issue is reproducible with a particular Rich Media, deep link, etc. — specify it.
+      placeholder: |
+        1. Open the app;
+        2. Switch it to the background;
+        3. Received notification with "root_params" causes the app to crash.
+        This happens only if dependency XYZ v.1.2.3 is installed
+    validations:
+      required: true
+  - type: dropdown
+    id: affected-version
+    attributes:
+      label: Your Pushwoosh Cordova plugin version
+      description: Your version of the Cordova plugin integrated into the application. You may find it on the [releases page](https://github.com/Pushwoosh/pushwoosh-phonegap-plugin/releases)
+      options:
+        - 8.3.37
+        - 8.3.36
+        - 8.3.35
+        - 8.3.34
+        - 8.3.33
+        - 8.3.28
+        - 8.3.27
+        - 8.3.26
+        - 8.3.25
+        - 8.3.24
+        - 8.3.23
+        - 8.3.22
+        - 8.3.21
+        - 8.3.20
+        - 8.3.19
+        - 8.3.18
+        - 8.3.17
+        - 8.3.16
+        - 8.3.15
+        - 8.3.14
+        - 8.3.13
+        - 8.3.12
+        - 8.3.11
+        - 8.3.10
+        - 8.3.9
+        - 8.3.8
+        - 8.3.7
+        - 8.3.6
+        - 8.3.5
+        - 8.3.4
+        - 8.3.3
+        - 8.3.2
+        - 8.3.1
+        - 8.3.0
+        - Other — specify it in the description
+    validations:
+      required: true
+  - type: input
+    id: framework-version
+    attributes:
+      label: cordova package version
+      description: Your cordova framework version
+    validations:
+      required: true
+  - type: input
+    id: last-worked
+    attributes:
+      label: Last worked Pushwoosh Cordova plugin version (if any)
+      description: Is there a version that worked well? If so, please specify.
+  - type: checkboxes
+    id: platforms-affected
+    attributes:
+      label: Affected platforms
+      description: Select the platforms on which the issue occurs. This helps us determine whether the root cause is core plugin or platform specific.
+      options:
+        - label: Android
+        - label: iOS
+    validations:
+      required: true
+  - type: textarea
+    id: platform-versions
+    attributes:
+      label: Affected OS versions and/or devices
+      description: Please specify device models and custom distributions (if any) on which this issue occurs. If the issue occurs when building, then specify the target platform.
+      placeholder: |
+        E.g. Android 13 on a Google Pixel 3a XL,
+        iOS 17.0.3 on an iPhone 14
+        MIUI 14.0.8.0 on Xiaomi 13 Ultra, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: Have you found a workaround for this issue? Please tell us — this may help other people to continue their work while waiting for this issue to be resolved.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: After reproducing the issue, copy device console logs and paste them here "as is". This code block will be formatted automatically, so no additional formatting is needed. If the issue occurs when building, then provide us building logs here.
+      render: shell

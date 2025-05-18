@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="8.3.26-OS">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="8.3.37-OS">
 	<name>Pushwoosh</name>
 
 	<description>
@@ -16,7 +16,7 @@
 	<issue>https://github.com/Pushwoosh/pushwoosh-phonegap-plugin/issues</issue>
 
 	<preference name="LOG_LEVEL" default="DEBUG" />
-	<preference name="IOS_FOREGROUND_ALERT_TYPE" default="NONE" />
+	<preference name="IOS_FOREGROUND_ALERT_TYPE" default="ALERT" />
 	<preference name="PREHANDLE_URL_NOTIFICATIONS" default="NO" />
 	<preference name="ANDROID_FOREGROUND_PUSH" default="false" />
 
@@ -106,7 +106,7 @@
                 <source url="https://github.com/CocoaPods/Specs.git"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="PushwooshXCFramework" spec="6.5.11" />
+                <pod name="PushwooshXCFramework" spec="6.8.5" />
                 <pod name="PushwooshInboxUIXCFramework" spec="6.1.2" />
             </pods>
         </podspec>

@@ -624,6 +624,36 @@ PushNotification.prototype.setCommunicationEnabled = function(enable, success, f
 	exec(success, fail, "PushNotification", "setCommunicationEnabled", [enable]);
 };
 
+// Register email associated to the current user.
+// Email should be a string and could not be null or empty.
+PushNotification.prototype.setEmail = function(email, success, fail) {
+    exec(success, fail, "PushNotification", "setEmail", [email]);
+};
+
+// Register list of emails associated to the current user.
+PushNotification.prototype.setEmails = function(emails, success, fail) {
+    exec(success, fail, "PushNotification", "setEmails", [emails]);
+};
+
+// Set user identifier and register emails associated to the user.
+// userID can be Facebook ID or any other user ID.
+// This allows data and events to be matched across multiple user devices.
+PushNotification.prototype.setUserEmails = function(userId, emails, success, fail) {
+    exec(success, fail, "PushNotification", "setUserEmails", [userId, emails]);
+};
+
+// Registers phone number associated to the current user.
+// PhoneNumber should be a string and cannot be null or empty.
+PushNotification.prototype.registerSMSNumber = function(phoneNumber, success, fail) {
+	exec(success, fail, "PushNotification", "registerSMSNumber", [phoneNumber]);
+};
+
+// Registers Whatsapp number associated to the current user.
+// PhoneNumber should be a string and cannot be null or empty.
+PushNotification.prototype.registerWhatsappNumber = function(phoneNumber, success, fail) {
+	exec(success, fail, "PushNotification", "registerWhatsappNumber", [phoneNumber]);
+};
+
 // Removes all device data from Pushwoosh and stops all interactions and communication permanently.
 PushNotification.prototype.removeAllDeviceData = function(success, fail) {
 	exec(success, fail, "PushNotification", "removeAllDeviceData", []);
@@ -645,6 +675,10 @@ PushNotification.prototype.isAvailableGDPR = function(success) {
 // Enable Huawei push notifications in Android
 PushNotification.prototype.enableHuaweiPushNotifications = function() {
 	exec(null, null, "PushNotification", "enableHuaweiPushNotifications", []);
+}
+
+PushNotification.prototype.setApiToken = function(token) {
+	exec(null, null, "PushNotification", "setApiToken", [token]);
 }
 
 module.exports = new PushNotification();
