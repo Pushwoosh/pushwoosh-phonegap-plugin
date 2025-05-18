@@ -1079,12 +1079,14 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@CordovaMethod
-	private boolean setApiToken(String token) {
-		if (token != null) {
+	private boolean setApiToken(JSONArray data, final CallbackContext callbackContextn) {
+		try {
+			String token = data.getString(0);
 			Pushwoosh.getInstance().setApiToken(token);
-			return true;
+		} catch (JSONException e) {
+			PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 		}
-		return false;
+		return true;
 	}
 
 	private static JSONObject inboxMessageToJson(InboxMessage message) {
