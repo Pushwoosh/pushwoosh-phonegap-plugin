@@ -142,6 +142,7 @@ public class PushNotifications extends CordovaPlugin {
 
 		try {
 
+			//next line must remain intact to ensure Outsystems callback work properly
 			if (sStartPushData != null) {
 				doOnPushOpened(sStartPushData.toString());
 			}
@@ -172,7 +173,8 @@ public class PushNotifications extends CordovaPlugin {
 			PWLog.error(TAG, "Missing pw_appid parameter. Did you follow the guide correctly?", e);
 			return false;
 		}
-				
+
+		//next line must remain intact to ensure Outsystems callback work properly
 		callbackContext.success();
 		return true;
 	}
