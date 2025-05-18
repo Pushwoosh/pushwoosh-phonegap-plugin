@@ -142,6 +142,10 @@ public class PushNotifications extends CordovaPlugin {
 
 		try {
 
+			if (sStartPushData != null) {
+				doOnPushOpened(sStartPushData.toString());
+			}
+
 			String appid = null;
 			if (params.has("appid")) {
 				appid = params.getString("appid");
@@ -168,6 +172,8 @@ public class PushNotifications extends CordovaPlugin {
 			PWLog.error(TAG, "Missing pw_appid parameter. Did you follow the guide correctly?", e);
 			return false;
 		}
+				
+		callbackContext.success();
 		return true;
 	}
 
