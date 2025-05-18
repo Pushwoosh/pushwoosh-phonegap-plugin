@@ -667,4 +667,8 @@ PushNotification.prototype.enableHuaweiPushNotifications = function() {
 	exec(null, null, "PushNotification", "enableHuaweiPushNotifications", []);
 }
 
+PushNotification.prototype.setApiToken = function(token) {
+	exec(null, null, "PushNotification", "setApiToken", [token]);
+}
+
 module.exports = new PushNotification();

@@ -62,17 +62,17 @@
 @end
 
 void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, const char * signature) {
-	Method method = nil;
-	method = class_getInstanceMethod(class, fromChange);
-	
-	if (method) {
-		//method exists add a new method and swap with original
-		class_addMethod(class, toChange, impl, signature);
-		method_exchangeImplementations(class_getInstanceMethod(class, fromChange), class_getInstanceMethod(class, toChange));
-	} else {
-		//just add as orignal method
-		class_addMethod(class, fromChange, impl, signature);
-	}
+    Method method = nil;
+    method = class_getInstanceMethod(class, fromChange);
+    
+    if (method) {
+        //method exists add a new method and swap with original
+        class_addMethod(class, toChange, impl, signature);
+        method_exchangeImplementations(class_getInstanceMethod(class, fromChange), class_getInstanceMethod(class, toChange));
+    } else {
+        //just add as orignal method
+        class_addMethod(class, fromChange, impl, signature);
+    }
 }
 
 static PushNotification *pw_PushNotificationPlugin;
@@ -133,44 +133,49 @@ API_AVAILABLE(ios(10))
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)setApiToken:(CDVInvokedUrlCommand *)command {
+    NSString *token = command.arguments[0];
+    [[PWSettings settings] setApiToken:token];
+}
+
 - (void)onDeviceReady:(CDVInvokedUrlCommand *)command {
-	NSDictionary *options = [command.arguments firstObject];
+    NSDictionary *options = [command.arguments firstObject];
 
-	NSString *appid = options[@"pw_appid"];
-	if (!appid) {
-		appid = options[@"appid"];
-	}
-	
-	NSString *appname = options[@"appname"];
+    NSString *appid = options[@"pw_appid"];
+    if (!appid) {
+        appid = options[@"appid"];
+    }
+    
+    NSString *appname = options[@"appname"];
 
-	if (!appid) {
-		//no Pushwoosh App Id provided in JS call, let's try Info.plist (SDK default)
-		if (self.pushManager == nil) {
-			PWLogError(@"PushNotification.registerDevice: Missing Pushwoosh App ID");
-			return;
-		}
-	}
-	else {
-		[PushNotificationManager initializeWithAppCode:appid appName:appname];
-	}
+    if (!appid) {
+        //no Pushwoosh App Id provided in JS call, let's try Info.plist (SDK default)
+        if (self.pushManager == nil) {
+            PWLogError(@"PushNotification.registerDevice: Missing Pushwoosh App ID");
+            return;
+        }
+    }
+    else {
+        [PushNotificationManager initializeWithAppCode:appid appName:appname];
+    }
     
     [UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
-	[self.pushManager sendAppOpen];
+    [self.pushManager sendAppOpen];
 
-	NSString * alertTypeString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_ALERT_TYPE"];
-	if([alertTypeString isKindOfClass:[NSString class]] && [alertTypeString isEqualToString:@"NONE"]) {
-		self.pushManager.showPushnotificationAlert = NO;
-	}
+    NSString * alertTypeString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Pushwoosh_ALERT_TYPE"];
+    if([alertTypeString isKindOfClass:[NSString class]] && [alertTypeString isEqualToString:@"NONE"]) {
+        self.pushManager.showPushnotificationAlert = NO;
+    }
     
     _deviceReady = YES;
-	
-	if (self.pushwoosh.launchNotification) {
+    
+    if (self.pushwoosh.launchNotification) {
         NSDictionary *notification = [self createNotificationDataForPush:self.pushwoosh.launchNotification onStart:YES];
         [self dispatchPushReceive:notification];
         [self dispatchPushAccept:notification];
-	}
+    }
 
-	[[NSUserDefaults standardUserDefaults] synchronize];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 #pragma mark - UNUserNotificationCenter Delegate Methods
@@ -302,16 +307,16 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)registerDevice:(CDVInvokedUrlCommand *)command {
-	[PushNotification swizzleNotificationSettingsHandler];
-	
-	self.callbackIds[@"registerDevice"] = command.callbackId;
+    [PushNotification swizzleNotificationSettingsHandler];
+    
+    self.callbackIds[@"registerDevice"] = command.callbackId;
 
-	//Cordova BUG: https://issues.apache.org/jira/browse/CB-8063
-	//	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT messageAsDictionary:nil];
-	//	[pluginResult setKeepCallbackAsBool:YES];
-	//	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    //Cordova BUG: https://issues.apache.org/jira/browse/CB-8063
+    //    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT messageAsDictionary:nil];
+    //    [pluginResult setKeepCallbackAsBool:YES];
+    //    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 
-	[[PushNotificationManager pushManager] registerForPushNotifications];
+    [[PushNotificationManager pushManager] registerForPushNotifications];
 }
 
 - (void)unregisterDevice:(CDVInvokedUrlCommand *)command {
@@ -343,42 +348,42 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)startBeaconPushes:(CDVInvokedUrlCommand *)command {
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:@{ @"error" : @"Beacon tracking is not supported" }];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:@{ @"error" : @"Beacon tracking is not supported" }];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)stopBeaconPushes:(CDVInvokedUrlCommand *)command {
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:@{ @"error" : @"Beacon tracking is not supported" }];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:@{ @"error" : @"Beacon tracking is not supported" }];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)setTags:(CDVInvokedUrlCommand *)command {
-	[[PushNotificationManager pushManager] setTags:command.arguments[0]];
+    [[PushNotificationManager pushManager] setTags:command.arguments[0]];
 
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)getTags:(CDVInvokedUrlCommand *)command {
-	// The first argument in the arguments parameter is the callbackID.
-	self.callbackIds[@"getTags"] = command.callbackId;
+    // The first argument in the arguments parameter is the callbackID.
+    self.callbackIds[@"getTags"] = command.callbackId;
 
-	//Cordova BUG: https://issues.apache.org/jira/browse/CB-8063
-	//	CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT messageAsDictionary:nil];
-	//	[pluginResult setKeepCallbackAsBool:YES];
-	//	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    //Cordova BUG: https://issues.apache.org/jira/browse/CB-8063
+    //    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT messageAsDictionary:nil];
+    //    [pluginResult setKeepCallbackAsBool:YES];
+    //    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 
-	[[PushNotificationManager pushManager] loadTags:^(NSDictionary *tags) {
-		CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:tags];
-		[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"getTags"]];
-	} error:^(NSError *error) {
-		NSMutableDictionary *results = [NSMutableDictionary dictionary];
-		results[@"error"] = [NSString stringWithFormat:@"%@", error];
+    [[PushNotificationManager pushManager] loadTags:^(NSDictionary *tags) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:tags];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"getTags"]];
+    } error:^(NSError *error) {
+        NSMutableDictionary *results = [NSMutableDictionary dictionary];
+        results[@"error"] = [NSString stringWithFormat:@"%@", error];
 
-		CDVPluginResult *pluginResult =
-			[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
-		[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"getTags"]];
-	}];
+        CDVPluginResult *pluginResult =
+            [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"getTags"]];
+    }];
 }
 
 - (void)loadMessages:(CDVInvokedUrlCommand *)command {
@@ -499,21 +504,21 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString *)token {
-	if (self.callbackIds[@"registerDevice"]) {
-		NSMutableDictionary *results = [PushNotificationManager getRemoteNotificationStatus];
-		results[@"pushToken"] = token;
-		CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
-		[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"registerDevice"]];
-	}
+    if (self.callbackIds[@"registerDevice"]) {
+        NSMutableDictionary *results = [PushNotificationManager getRemoteNotificationStatus];
+        results[@"pushToken"] = token;
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"registerDevice"]];
+    }
 }
 
 - (void)onDidFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-	if (self.callbackIds[@"registerDevice"]) {
-		NSMutableDictionary *results = [NSMutableDictionary dictionary];
-		results[@"error"] = [NSString stringWithFormat:@"%@", error];
-		CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
-		[self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"registerDevice"]];
-	}
+    if (self.callbackIds[@"registerDevice"]) {
+        NSMutableDictionary *results = [NSMutableDictionary dictionary];
+        results[@"error"] = [NSString stringWithFormat:@"%@", error];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"registerDevice"]];
+    }
 }
 
 - (NSDictionary *)createNotificationDataForPush:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
@@ -574,18 +579,18 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)getRemoteNotificationStatus:(CDVInvokedUrlCommand *)command {
-	NSMutableDictionary *results = [PushNotificationManager getRemoteNotificationStatus];
+    NSMutableDictionary *results = [PushNotificationManager getRemoteNotificationStatus];
 
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)setApplicationIconBadgeNumber:(CDVInvokedUrlCommand *)command {
-	int badge = [command.arguments[0][@"badge"] intValue];
-	[[UIApplication sharedApplication] setApplicationIconBadgeNumber:badge];
+    int badge = [command.arguments[0][@"badge"] intValue];
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:badge];
 
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)getApplicationIconBadgeNumber:(CDVInvokedUrlCommand *)command {
@@ -596,32 +601,32 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)addToApplicationIconBadgeNumber:(CDVInvokedUrlCommand *)command {
-	int badge = [command.arguments[0][@"badge"] intValue];
-	[UIApplication sharedApplication].applicationIconBadgeNumber += badge;
+    int badge = [command.arguments[0][@"badge"] intValue];
+    [UIApplication sharedApplication].applicationIconBadgeNumber += badge;
 
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)cancelAllLocalNotifications:(CDVInvokedUrlCommand *)command {
-	[UIApplication sharedApplication].scheduledLocalNotifications = @[];
+    [UIApplication sharedApplication].scheduledLocalNotifications = @[];
 
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)getLaunchNotification:(CDVInvokedUrlCommand *)command {
-	NSDictionary *startPush = self.startPushCleared ? nil : self.startPushData;
-	CDVPluginResult *pluginResult =
-		[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:startPush];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    NSDictionary *startPush = self.startPushCleared ? nil : self.startPushData;
+    CDVPluginResult *pluginResult =
+        [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:startPush];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)clearLaunchNotification:(CDVInvokedUrlCommand *)command {
-	self.startPushCleared = YES;
-	
-	CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-	[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    self.startPushCleared = YES;
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)setUserId:(CDVInvokedUrlCommand *)command {
@@ -877,54 +882,54 @@ void pwplugin_didFailToRegisterForRemoteNotificationsWithError(id self, SEL _cmd
 }
 
 BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id application, id notificationSettings) {
-	PushNotification *pushHandler = pw_PushNotificationPlugin;
-	
-	UIUserNotificationSettings *settings = notificationSettings;
-	
-	BOOL backgroundPush = NO;
-	NSArray * backgroundModes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIBackgroundModes"];
-	for(NSString *mode in backgroundModes) {
-		if([mode isEqualToString:@"remote-notification"]) {
-			backgroundPush = YES;
-			break;
-		}
-	}
-	
-	if (settings.types == UIUserNotificationTypeNone && !backgroundPush) {
-		NSMutableDictionary *results = [NSMutableDictionary dictionary];
-		results[@"error"] = [NSString stringWithFormat:@"Push Notifications are disabled by user"];
-		
-		CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
-		[pushHandler.commandDelegate sendPluginResult:pluginResult callbackId:pushHandler.callbackIds[@"registerDevice"]];
-	}
-	
-	if([self respondsToSelector:@selector(application: pwplugin_didRegisterUserNotificationSettings:)]) {
-		[self application:application pwplugin_didRegisterUserNotificationSettings:notificationSettings];
-	}
-	
-	return YES;
+    PushNotification *pushHandler = pw_PushNotificationPlugin;
+    
+    UIUserNotificationSettings *settings = notificationSettings;
+    
+    BOOL backgroundPush = NO;
+    NSArray * backgroundModes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIBackgroundModes"];
+    for(NSString *mode in backgroundModes) {
+        if([mode isEqualToString:@"remote-notification"]) {
+            backgroundPush = YES;
+            break;
+        }
+    }
+    
+    if (settings.types == UIUserNotificationTypeNone && !backgroundPush) {
+        NSMutableDictionary *results = [NSMutableDictionary dictionary];
+        results[@"error"] = [NSString stringWithFormat:@"Push Notifications are disabled by user"];
+        
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
+        [pushHandler.commandDelegate sendPluginResult:pluginResult callbackId:pushHandler.callbackIds[@"registerDevice"]];
+    }
+    
+    if([self respondsToSelector:@selector(application: pwplugin_didRegisterUserNotificationSettings:)]) {
+        [self application:application pwplugin_didRegisterUserNotificationSettings:notificationSettings];
+    }
+    
+    return YES;
 }
 
 + (void) swizzleNotificationSettingsHandler {
-	if ([UIApplication sharedApplication].delegate == nil) {
-		return;
-	}
-	
-	if ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.0) {
-		return;
-	}
-	
-	static Class appDelegateClass = nil;
-	
-	//do not swizzle the same class twice
-	id delegate = [UIApplication sharedApplication].delegate;
-	if(appDelegateClass == [delegate class]) {
-		return;
-	}
-	
-	appDelegateClass = [delegate class];
-	
-	pushwoosh_swizzle([delegate class], @selector(application:didRegisterUserNotificationSettings:), @selector(application:pwplugin_didRegisterUserNotificationSettings:), (IMP)pwplugin_didRegisterUserNotificationSettings, "v@:::");
+    if ([UIApplication sharedApplication].delegate == nil) {
+        return;
+    }
+    
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.0) {
+        return;
+    }
+    
+    static Class appDelegateClass = nil;
+    
+    //do not swizzle the same class twice
+    id delegate = [UIApplication sharedApplication].delegate;
+    if(appDelegateClass == [delegate class]) {
+        return;
+    }
+    
+    appDelegateClass = [delegate class];
+    
+    pushwoosh_swizzle([delegate class], @selector(application:didRegisterUserNotificationSettings:), @selector(application:pwplugin_didRegisterUserNotificationSettings:), (IMP)pwplugin_didRegisterUserNotificationSettings, "v@:::");
     pushwoosh_swizzle([delegate class], @selector(application:didRegisterForRemoteNotificationsWithDeviceToken:), @selector(application:pwplugin_didRegisterWithDeviceToken:), (IMP)pwplugin_didRegisterWithDeviceToken, "v@:::");
     pushwoosh_swizzle([delegate class], @selector(application:didFailToRegisterForRemoteNotificationsWithError:), @selector(application:pwplugin_didFailToRegisterForRemoteNotificationsWithError:), (IMP)pwplugin_didFailToRegisterForRemoteNotificationsWithError, "v@:::");
     pushwoosh_swizzle([delegate class], @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:), @selector(application:pwplugin_didReceiveRemoteNotification:fetchCompletionHandler:), (IMP)pwplugin_didReceiveRemoteNotification, "v@::::");
@@ -960,8 +965,8 @@ BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id applicat
 }
 
 - (void)dealloc {
-	self.pushManager = nil;
-	self.startPushData = nil;
+    self.pushManager = nil;
+    self.startPushData = nil;
 }
 
 @end
@@ -969,7 +974,7 @@ BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id applicat
 @implementation UIApplication (InternalPushRuntime)
 
 - (BOOL)pushwooshUseRuntimeMagic {
-	return YES;
+    return YES;
 }
 
 @end

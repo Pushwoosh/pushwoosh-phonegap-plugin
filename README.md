@@ -14,13 +14,13 @@ Cross-Platform push notifications by Pushwoosh for Cordova / PhoneGap
 Using npm:
 
 ```
-cordova plugin add pushwoosh-cordova-plugin@8.3.36
+cordova plugin add pushwoosh-cordova-plugin@8.3.37
 ```
 
 Using git:
 
 ```
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.36
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.37
 ```
 
 ### Guide
@@ -30,17 +30,6 @@ https://www.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/
 ### Documentation
 
 https://www.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/cordova/cordova-plugin-api-reference
-
-### Pushwoosh Sample App
-
-To run the Pushwoosh Sample App, navigate to the example/newdemo directory and execute the following command:
-
-```
-cordova plugin add ../.. --link &&\
-cordova prepare
-
-```
-After this, the Pushwoosh Sample App will be linked locally with the plugin sources and will use the local version of the plugin.
 
 ### Acknowledgments
 Plugman support by Platogo

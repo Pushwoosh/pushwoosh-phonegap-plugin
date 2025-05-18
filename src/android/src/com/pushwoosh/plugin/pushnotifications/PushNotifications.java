@@ -1070,6 +1070,15 @@ public class PushNotifications extends CordovaPlugin {
 		return true;
 	}
 
+	@CordovaMethod
+	private boolean setApiToken(String token) {
+		if (token != null) {
+			Pushwoosh.getInstance().setApiToken(token);
+			return true;
+		}
+		return false;
+	}
+
 	private static JSONObject inboxMessageToJson(InboxMessage message) {
 		JSONObject object = new JSONObject();
 		try {

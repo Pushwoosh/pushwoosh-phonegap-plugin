@@ -92,4 +92,5 @@ export interface PushNotification {
 	setUserEmails(userId: string, emails: string[], success?: () => void, fail?: (error: Error|string) => void): void;
 	registerSMSNumber(phoneNumber: string, success?: () => void, fail?: (error: Error|string) => void): void;
 	registerWhatsappNumber(phoneNumber: string, success?: () => void, fail?: (error: Error|string) => void): void;
+	setApiToken(apiToken: string): void;
 }
