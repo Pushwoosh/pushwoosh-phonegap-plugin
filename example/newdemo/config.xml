@@ -14,6 +14,7 @@
         <variable name="LOG_LEVEL" value="DEBUG" />
         <variable name="IOS_FOREGROUND_ALERT_TYPE" value="NONE" />
         <variable name="ANDROID_FOREGROUND_PUSH" value="false" />
+        <variable name="PW_VOIP_IOS_ENABLED" value="true" />
     </plugin>
 </widget>
 

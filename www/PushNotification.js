@@ -486,6 +486,141 @@ PushNotification.prototype.notificationCallback = function(notification) {
 	document.dispatchEvent(ev);
 };
 
+// CallKit, PushKit
+/**
+ * Registers a callback for a specific VoIP-related event.
+ *
+ * This method allows you to subscribe to a predefined set of VoIP events.
+ * When the specified event occurs, the provided success callback will be invoked.
+ *
+ * @param {string} eventName - The name of the event to register for.
+ *                             Supported event names include:
+ *                             - "answer": Triggered when the call is answered.
+ *                             - "hangup": Triggered when the call is hung up.
+ *                             - "reject": Triggered when the call is rejected.
+ *                             - "muted": Triggered when the call is muted or unmuted.
+ *                             - "held": Triggered when the call is put on or off hold.
+ *                             - "voipPushPayload": Triggered when a VoIP push notification is received.
+ *                             - "incomingCallSuccess": Triggered when an incoming call is successfully displayed.
+ *                             - "incomingCallFailure": Triggered when displaying the incoming call fails.
+ *                             - "playDTMF": Triggered when a DTMF tone is played.
+ *
+ * @param {Function} success - Callback function to be invoked when the event occurs.
+ * @param {Function} fail - Callback function to be invoked if the registration fails.
+ */
+PushNotification.prototype.registerEvent = function(eventName, success, fail) {
+	exec(success, fail, "PushNotification", "registerEvent", [eventName]);
+};
+
+/**
+ * Initializes VoIP call parameters for the native calling system.
+ *
+ * This method configures options related to VoIP calls such as video support,
+ * custom ringtone, and handle type used for identifying the caller.
+ * These parameters affect how the call will be displayed and handled by the system (e.g., CallKit on iOS).
+ *
+ * If no parameters are provided, defaults will be used.
+ * Handles optional argument shifting when called with fewer parameters.
+ *
+ * @param {boolean} [supportsVideo] - Indicates whether video calls are supported. Defaults to `false`.
+ * @param {string} [ringtoneSound] - The name of the custom ringtone sound file (e.g., `"mySound.caf"`). Defaults to an empty string.
+ * @param {number} [handleTypes] - Type of call handle to use (iOS-only, Android does not require this setting):
+ *   - `1` – Generic
+ *   - `2` – Phone number
+ *   - `3` – Email address
+ *   Defaults to `1` if not provided.
+ * @param {Function} success - Callback invoked when the parameters are successfully initialized.
+ * @param {Function} error - Callback invoked if initialization fails.
+ *
+ * @example
+ * PushNotification.initializeVoIPParameters(true, "ringtone.caf", 2, onSuccess, onError);
+ * PushNotification.initializeVoIPParameters(onSuccess, onError); // Use default values
+ */
+PushNotification.prototype.initializeVoIPParameters = function(supportsVideo, ringtoneSound, handleTypes, success, error) {
+    if (typeof handleTypes === "function") {
+        error = ringtoneSound;
+        success = supportsVideo;
+        handleTypes = undefined;
+        ringtoneSound = undefined;
+        supportsVideo = undefined;
+    }
+
+    exec(success, error, "PushNotification", "initializeVoIPParameters", [
+        !!supportsVideo,
+        ringtoneSound || "",
+        handleTypes != null ? Number(handleTypes) : 1
+    ]);
+};
+
+/**
+ * Enables the device speaker during an active call.
+ *
+ * This method routes the call audio output through the device’s loudspeaker
+ * instead of the earpiece. Useful for hands-free or speakerphone mode.
+ *
+ * @param {Function} success - Callback invoked when the speaker is successfully enabled.
+ * @param {Function} error - Callback invoked if the operation fails.
+ *
+ * @example
+ * PushNotification.speakerOn(onSuccess, onError);
+ */
+PushNotification.prototype.speakerOn = function(success, error) {
+    exec(success, error, "PushNotification", "speakerOn", []);
+};
+
+/**
+ * Disables the device speaker and routes audio back to the earpiece.
+ *
+ * This method returns the audio output to the default mode (typically the earpiece),
+ * which is used for private voice conversations.
+ *
+ * @param {Function} success - Callback invoked when the speaker is successfully disabled.
+ * @param {Function} error - Callback invoked if the operation fails.
+ *
+ * @example
+ * PushNotification.speakerOff(onSuccess, onError);
+ */
+PushNotification.prototype.speakerOff = function(success, error) {
+    exec(success, error, "PushNotification", "speakerOff", []);
+};
+
+/**
+ * Mute device microphone
+ * @param {Function} success - Callback invoked when the microphone is successfully disabled.
+ * @param {Function} error - Callback invoked if the operation fails.
+ */
+PushNotification.prototype.mute = function(success, error) {
+	    exec(success, error, "PushNotification", "speakerOff", []);
+
+}
+
+/**
+ * Unmute device microphone
+ * @param {Function} success - Callback invoked when the microphone is successfully enable.
+ * @param {Function} error - Callback invoked if the operation fails.
+ */
+PushNotification.prototype.unmute = function(success, error) {
+	    exec(success, error, "PushNotification", "unmute", []);
+
+}
+
+// Android calls
+/**
+ * Request call permission and register phone account
+ */
+PushNotification.prototype.requestCallPermission = function() {
+	exec(null, null, "PushNotification", "requestCallPermission", []);
+}
+
+/**
+ * Notifies Pushwoosh that the call has ended
+ * @param {Function} success - Callback invoked when the call ends.
+ * @param {Function} error - Callback invoked if the operation fails.
+ */
+PushNotification.prototype.endCall = function(success, error) {
+	exec(success, error, "PushNotification", "endCall", []);
+}
+
 // Opens Inbox screen.
 //
 // Supported style keys:
@@ -599,16 +734,6 @@ PushNotification.prototype.performAction = function(number) {
 	exec(null, null, "PushNotification", "performAction", [number]);
 }
 
-// Show inApp for change setting Enable/disable all communication with Pushwoosh
-PushNotification.prototype.showGDPRConsentUI = function() {
-	exec(null, null, "PushNotification", "showGDPRConsentUI", []);
-}
-
-// Show inApp for all device data from Pushwoosh and stops all interactions and communication permanently.
-PushNotification.prototype.showGDPRDeletionUI = function() {
-	exec(null, null, "PushNotification", "showGDPRDeletionUI", []);
-}
-
 // Enable/disable all communication with Pushwoosh. Enabled by default.
 PushNotification.prototype.setCommunicationEnabled = function(enable, success, fail) {
 	exec(success, fail, "PushNotification", "setCommunicationEnabled", [enable]);
@@ -644,22 +769,8 @@ PushNotification.prototype.registerWhatsappNumber = function(phoneNumber, succes
 	exec(success, fail, "PushNotification", "registerWhatsappNumber", [phoneNumber]);
 };
 
-// Removes all device data from Pushwoosh and stops all interactions and communication permanently.
-PushNotification.prototype.removeAllDeviceData = function(success, fail) {
-	exec(success, fail, "PushNotification", "removeAllDeviceData", []);
-};
-
 PushNotification.prototype.isCommunicationEnabled = function(success) {
 	return exec(success, null, "PushNotification", "isCommunicationEnabled", []);
-};
-
-PushNotification.prototype.isDeviceDataRemoved = function(success) {
-	return exec(success, null, "PushNotification", "isDeviceDataRemoved", []);
-};
-
-// Indicates availability of the GDPR compliance solution.
-PushNotification.prototype.isAvailableGDPR = function(success) {
-	return exec(success, null, "PushNotification", "isAvailableGDPR", []);
 };
 
 // Enable Huawei push notifications in Android
@@ -669,6 +780,10 @@ PushNotification.prototype.enableHuaweiPushNotifications = function() {
 
 PushNotification.prototype.setApiToken = function(token) {
 	exec(null, null, "PushNotification", "setApiToken", [token]);
+}
+
+PushNotification.prototype.setVoipAppCode = function(appCode) {
+	exec(null, null, "PushNotification", "setVoipAppCode", [appCode]);
 }
 
 module.exports = new PushNotification();

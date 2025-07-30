@@ -29,9 +29,59 @@ function onDeviceReady() {
 
     pushwooshInitialize(pushwoosh);
 
+    pushwoosh.setVoipAppCode("7BCDB-76CBE");
+    pushwoosh.initializeVoIPParameters(true, "ring.caf", 2, function(success) {
+        console.log("Success:", success);
+    }, function(error) {
+        console.error("Error:", error);
+    });
+
+
+    pushwoosh.requestCallPermission();
+    pushwoosh.registerEvent("answer",
+        function(payload){
+            console.log("Answer call from " + payload.callerName);
+        },
+        function(error) {
+            console.log("ERROR");
+
+        }
+    );
+
+    pushwoosh.registerEvent("reject",
+        function(payload){
+            console.log("Reject call from " + payload.callerName);
+        },
+        function(error) {
+            console.log("ERROR");
+
+        }
+    );
+
+    pushwoosh.registerEvent("hangup",
+        function(payload){
+            console.log("Reject call from " + payload.callerName);
+        },
+        function(error) {
+            console.log("ERROR");
+
+        }
+    );
+
+    pushwoosh.registerEvent("voipPushPayload",
+        function(payload){
+            console.log("Received call with " + JSON.stringify(payload));
+        },
+        function(error) {
+            console.log("ERROR");
+
+        }
+    );
+
     registerForPushNotificationAction(pushwoosh);
 
     setTagsAction(pushwoosh);
+    endCallAction(pushwoosh);
     setLanguageAction(pushwoosh);
     setUserIdAction(pushwoosh);
     sendPostEventAction(pushwoosh);
@@ -42,6 +92,18 @@ function onDeviceReady() {
 
     sendLocalNotificationAction(pushwoosh);
     clearNotificationCenterAction(pushwoosh);
+}
+
+function endCallAction(pushwoosh) {
+    document.getElementById('endCall').addEventListener('click', function() {
+        pushwoosh.endCall(
+            function() {
+                console.warn('setTags success');
+            },
+            function(error) {
+                console.warn('setTags failed');
+            });
+    });
 }
 
 function setTagsAction(pushwoosh) {
@@ -392,8 +454,7 @@ function pushwooshInitialize(pushwoosh) {
  *            \__/
  */
     pushwoosh.onDeviceReady({        
-        appid: "XXXXX-XXXXX",
-        projectid: "XXXXXXXXXXXXXXX",
-        serviceName: "XXXX"
+        appid: "11C10-EF18D",
+        projectid: "245850018966"
     });
 }

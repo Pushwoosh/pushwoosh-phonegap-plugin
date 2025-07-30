@@ -1,4 +1,4 @@
-interface PushwooshConfig {
+	interface PushwooshConfig {
 	projectid: string,
 	appid: string,
 	serviceName?: string
@@ -72,13 +72,8 @@ export interface PushNotification {
     readMessage(id: string): void;
     deleteMessage(id: string): void;
     performAction(id: string): void;
-	showGDPRConsentUI(): void;
-	showGDPRDeletionUI(): void;
 	setCommunicationEnabled(enable: boolean, success?: () => void, fail?: (callback: Error|string) => void): void;
-	removeAllDeviceData(success?: () => void, fail?: (callback: Error|string) => void): void;
 	isCommunicationEnabled(success: (enabled: boolean) => void): void;
-	isDeviceDataRemoved(success: (removed: boolean) => void): void;
-	isAvailableGDPR(success: (isAvailable: boolean) => void): void;
 	enableHuaweiPushNotifications(): void;
 	setSoundType(type: string, success?: () => void, fail?: () => void): void;
 	setVibrateType(type: string, success?: () => void, fail?: () => void): void;
@@ -93,4 +88,13 @@ export interface PushNotification {
 	registerSMSNumber(phoneNumber: string, success?: () => void, fail?: (error: Error|string) => void): void;
 	registerWhatsappNumber(phoneNumber: string, success?: () => void, fail?: (error: Error|string) => void): void;
 	setApiToken(apiToken: string): void;
+	setVoipAppCode(appCode: string): void;
+	registerEvent(eventName: string, success: (...args: any[]) => void, fail?: (error?: Error | string) => void): void;
+	initializeVoIPParameters(supportsVideo?: boolean, ringtoneSound?: string, handleTypes?: number, success?: () => void, error?: (err: Error | string) => void): void;
+	speakerOn(success?: () => void, error?: (err: Error | string) => void): void;
+	speakerOff(success?: () => void, error?: (err: Error | string) => void): void;
+	mute(success?: () => void, error?: (err: Error | string) => void): void;
+	unmute(success?: () => void, error?: (err: Error | string) => void): void;
+	requestCallPermission(): void;
+	endCall(success?: () => void, error?: (err: Error | string) => void): void;
 }

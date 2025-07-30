@@ -13,8 +13,8 @@
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
   "devDependencies": {
-    "cordova-android": "^12.0.1",
-    "cordova-ios": "^7.1.0",
+    "cordova-android": "^14.0.1",
+    "cordova-ios": "^7.1.1",
     "pushwoosh-cordova-plugin": "file:../.."
   },
   "cordova": {
@@ -26,7 +26,8 @@
       "pushwoosh-cordova-plugin": {
         "LOG_LEVEL": "DEBUG",
         "IOS_FOREGROUND_ALERT_TYPE": "NONE",
-        "ANDROID_FOREGROUND_PUSH": "false"
+        "ANDROID_FOREGROUND_PUSH": "false",
+        "PW_VOIP_IOS_ENABLED": "true"
       }
     }
   }

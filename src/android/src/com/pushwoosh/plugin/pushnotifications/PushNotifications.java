@@ -10,18 +10,24 @@
 
 package com.pushwoosh.plugin.pushnotifications;
 
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationManagerCompat;
 import android.webkit.JavascriptInterface;
 
-import com.pushwoosh.GDPRManager;
 import com.pushwoosh.Pushwoosh;
 import com.pushwoosh.RegisterForPushNotificationsResultData;
 import com.pushwoosh.badge.PushwooshBadge;
+import com.pushwoosh.calls.PushwooshCallReceiver;
+import com.pushwoosh.calls.PushwooshCallSettings;
+import com.pushwoosh.calls.PushwooshVoIPMessage;
 import com.pushwoosh.exception.GetTagsException;
 import com.pushwoosh.exception.PushwooshException;
 import com.pushwoosh.exception.RegisterForPushNotificationsException;
@@ -33,6 +39,7 @@ import com.pushwoosh.inbox.PushwooshInbox;
 import com.pushwoosh.inbox.data.InboxMessage;
 import com.pushwoosh.inbox.exception.InboxMessagesException;
 import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
+import com.pushwoosh.internal.platform.AndroidPlatformModule;
 import com.pushwoosh.internal.platform.utils.GeneralUtils;
 import com.pushwoosh.internal.utils.JsonUtils;
 import com.pushwoosh.internal.utils.PWLog;
@@ -46,7 +53,10 @@ import com.pushwoosh.tags.Tags;
 import com.pushwoosh.tags.TagsBundle;
 
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,6 +83,10 @@ public class PushNotifications extends CordovaPlugin {
 	private static AtomicBoolean sAppReady = new AtomicBoolean();
 	private static PushNotifications sInstance;
 
+//	private CallbackContext callbackContext;
+	private static CordovaInterface cordovaInterface;
+	private static HashMap<String, ArrayList<CallbackContext>> callbackContextMap = new HashMap<String, ArrayList<CallbackContext>>();
+
 	private final HashMap<String, CallbackContext> callbackIds = new HashMap<String, CallbackContext>();
 
 	private static final Map<String, Method> exportedMethods;
@@ -94,6 +108,14 @@ public class PushNotifications extends CordovaPlugin {
 		}
 
 		exportedMethods = methods;
+	}
+
+	public static CordovaInterface getCordova() {
+		return cordovaInterface;
+	}
+
+	public static HashMap<String, ArrayList<CallbackContext>> getCallbackContexts() {
+		return callbackContextMap;
 	}
 
 	private final Handler handler = new Handler(Looper.getMainLooper());
@@ -718,71 +740,26 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@CordovaMethod
-	public boolean showGDPRConsentUI(JSONArray data, final CallbackContext callbackContext) {
-		GDPRManager.getInstance().showGDPRConsentUI();
-		return true;
-	}
-
-	@CordovaMethod
-	public boolean showGDPRDeletionUI(JSONArray data, final CallbackContext callbackContext) {
-		GDPRManager.getInstance().showGDPRDeletionUI();
-		return true;
-	}
-
-	@CordovaMethod
-	public boolean isDeviceDataRemoved(JSONArray data, final CallbackContext callbackContext) {
-		boolean removed = GDPRManager.getInstance().isDeviceDataRemoved();
-		callbackContext.success(removed ? 1 : 0);
-		return true;
-	}
-
-	@CordovaMethod
 	public boolean isCommunicationEnabled(JSONArray data, final CallbackContext callbackContext) {
-		boolean enabled = GDPRManager.getInstance().isCommunicationEnabled();
+		boolean enabled = Pushwoosh.getInstance().isServerCommunicationAllowed();
 		callbackContext.success(enabled ? 1 : 0);
 		return true;
 
 	}
 
 	@CordovaMethod
-	public boolean isAvailableGDPR(JSONArray data, final CallbackContext callbackContext) {
-		boolean isAvailableGDPR = GDPRManager.getInstance().isAvailable();
-		callbackContext.success(isAvailableGDPR ? 1 : 0);
-		return true;
-	}
-
-	@CordovaMethod
-	public boolean removeAllDeviceData(JSONArray data, final CallbackContext callbackContext) {
-		GDPRManager.getInstance().removeAllDeviceData(new Callback<Void, PushwooshException>() {
-			@Override
-			public void process(@NonNull Result<Void, PushwooshException> result) {
-				if(result.isSuccess()) {
-					callbackContext.success();
-				}else {
-					callbackContext.error(result.getException().getMessage());
-				}
-			}
-		});
-		return true;
-	}
-
-	@CordovaMethod
 	public boolean setCommunicationEnabled(JSONArray data, final CallbackContext callbackContext) {
 		try {
 			boolean enable = data.getBoolean(0);
-			GDPRManager.getInstance().setCommunicationEnabled(enable, new Callback<Void, PushwooshException>() {
-				@Override
-				public void process(@NonNull Result<Void, PushwooshException> result) {
-					if(result.isSuccess()) {
-						callbackContext.success();
-					}else {
-						callbackContext.error(result.getException().getMessage());
-					}
-				}
-			});
+			if (enable) {
+				Pushwoosh.getInstance().startServerCommunication();
+			} else {
+				Pushwoosh.getInstance().stopServerCommunication();
+			}
+			callbackContext.success();
 			return true;
 		} catch (JSONException e) {
-			e.printStackTrace();
+			callbackContext.error(e.getMessage());
 		}
 		return false;
 	}
@@ -879,6 +856,15 @@ public class PushNotifications extends CordovaPlugin {
 	public boolean enableHuaweiPushNotifications(JSONArray data, final CallbackContext callbackContext) {
 		Pushwoosh.getInstance().enableHuaweiPushNotifications();
 		return true;
+	}
+
+	@Override
+	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+		cordovaInterface = cordova;
+		callbackContextMap.put("answer", new ArrayList<CallbackContext>());
+		callbackContextMap.put("reject", new ArrayList<CallbackContext>());
+		callbackContextMap.put("hangup", new ArrayList<CallbackContext>());
+		callbackContextMap.put("voipPushPayload", new ArrayList<CallbackContext>());
 	}
 
 	@Override
@@ -1071,14 +1057,214 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@CordovaMethod
-	private boolean setApiToken(JSONArray data, final CallbackContext callbackContextn) {
+	private boolean setApiToken(JSONArray data, final CallbackContext callbackContext) {
 		try {
-			String token = data.getString(0);
-			Pushwoosh.getInstance().setApiToken(token);
+			String appCode = data.getString(0);
+			Pushwoosh.getInstance().addAlternativeAppCode(appCode);
 		} catch (JSONException e) {
 			PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 		}
 		return true;
+	}
+
+	@CordovaMethod
+	private boolean setVoipAppCode(JSONArray data, CallbackContext callbackContext) {
+		try {
+			String appCode = data.getString(0);
+			Pushwoosh.getInstance().addAlternativeAppCode(appCode);
+		} catch (JSONException e) {
+			PWLog.error(TAG, "No parameters passed (missing parameters)", e);
+			return false;
+		}
+		return true;
+	}
+
+	@CordovaMethod
+	private boolean requestCallPermission(JSONArray data, final CallbackContext callbackContext) {
+		try {
+			PushwooshCallSettings.requestCallPermissions();
+		} catch (Exception e) {
+			PWLog.error(TAG, "Failed to request call permissions: " + e.getMessage());
+			return false;
+		}
+        return true;
+    }
+
+	@CordovaMethod
+	private boolean registerEvent(JSONArray data, final CallbackContext callbackContext) {
+		try {
+
+			String eventType = data.getString(0);
+			ArrayList<CallbackContext> callbackContextList = callbackContextMap.get(eventType);
+			if (callbackContextList != null) {
+				callbackContextList.add(callbackContext);
+			}
+			return true;
+		} catch (Exception e) {
+
+			return false;
+		}
+	}
+
+	@CordovaMethod
+	private boolean endCall(JSONArray data, final CallbackContext callbackContext) {
+		Context context = AndroidPlatformModule.getApplicationContext();
+		Intent endCallIntent = new Intent(context, PushwooshCallReceiver.class);
+		endCallIntent.putExtras(PWCordovaCallEventListener.getCurrentCallInfo());
+		endCallIntent.setAction("ACTION_END_CALL");
+		getCordova().getActivity().getApplicationContext().sendBroadcast(endCallIntent);
+
+		return true;
+	}
+
+	@CordovaMethod
+	private boolean initializeVoIPParameters(JSONArray data, final CallbackContext callbackContext) {
+		try {
+			String callSound = data.getString(1);
+			if (callSound!= null && !callSound.isEmpty()){
+				PushwooshCallSettings.setCallSound(callSound);
+			}
+			return true;
+		}  catch (Exception e) {
+			PWLog.error("Failed to fetch custom sound name");
+			return false;
+		}
+	}
+
+	@CordovaMethod
+	private boolean mute() {
+		try {
+			AudioManager audioManager = (AudioManager) this.cordova.getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+			audioManager.setMicrophoneMute(true);
+			return true;
+		} catch (Exception e) {
+			PWLog.error("Failed to mute audio channel");
+			return false;
+		}
+	}
+
+	@CordovaMethod
+	private boolean unmute() {
+		try {
+			AudioManager audioManager = (AudioManager) this.cordova.getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+			audioManager.setMicrophoneMute(false);
+			return true;
+		} catch (Exception e) {
+			PWLog.error("Failed to unmute audio channel");
+			return false;
+		}
+	}
+
+	@CordovaMethod
+	private boolean speakerOn() {
+		try {
+		AudioManager audioManager = (AudioManager) this.cordova.getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+		audioManager.setSpeakerphoneOn(true);
+		return true;
+		} catch (Exception e) {
+			PWLog.error("Failed to turn speaker on");
+			return false;
+		}
+	}
+
+	@CordovaMethod
+	private boolean speakerOff() {
+		try {
+			AudioManager audioManager = (AudioManager) this.cordova.getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+			audioManager.setSpeakerphoneOn(false);
+			return true;
+		} catch (Exception e) {
+			PWLog.error("Failed to turn speaker off");
+			return false;
+		}
+	}
+
+	public static void onAnswer(PushwooshVoIPMessage voIPMessage) {
+		Context context = AndroidPlatformModule.getApplicationContext();
+		if (context == null) {
+			return;
+		}
+		Intent launchIntent = context.getPackageManager()
+				.getLaunchIntentForPackage(context.getPackageName());
+		if (launchIntent == null) {
+			return;
+		}
+		launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		context.startActivity(launchIntent);
+		ArrayList<CallbackContext> callbackContexts = getCallbackContexts().get("answer");
+		if (callbackContexts != null) {
+			for (final CallbackContext callbackContext : callbackContexts) {
+				getCordova().getThreadPool().execute(new Runnable() {
+					public void run() {;
+						PluginResult result = new PluginResult(
+								PluginResult.Status.OK, parseVoIPMessage(voIPMessage));
+						result.setKeepCallback(true);
+						callbackContext.sendPluginResult(result);
+					}
+				});
+			}
+		}
+	}
+
+	public static void onReject(PushwooshVoIPMessage voIPMessage) {
+		ArrayList<CallbackContext> callbackContexts = getCallbackContexts().get("reject");
+		if (callbackContexts != null) {
+			for (final CallbackContext callbackContext : callbackContexts) {
+				getCordova().getThreadPool().execute(new Runnable() {
+					public void run() {
+						PluginResult result = new PluginResult(
+								PluginResult.Status.OK, parseVoIPMessage(voIPMessage));
+						result.setKeepCallback(true);
+						callbackContext.sendPluginResult(result);
+					}
+				});
+			}
+		}
+	}
+
+	public static void onDisconnect(PushwooshVoIPMessage voIPMessage) {
+		ArrayList<CallbackContext> callbackContexts = getCallbackContexts().get("hangup");
+		if (callbackContexts != null) {
+			for (final CallbackContext callbackContext : callbackContexts) {
+				getCordova().getThreadPool().execute(new Runnable() {
+					public void run() {
+						PluginResult result = new PluginResult(
+								PluginResult.Status.OK, parseVoIPMessage(voIPMessage));
+						result.setKeepCallback(true);
+						callbackContext.sendPluginResult(result);
+					}
+				});
+			}
+		}
+	}
+
+	public static void onCreateIncomingConnection(@Nullable Bundle bundle) {
+		ArrayList<CallbackContext> callbackContexts = getCallbackContexts().get("voipPushPayload");
+		if (callbackContexts != null) {
+			for (final CallbackContext callbackContext : callbackContexts) {
+				getCordova().getThreadPool().execute(new Runnable() {
+					public void run() {
+						JSONObject payload = JsonUtils.bundleToJson(bundle);
+						PluginResult result = new PluginResult(
+								PluginResult.Status.OK, payload);
+						result.setKeepCallback(true);
+						callbackContext.sendPluginResult(result);
+					}
+				});
+			}
+		}
+	}
+
+	private static JSONObject parseVoIPMessage(PushwooshVoIPMessage message) {
+		JSONObject payload = new JSONObject();
+		try {
+			payload.put("callerName", message.getCallerName())
+					.put("rawPayload", message.getRawPayload())
+					.put("hasVideo", message.getHasVideo());
+		} catch (JSONException e) {
+			PWLog.error("Failed to parse call notification payload");
+		}
+		return payload;
 	}
 
 	private static JSONObject inboxMessageToJson(InboxMessage message) {
@@ -1105,5 +1291,4 @@ public class PushNotifications extends CordovaPlugin {
 		}
 		return object;
 	}
-
 }
