@@ -1,19 +1,22 @@
 package com.pushwoosh.plugin.pushnotifications.calls;
 
 import static com.pushwoosh.plugin.pushnotifications.PushNotifications.getCallbackContextMap;
-import static com.pushwoosh.plugin.pushnotifications.PushNotifications.getCordova;
+import static com.pushwoosh.plugin.pushnotifications.PushNotifications.getCordovaInterface;
 
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.os.Bundle;
 
 import com.pushwoosh.Pushwoosh;
 import com.pushwoosh.calls.PushwooshCallReceiver;
 import com.pushwoosh.calls.PushwooshCallSettings;
+import com.pushwoosh.calls.PushwooshVoIPMessage;
 import com.pushwoosh.internal.platform.AndroidPlatformModule;
+import com.pushwoosh.internal.utils.JsonUtils;
 import com.pushwoosh.internal.utils.PWLog;
 import com.pushwoosh.plugin.pushnotifications.CallsAdapter;
-import com.pushwoosh.plugin.pushnotifications.PWCordovaCallEventListener;
+import com.pushwoosh.plugin.pushnotifications.PushNotifications;
 
 import org.apache.cordova.CallbackContext;
 import org.json.JSONArray;
@@ -23,10 +26,6 @@ import java.util.ArrayList;
 
 public class PushwooshCallsAdapter implements CallsAdapter {
     public static final String TAG = "PushwooshCallsAdapter";
-    @Override
-    public boolean isAvailable() {
-        return true;
-    }
 
     @Override
     public boolean setVoipAppCode(JSONArray data, CallbackContext callbackContext) {
@@ -73,7 +72,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
         Intent endCallIntent = new Intent(context, PushwooshCallReceiver.class);
         endCallIntent.putExtras(PWCordovaCallEventListener.getCurrentCallInfo());
         endCallIntent.setAction("ACTION_END_CALL");
-        getCordova().getActivity().getApplicationContext().sendBroadcast(endCallIntent);
+        getCordovaInterface().getActivity().getApplicationContext().sendBroadcast(endCallIntent);
 
         return true;
     }
@@ -95,7 +94,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     @Override
     public boolean mute() {
         try {
-            AudioManager audioManager = (AudioManager) getCordova().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+            AudioManager audioManager = (AudioManager) getCordovaInterface().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
             audioManager.setMicrophoneMute(true);
             return true;
         } catch (Exception e) {
@@ -107,7 +106,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     @Override
     public boolean unmute() {
         try {
-            AudioManager audioManager = (AudioManager) getCordova().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+            AudioManager audioManager = (AudioManager) getCordovaInterface().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
             audioManager.setMicrophoneMute(false);
             return true;
         } catch (Exception e) {
@@ -119,7 +118,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     @Override
     public boolean speakerOn() {
         try {
-            AudioManager audioManager = (AudioManager) this.cordova.getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+            AudioManager audioManager = (AudioManager) getCordovaInterface().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
             audioManager.setSpeakerphoneOn(true);
             return true;
         } catch (Exception e) {
@@ -131,12 +130,38 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     @Override
     public boolean speakerOff() {
         try {
-            AudioManager audioManager = (AudioManager) this.cordova.getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+            AudioManager audioManager = (AudioManager) getCordovaInterface().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
             audioManager.setSpeakerphoneOn(false);
             return true;
         } catch (Exception e) {
             PWLog.error("Failed to turn speaker off");
             return false;
         }
+    }
+
+    public static void onAnswer(PushwooshVoIPMessage voIPMessage) {
+        PushNotifications.emitVoipEvent("answer", parseVoIPMessage(voIPMessage));
+    }
+
+    public static void onReject(PushwooshVoIPMessage voIPMessage) {
+        PushNotifications.emitVoipEvent("reject", parseVoIPMessage(voIPMessage));
+    }
+
+    public static void onDisconnect(PushwooshVoIPMessage voIPMessage) {
+        PushNotifications.emitVoipEvent("hangup", parseVoIPMessage(voIPMessage));
+    }
+
+    public static void onCreateIncomingConnection(Bundle bundle) {
+        PushNotifications.emitVoipEvent("voipPushPayload", JsonUtils.bundleToJson(bundle));
+    }
+
+    private static org.json.JSONObject parseVoIPMessage(PushwooshVoIPMessage message) {
+        org.json.JSONObject payload = new org.json.JSONObject();
+        try {
+            payload.put("callerName", message.getCallerName())
+                    .put("rawPayload", message.getRawPayload())
+                    .put("hasVideo", message.getHasVideo());
+        } catch (org.json.JSONException ignored) {}
+        return payload;
     }
 }

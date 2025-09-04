@@ -1,4 +1,4 @@
-package com.pushwoosh.plugin.pushnotifications;
+package com.pushwoosh.plugin.pushnotifications.calls;
 
 import android.os.Bundle;
 
@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 
 import com.pushwoosh.calls.PushwooshVoIPMessage;
 import com.pushwoosh.calls.listener.CallEventListener;
+import com.pushwoosh.plugin.pushnotifications.PushNotifications;
 
 public class PWCordovaCallEventListener implements CallEventListener {
     private static final Object sCurrentCallLock = new Object();
@@ -18,12 +19,12 @@ public class PWCordovaCallEventListener implements CallEventListener {
         synchronized (sCurrentCallLock) {
             currentCallInfo = pushwooshVoIPMessage.getRawPayload();
         }
-        PushNotifications.onAnswer(pushwooshVoIPMessage);
+        PushwooshCallsAdapter.onAnswer(pushwooshVoIPMessage);
     }
 
     @Override
     public void onReject(@NonNull PushwooshVoIPMessage pushwooshVoIPMessage) {
-        PushNotifications.onReject(pushwooshVoIPMessage);
+        PushwooshCallsAdapter.onReject(pushwooshVoIPMessage);
         synchronized (sCurrentCallLock) {
             currentCallInfo = null;
         }
@@ -31,7 +32,7 @@ public class PWCordovaCallEventListener implements CallEventListener {
 
     @Override
     public void onDisconnect(@NonNull PushwooshVoIPMessage pushwooshVoIPMessage) {
-        PushNotifications.onDisconnect(pushwooshVoIPMessage);
+        PushwooshCallsAdapter.onDisconnect(pushwooshVoIPMessage);
         synchronized (sCurrentCallLock) {
             currentCallInfo = null;
         }
@@ -42,7 +43,7 @@ public class PWCordovaCallEventListener implements CallEventListener {
         synchronized (sCurrentCallLock) {
             currentCallInfo = bundle;
         }
-        PushNotifications.onCreateIncomingConnection(bundle);
+        PushwooshCallsAdapter.onCreateIncomingConnection(bundle);
     }
 
     @Override
