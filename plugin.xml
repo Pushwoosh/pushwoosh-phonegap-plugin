@@ -20,6 +20,8 @@
 	<preference name="IOS_FOREGROUND_ALERT_TYPE" default="ALERT" />
 	<preference name="ANDROID_FOREGROUND_PUSH" default="true" />
     <preference name="PW_VOIP_IOS_ENABLED" default="false" />
+    <preference name="PW_VOIP_ANDROID_ENABLED" default="false" />
+
 
 	<js-module src="www/PushNotification.js" name="PushNotification">
 		<clobbers target="plugins.pushNotification" />
@@ -55,6 +57,8 @@
 			</feature>
 		</config-file>
 
+    	<!-- core source files -->
+
 		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PushNotifications.java"
 			target-dir="src/com/pushwoosh/plugin/pushnotifications" />
             
@@ -69,7 +73,15 @@
 
 		<source-file src="src/android/src/com/pushwoosh/plugin/internal/PhonegapPluginProvider.java"
 			target-dir="src/com/pushwoosh/plugin/internal" />
-		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/PWCordovaCallEventListener.java" target-dir="src/com/pushwoosh/plugin/pushnotifications" />
+
+    	<!-- required call source files -->
+		<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/CallsAdapter.java" target-dir="src/com/pushwoosh/plugin/pushnotifications" />
+    	<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/NoopCallsAdapter.java" target-dir="src/com/pushwoosh/plugin/pushnotifications" />
+    	<source-file src="src/android/src/com/pushwoosh/plugin/pushnotifications/CallsAdapterFactory.java" target-dir="src/com/pushwoosh/plugin/pushnotifications" />
+
+    	<!-- gradle script to include pushwoosh-calls-related source files and dependencies -->
+    	<hook type="after_prepare" src="spec/set-voip-gradle-prop.js" />
+	    <framework src="src/android/add-android-voip.gradle" custom="true" type="gradleReference" />
 
         <framework src="build-extras-pushwoosh.gradle" custom="true" type="gradleReference" />
 
@@ -90,7 +102,6 @@
         <framework src="com.pushwoosh:pushwoosh-inbox:6.7.31"/>
         <framework src="com.pushwoosh:pushwoosh-inbox-ui:6.7.31"/>
 		<framework src="com.pushwoosh:pushwoosh-huawei:6.7.31"/>
-		<framework src="com.pushwoosh:pushwoosh-calls:6.7.31"/>
     </platform>
 
 	<!-- ios -->

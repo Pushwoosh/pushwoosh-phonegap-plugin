@@ -1,0 +1,35 @@
+// Read from: -P, env, or (last-resort) literal placeholder
+def _rawVoip = (project.findProperty('PW_VOIP_ANDROID_ENABLED')
+        ?: System.getenv('PW_VOIP_ANDROID_ENABLED')
+        ?: '$PW_VOIP_ANDROID_ENABLED')  // stays literal if not set
+
+def voipEnabled = _rawVoip.toString().trim().toLowerCase() in ['1','true','yes','y']
+
+def pluginId = 'pushwoosh-cordova-plugin'
+def pluginDirCandidates = [
+        file("${rootDir}/../plugins/${pluginId}"),
+        file("${rootDir}/../../plugins/${pluginId}")
+]
+def pluginDir = pluginDirCandidates.find { it.exists() }
+def callsSrc = pluginDir ? new File(pluginDir, 'src/android/src/com/pushwoosh/plugin/pushnotifications/calls') : null
+
+def applyVoip = {
+    if (voipEnabled) {
+        println "[${pluginId}] PW_VOIP_ANDROID_ENABLED=true — enabling VoIP (dependency + sources)"
+        dependencies { implementation "com.pushwoosh:pushwoosh-calls:6.7.31" }
+        if (callsSrc?.exists()) {
+            android.sourceSets.main.java.srcDirs += callsSrc
+            println "[${pluginId}] Added optional sources: ${callsSrc}"
+        } else {
+            println "[${pluginId}] WARN optional sources not found at ${callsSrc}"
+        }
+    } else {
+        println "[${pluginId}] PW_VOIP_ANDROID_ENABLED=false — VoIP disabled"
+    }
+}
+
+if (project.hasProperty('cdvPluginPostBuildExtras')) {
+    cdvPluginPostBuildExtras << applyVoip
+} else {
+    afterEvaluate { applyVoip() }
+}
