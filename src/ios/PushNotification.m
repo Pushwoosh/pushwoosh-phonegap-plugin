@@ -693,7 +693,6 @@ API_AVAILABLE(ios(10.0)) {
     NSNumber *handleTypesNumber = [command.arguments objectAtIndex:2];
 
     if ([supportsVideoNumber isKindOfClass:[NSNumber class]] &&
-        [ringtoneSound isKindOfClass:[NSString class]] && ringtoneSound.length > 0 &&
         [handleTypesNumber isKindOfClass:[NSNumber class]]) {
         
         BOOL supportsVideo = [supportsVideoNumber boolValue];
@@ -706,7 +705,7 @@ API_AVAILABLE(ios(10.0)) {
 
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"VoIP Parameters Initialized"];
     } else {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid Parameters"];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid initialization parameters"];
     }
 
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
