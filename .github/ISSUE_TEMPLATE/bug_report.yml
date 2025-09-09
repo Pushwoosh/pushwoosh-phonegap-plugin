@@ -58,6 +58,7 @@ body:
       label: Your Pushwoosh Cordova plugin version
       description: Your version of the Cordova plugin integrated into the application. You may find it on the [releases page](https://github.com/Pushwoosh/pushwoosh-phonegap-plugin/releases)
       options:
+        - 8.3.43
         - 8.3.42
         - 8.3.41
         - 8.3.40
