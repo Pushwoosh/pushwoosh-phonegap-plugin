@@ -13,7 +13,6 @@
 #import "PushNotification.h"
 #import "PWLog.h"
 #import <PushwooshInboxUI/PushwooshInboxUI.h>
-#import <PushwooshFramework/PWGDPRManager.h>
 #import <PushwooshFramework/PWInAppManager.h>
 #import <PushwooshFramework/PushNotificationManager.h>
 #import <PushwooshFramework/PWInbox.h>
@@ -37,6 +36,8 @@
 
 
 #define WRITEJS(VAL) [NSString stringWithFormat:@"setTimeout(function() { %@; }, 0);", VAL]
+#define PW_COMMUNICATION_ENABLED_KEY @"PushwooshCommunicationEnabled"
+#define PW_COMMUNICATION_ENABLED_PLIST_KEY @"Pushwoosh_ALLOW_SERVER_COMMUNICATION"
 
 NSMutableDictionary *callbackIds;
 NSDictionary* pendingCallFromRecents;
@@ -120,6 +121,7 @@ API_AVAILABLE(ios(10))
 - (void)pluginInitialize {
     [super pluginInitialize];
     pw_PushNotificationPlugin = self;
+    
 #if PW_VOIP_ENABLED
     callbackIds = [[NSMutableDictionary alloc] initWithCapacity:5];
     [callbackIds setObject:[NSMutableArray array] forKey:@"initializeVoIPParameters"];
@@ -135,6 +137,8 @@ API_AVAILABLE(ios(10))
     [callbackIds setObject:[NSMutableArray array] forKey:@"speakerOn"];
     [callbackIds setObject:[NSMutableArray array] forKey:@"speakerOff"];
     [callbackIds setObject:[NSMutableArray array] forKey:@"playDTMF"];
+    [callbackIds setObject:[NSMutableArray array] forKey:@"voipDidFailToRegisterTokenWithError"];
+    [callbackIds setObject:[NSMutableArray array] forKey:@"voipDidRegisterTokenSuccessfully"];
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveCallFromRecents:) name:@"RecentsCallNotification" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAudioRouteChange:) name:AVAudioSessionRouteChangeNotification object:nil];
@@ -627,6 +631,10 @@ API_AVAILABLE(ios(10.0)) {
     //stub, android only
 }
 
+- (void)getCallPermissionStatus:(CDVInvokedUrlCommand *)command {
+    //stub, android only
+}
+
 - (void)setVoipAppCode:(CDVInvokedUrlCommand *)command {
     NSString *voipAppCode = command.arguments[0];
     [PushwooshVoIPImplementation setPushwooshVoIPAppId:voipAppCode];
@@ -758,6 +766,21 @@ API_AVAILABLE(ios(10.0)) {
     }
 }
 
+// MARK: - Unregister event func
+- (void)unregisterEvent:(CDVInvokedUrlCommand*)command {
+    NSString* eventName = [command.arguments objectAtIndex:0];
+    
+    if(callbackIds[eventName] != nil) {
+        [callbackIds[eventName] removeAllObjects];
+        
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"Successfully unregistered from %@ event", eventName]];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    } else {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[NSString stringWithFormat:@"Event %@ not found or not supported", eventName]];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }
+}
+
 // MARK: - Send Call
 - (void)sendCall:(CDVInvokedUrlCommand*)command {
     BOOL hasId = ![[command.arguments objectAtIndex:1] isEqual:[NSNull null]];
@@ -846,6 +869,34 @@ API_AVAILABLE(ios(10.0)) {
     
     if ([callbackIds[@"sendCall"] count] == 0) {
         pendingCallFromRecents = callData;
+    }
+}
+
+// MARK: - voipDidFailToRegisterTokenWithError callback
+- (void)voipDidFailToRegisterTokenWithError:(NSError *)error {
+    for (id callbackId in callbackIds[@"voipDidFailToRegisterTokenWithError"]) {
+        CDVPluginResult* pluginResult = nil;
+        NSDictionary *errorData = @{
+            @"error": error.localizedDescription ?: @"Unknown error",
+            @"code": @(error.code),
+            @"domain": error.domain ?: @"Unknown domain"
+        };
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:errorData];
+        [pluginResult setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+    }
+}
+
+// MARK: - voipDidRegisterTokenSuccessfully callback
+- (void)voipDidRegisterTokenSuccessfully {
+    for (id callbackId in callbackIds[@"voipDidRegisterTokenSuccessfully"]) {
+        CDVPluginResult* pluginResult = nil;
+        NSDictionary *successData = @{
+            @"message": @"VoIP token registered successfully"
+        };
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:successData];
+        [pluginResult setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
     }
 }
 
@@ -1042,22 +1093,49 @@ API_AVAILABLE(ios(10.0)) {
     [[PWInAppManager sharedManager] addJavascriptInterface:bridge withName:name];
 }
 
+- (BOOL)getCommunicationEnabledState {
+    NSBundle *bundle = [NSBundle mainBundle];
+    NSObject *plistValue = [bundle objectForInfoDictionaryKey:PW_COMMUNICATION_ENABLED_PLIST_KEY];
+    
+    if (plistValue != nil) {
+        if ([plistValue isKindOfClass:[NSNumber class]]) {
+            return [(NSNumber *)plistValue boolValue];
+        } else if ([plistValue isKindOfClass:[NSString class]]) {
+            NSString *stringValue = [(NSString *)plistValue lowercaseString];
+            return [stringValue isEqualToString:@"true"] || [stringValue isEqualToString:@"yes"] || [stringValue isEqualToString:@"1"];
+        }
+    }
+    
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:PW_COMMUNICATION_ENABLED_KEY] != nil) {
+        return [[NSUserDefaults standardUserDefaults] boolForKey:PW_COMMUNICATION_ENABLED_KEY];
+    }
+    
+    return YES;
+}
+
 - (void)setCommunicationEnabled:(CDVInvokedUrlCommand *)command {
-    self.callbackIds[@"setCommunicationEnabled"] = command.callbackId;
-    
     NSNumber *enabledObject = [command.arguments firstObject];
-    
     BOOL enabled = [enabledObject boolValue];
     
-    [[PWGDPRManager sharedManager] setCommunicationEnabled:enabled completion:^(NSError *error) {
-        if (!error) {
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"setCommunicationEnabled"]];
-        } else {
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"setCommunicationEnabled"]];
-        }
-    }];
+    [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:PW_COMMUNICATION_ENABLED_KEY];
+    
+    CDVPluginResult *pluginResult = nil;
+    
+    if (enabled) {
+        [[Pushwoosh sharedInstance] startServerCommunication];
+    } else {
+        [[Pushwoosh sharedInstance] stopServerCommunication];
+    }
+    
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)isCommunicationEnabled:(CDVInvokedUrlCommand *)command {
+    BOOL isEnabled = [self getCommunicationEnabledState];
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(isEnabled ? 1 : 0)];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)setEmail:(CDVInvokedUrlCommand *)command {
@@ -1115,11 +1193,6 @@ API_AVAILABLE(ios(10.0)) {
     NSString *phoneNumber = command.arguments[0];
     [[Pushwoosh sharedInstance] registerWhatsappNumber:phoneNumber];
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)isCommunicationEnabled:(CDVInvokedUrlCommand *)command {
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[[PWGDPRManager sharedManager] isCommunicationEnabled]];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 

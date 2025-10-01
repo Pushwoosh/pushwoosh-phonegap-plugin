@@ -96,5 +96,6 @@ export interface PushNotification {
 	mute(success?: () => void, error?: (err: Error | string) => void): void;
 	unmute(success?: () => void, error?: (err: Error | string) => void): void;
 	requestCallPermission(): void;
+	getCallPermissionStatus(success?: (status: number) => void, error?: (err: Error | string) => void): void;
 	endCall(success?: () => void, error?: (err: Error | string) => void): void;
 }

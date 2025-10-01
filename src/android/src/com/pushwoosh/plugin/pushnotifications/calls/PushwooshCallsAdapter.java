@@ -51,6 +51,18 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     }
 
     @Override
+    public boolean getCallPermissionStatus(JSONArray data, CallbackContext callbackContext) {
+        try {
+            int status = PushwooshCallSettings.getCallPermissionStatus();
+            callbackContext.success(status);
+            return true;
+        } catch (Exception e) {
+            PWLog.error(TAG, "Failed to get call permission status: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
     public boolean registerEvent(JSONArray data, CallbackContext callbackContext) {
         try {
 
@@ -61,7 +73,24 @@ public class PushwooshCallsAdapter implements CallsAdapter {
             }
             return true;
         } catch (Exception e) {
+            return false;
+        }
+    }
 
+    @Override
+    public boolean unregisterEvent(JSONArray data, CallbackContext callbackContext) {
+        try {
+            String eventType = data.getString(0);
+            ArrayList<CallbackContext> callbackContextList = getCallbackContextMap().get(eventType);
+            if (callbackContextList != null) {
+                callbackContextList.clear();
+                callbackContext.success("Successfully unregistered from " + eventType + " event");
+            } else {
+                callbackContext.error("Event " + eventType + " not found or not supported");
+            }
+            return true;
+        } catch (Exception e) {
+            PWLog.error(TAG, "Failed to unregister event: " + e.getMessage());
             return false;
         }
     }

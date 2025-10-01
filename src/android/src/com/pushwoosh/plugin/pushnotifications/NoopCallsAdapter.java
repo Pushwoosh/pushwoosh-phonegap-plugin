@@ -20,7 +20,19 @@ public class NoopCallsAdapter implements CallsAdapter{
     }
 
     @Override
+    public boolean getCallPermissionStatus(JSONArray data, CallbackContext callbackContext) {
+        PWLog.error(TAG,"Method not implemented");
+        return false;
+    }
+
+    @Override
     public boolean registerEvent(JSONArray data, CallbackContext callbackContext) {
+        PWLog.error(TAG,"Method not implemented");
+        return false;
+    }
+
+    @Override
+    public boolean unregisterEvent(JSONArray data, CallbackContext callbackContext) {
         PWLog.error(TAG,"Method not implemented");
         return false;
     }

@@ -504,12 +504,42 @@ PushNotification.prototype.notificationCallback = function(notification) {
  *                             - "incomingCallSuccess": Triggered when an incoming call is successfully displayed.
  *                             - "incomingCallFailure": Triggered when displaying the incoming call fails.
  *                             - "playDTMF": Triggered when a DTMF tone is played.
+ *                             - "voipDidFailToRegisterTokenWithError": Triggered when VoIP token registration fails (iOS only).
+ *                             - "voipDidRegisterTokenSuccessfully": Triggered when VoIP token registration succeeds (iOS only).
  *
  * @param {Function} success - Callback function to be invoked when the event occurs.
  * @param {Function} fail - Callback function to be invoked if the registration fails.
  */
 PushNotification.prototype.registerEvent = function(eventName, success, fail) {
 	exec(success, fail, "PushNotification", "registerEvent", [eventName]);
+};
+
+/**
+ * Unregisters a callback for a specific VoIP-related event.
+ *
+ * This method allows you to unsubscribe from a previously registered VoIP event.
+ * After unregistering, the event callback will no longer be invoked when the event occurs.
+ *
+ * @param {string} eventName - The name of the event to unregister from.
+ *                             This should match the event name used in registerEvent().
+ *                             Supported event names include:
+ *                             - "answer": Triggered when the call is answered.
+ *                             - "hangup": Triggered when the call is hung up.
+ *                             - "reject": Triggered when the call is rejected.
+ *                             - "muted": Triggered when the call is muted or unmuted.
+ *                             - "held": Triggered when the call is put on or off hold.
+ *                             - "voipPushPayload": Triggered when a VoIP push notification is received.
+ *                             - "incomingCallSuccess": Triggered when an incoming call is successfully displayed.
+ *                             - "incomingCallFailure": Triggered when displaying the incoming call fails.
+ *                             - "playDTMF": Triggered when a DTMF tone is played.
+ *                             - "voipDidFailToRegisterTokenWithError": Triggered when VoIP token registration fails (iOS only).
+ *                             - "voipDidRegisterTokenSuccessfully": Triggered when VoIP token registration succeeds (iOS only).
+ *
+ * @param {Function} success - Callback function to be invoked when the event is successfully unregistered.
+ * @param {Function} fail - Callback function to be invoked if the unregistration fails.
+ */
+PushNotification.prototype.unregisterEvent = function(eventName, success, fail) {
+	exec(success, fail, "PushNotification", "unregisterEvent", [eventName]);
 };
 
 /**
@@ -610,6 +640,19 @@ PushNotification.prototype.unmute = function(success, error) {
  */
 PushNotification.prototype.requestCallPermission = function() {
 	exec(null, null, "PushNotification", "requestCallPermission", []);
+}
+
+/**
+ * Get call permission status
+ * Returns a Promise or calls success callback with status:
+ *   0 - Permission not requested yet
+ *   1 - Permission granted by user
+ *   2 - Permission denied by user
+ * @param {Function} success - Callback invoked with permission status
+ * @param {Function} error - Callback invoked if the operation fails
+ */
+PushNotification.prototype.getCallPermissionStatus = function(success, error) {
+	exec(success, error, "PushNotification", "getCallPermissionStatus", []);
 }
 
 /**

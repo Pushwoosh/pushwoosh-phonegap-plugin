@@ -1077,8 +1077,18 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@CordovaMethod
+	private boolean getCallPermissionStatus(JSONArray data, final CallbackContext callbackContext) {
+		return callsAdapter.getCallPermissionStatus(data, callbackContext);
+	}
+
+	@CordovaMethod
 	private boolean registerEvent(JSONArray data, final CallbackContext callbackContext) {
 		return callsAdapter.registerEvent(data, callbackContext);
+	}
+
+	@CordovaMethod
+	private boolean unregisterEvent(JSONArray data, final CallbackContext callbackContext) {
+		return callsAdapter.unregisterEvent(data, callbackContext);
 	}
 
 	@CordovaMethod
