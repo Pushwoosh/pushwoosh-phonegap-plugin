@@ -16,7 +16,7 @@ def callsSrc = pluginDir ? new File(pluginDir, 'src/android/src/com/pushwoosh/pl
 def applyVoip = {
     if (voipEnabled) {
         println "[${pluginId}] PW_VOIP_ANDROID_ENABLED=true — enabling VoIP (dependency + sources)"
-        dependencies { implementation "com.pushwoosh:pushwoosh-calls:6.7.33" }
+        dependencies { implementation "com.pushwoosh:pushwoosh-calls:6.7.37" }
         if (callsSrc?.exists()) {
             android.sourceSets.main.java.srcDirs += callsSrc
             println "[${pluginId}] Added optional sources: ${callsSrc}"
