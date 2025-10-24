@@ -180,15 +180,19 @@ public class PushwooshCallsAdapter implements CallsAdapter {
         PushNotifications.emitVoipEvent("hangup", parseVoIPMessage(voIPMessage));
     }
 
-    public static void onCreateIncomingConnection(Bundle bundle) {
-        PushNotifications.emitVoipEvent("voipPushPayload", JsonUtils.bundleToJson(bundle));
+  public static void onCreateIncomingConnection(Bundle bundle) {
+        PushwooshVoIPMessage voipMessage = new PushwooshVoIPMessage(bundle);
+        PushNotifications.emitVoipEvent("voipPushPayload", parseVoIPMessage(voipMessage));
     }
 
     private static org.json.JSONObject parseVoIPMessage(PushwooshVoIPMessage message) {
         org.json.JSONObject payload = new org.json.JSONObject();
         try {
+            Bundle rawBundle = message.getRawPayload();
+            org.json.JSONObject rawPayloadJson = JsonUtils.bundleToJsonWithUserData(rawBundle);
+            
             payload.put("callerName", message.getCallerName())
-                    .put("rawPayload", message.getRawPayload())
+                    .put("rawPayload", rawPayloadJson)
                     .put("hasVideo", message.getHasVideo());
         } catch (org.json.JSONException ignored) {}
         return payload;
