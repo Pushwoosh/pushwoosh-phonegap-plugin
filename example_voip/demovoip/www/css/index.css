@@ -1,0 +1,605 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/* Global box-sizing to prevent horizontal scroll */
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+html, body {
+    width: 100%;
+    height: 100vh;
+    height: -webkit-fill-available;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: fixed;
+}
+
+body {
+    -webkit-touch-callout: none;
+    -webkit-text-size-adjust: none;
+    background-color: #f5f5f5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Welcome Screen */
+.welcome-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.welcome-overlay.hidden {
+    display: none;
+}
+
+.welcome-content {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-content h2 {
+    margin: 0 0 20px 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #667eea;
+    text-align: center;
+}
+
+.welcome-instructions {
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.welcome-instructions p {
+    margin: 15px 0;
+}
+
+.welcome-instructions strong {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.welcome-instructions ol {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.welcome-instructions li {
+    margin: 8px 0;
+    color: #555;
+}
+
+.welcome-footer {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.welcome-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.welcome-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.welcome-checkbox span {
+    font-size: 14px;
+    color: #666;
+}
+
+.app {
+    width: 100%;
+    height: 100vh;
+    height: -webkit-fill-available;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Scrollable Content */
+.scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px;
+    padding-top: max(20px, env(safe-area-inset-top));
+    padding-bottom: 60px;
+}
+
+/* Device Status */
+.status-indicator {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: #f5f5f5;
+    padding: 15px 0;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.status {
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: 600;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.status.listening {
+    background-color: #ff9800;
+    color: white;
+    display: block;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.status.ready {
+    background-color: #4caf50;
+    color: white;
+    animation: pulse-green 2s ease-in-out infinite;
+}
+
+#deviceready.ready .status.listening {
+    display: none;
+}
+
+#deviceready.ready .status.ready {
+    display: block;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+}
+
+@keyframes pulse-green {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(76, 175, 80, 0.8);
+        transform: scale(1.02);
+    }
+}
+
+/* Section Styling */
+.section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.section h2 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #667eea;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+}
+
+.form-group input[type="text"],
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: #f9f9f9;
+    transition: border-color 0.2s;
+}
+
+.form-group input[type="text"]:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    background-color: white;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.checkbox-label span {
+    font-size: 16px;
+    color: #333;
+}
+
+/* Buttons */
+.btn {
+    width: 100%;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 10px;
+    text-transform: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
+}
+
+.btn:last-child {
+    margin-bottom: 0;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.btn-secondary:active {
+    background-color: #5a6268;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btn-danger:active {
+    background-color: #c82333;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+}
+
+.btn-small {
+    padding: 8px 16px;
+    font-size: 14px;
+    width: auto;
+    float: right;
+    margin-bottom: 10px;
+}
+
+/* Status Text */
+.status-text {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #f0f0f0;
+    color: #333;
+    min-height: 20px;
+}
+
+.status-text:empty {
+    display: none;
+}
+
+/* Event Log */
+.event-log {
+    clear: both;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    border-radius: 8px;
+    padding: 15px;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    min-height: 100px;
+}
+
+.event-log:empty::before {
+    content: 'No events yet...';
+    color: #808080;
+    font-style: italic;
+}
+
+.log-entry {
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    border-left: 3px solid #667eea;
+    background-color: rgba(102, 126, 234, 0.1);
+    border-radius: 4px;
+}
+
+.log-entry .timestamp {
+    color: #858585;
+    font-size: 11px;
+    margin-right: 8px;
+}
+
+.log-entry .event-name {
+    color: #4ec9b0;
+    font-weight: 600;
+}
+
+.log-entry .event-data {
+    color: #ce9178;
+    margin-left: 10px;
+}
+
+/* Dark mode support */
+@media screen and (prefers-color-scheme: dark) {
+    body {
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+    }
+
+    .welcome-content {
+        background: #2a2a2a;
+        color: #e0e0e0;
+    }
+
+    .welcome-content h2 {
+        color: #8b9bea;
+    }
+
+    .welcome-instructions li {
+        color: #b0b0b0;
+    }
+
+    .welcome-instructions strong {
+        color: #8b9bea;
+    }
+
+    .welcome-footer {
+        border-top-color: #404040;
+    }
+
+    .welcome-checkbox span {
+        color: #b0b0b0;
+    }
+
+    .status-indicator {
+        background-color: #1a1a1a;
+    }
+
+    .section {
+        background: #2a2a2a;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .section h2 {
+        color: #8b9bea;
+    }
+
+    .form-group label {
+        color: #b0b0b0;
+    }
+
+    .form-group input[type="text"],
+    .form-group select {
+        background-color: #1e1e1e;
+        border-color: #3a3a3a;
+        color: #e0e0e0;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group select:focus {
+        background-color: #2a2a2a;
+        border-color: #667eea;
+    }
+
+    .checkbox-label span {
+        color: #e0e0e0;
+    }
+
+    .status-text {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+    }
+
+    .scroll-content {
+        background-color: #1a1a1a;
+    }
+
+    .call-modal-content {
+        background-color: #2a2a2a;
+        border: 1px solid #444;
+    }
+
+    .call-modal-subtitle {
+        color: #b0b0b0;
+    }
+
+    .call-detail-label {
+        color: #888;
+    }
+
+    .call-detail-value {
+        color: #e0e0e0;
+    }
+
+    .call-details {
+        background-color: #1e1e1e;
+        border: 1px solid #444;
+    }
+}
+
+/* Call Cancelled Modal */
+.call-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.call-modal.hidden {
+    display: none;
+    opacity: 0;
+}
+
+.call-modal-content {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 32px 24px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.call-modal-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    line-height: 1;
+}
+
+.call-modal-content h2 {
+    font-size: 24px;
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.call-modal-subtitle {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 24px 0;
+}
+
+.call-details {
+    background-color: #f8f8f8;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    text-align: left;
+    border: 1px solid #e0e0e0;
+}
+
+.call-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.call-detail-item:last-child {
+    border-bottom: none;
+}
+
+.call-detail-label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.call-detail-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+    max-width: 60%;
+    text-align: right;
+    word-break: break-all;
+}

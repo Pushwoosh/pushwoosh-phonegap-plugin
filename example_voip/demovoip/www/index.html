@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+        <meta name="color-scheme" content="light dark">
+        <link rel="stylesheet" href="css/index.css">
+        <title>Pushwoosh VoIP Demo</title>
+    </head>
+    <body>
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" class="welcome-overlay">
+            <div class="welcome-content">
+                <h2>Welcome to Pushwoosh VoIP Demo</h2>
+                <div class="welcome-instructions">
+                    <p><strong>How to use this app:</strong></p>
+                    <ol>
+                        <li>Enter your App ID (VoIP App Code) and FCM Project ID</li>
+                        <li>Click "Initialize Pushwoosh" to start the SDK</li>
+                        <li>Initialize VoIP Parameters to configure video support and ringtone</li>
+                        <li>Request Call Permission on Android if needed</li>
+                        <li>Use End Call button to terminate active calls</li>
+                        <li>Monitor VoIP events in the Event Log below</li>
+                    </ol>
+                    <p><strong>Testing VoIP Calls:</strong></p>
+                    <p>To receive incoming VoIP calls, send a VoIP push notification from the Pushwoosh Control Panel using your App ID.</p>
+                </div>
+                <div class="welcome-footer">
+                    <label class="welcome-checkbox">
+                        <input type="checkbox" id="dontShowAgain">
+                        <span>Don't show this again</span>
+                    </label>
+                    <button id="btnGetStarted" class="btn btn-primary">Get Started</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cancelled Call Modal -->
+        <div id="cancelledCallModal" class="call-modal hidden">
+            <div class="call-modal-content">
+                <div class="call-modal-icon">📞</div>
+                <h2>Call Cancelled</h2>
+                <p class="call-modal-subtitle">The caller has ended the call</p>
+                <div class="call-details">
+                    <div class="call-detail-item">
+                        <span class="call-detail-label">Caller:</span>
+                        <span id="cancelledCallerName" class="call-detail-value">Unknown</span>
+                    </div>
+                    <div class="call-detail-item">
+                        <span class="call-detail-label">Call ID:</span>
+                        <span id="cancelledCallId" class="call-detail-value">N/A</span>
+                    </div>
+                    <div class="call-detail-item">
+                        <span class="call-detail-label">Handle Type:</span>
+                        <span id="cancelledHandleType" class="call-detail-value">N/A</span>
+                    </div>
+                    <div class="call-detail-item">
+                        <span class="call-detail-label">Video:</span>
+                        <span id="cancelledHasVideo" class="call-detail-value">No</span>
+                    </div>
+                </div>
+                <button id="btnDismissCancelledCall" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+
+        <div class="app">
+            <div class="scroll-content">
+                <!-- Device Status -->
+                <div id="deviceready" class="status-indicator">
+                    <div class="status listening">Connecting to Device...</div>
+                    <div class="status ready">Device Ready</div>
+                </div>
+
+                <!-- Push Notifications Setup Section -->
+                <div class="section">
+                    <h2>Push Notifications Setup</h2>
+
+                    <div class="form-group">
+                        <label for="pushAppId">App ID / VoIP App Code</label>
+                        <input type="text" id="pushAppId" value="7BCDB-76CBE">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pushProjectId">FCM Project ID (Android)</label>
+                        <input type="text" id="pushProjectId" value="843884467752">
+                    </div>
+
+                    <button id="btnInitPushwoosh" class="btn btn-primary">Initialize Pushwoosh</button>
+                </div>
+
+                <!-- VoIP Parameters Section -->
+                <div class="section">
+                    <h2>VoIP Parameters</h2>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="supportsVideo" checked>
+                            <span>Supports Video</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ringtoneSound">Ringtone Sound</label>
+                        <input type="text" id="ringtoneSound" value="ring.caf" placeholder="ring.caf">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="handleType">Handle Type</label>
+                        <select id="handleType">
+                            <option value="1">Generic - Generic handle type</option>
+                            <option value="2" selected>Phone Number - Phone number handle</option>
+                            <option value="3">Email Address - Email address handle</option>
+                        </select>
+                    </div>
+
+                    <button id="btnInitVoIP" class="btn btn-primary">Initialize VoIP Parameters</button>
+                </div>
+
+                <!-- Call Permissions Section -->
+                <div class="section">
+                    <h2>Call Permissions</h2>
+                    <button id="btnRequestCallPermission" class="btn btn-secondary">
+                        Request Call Permission (Android Only)
+                    </button>
+                    <button id="btnGetCallPermissionStatus" class="btn btn-secondary">
+                        Get Call Permission Status
+                    </button>
+                    <div id="permissionStatus" class="status-text"></div>
+                </div>
+
+                <!-- Push Notifications Registration Section -->
+                <div class="section">
+                    <h2>Push Notifications</h2>
+                    <button id="btnRegisterPush" class="btn btn-secondary">
+                        Register for Push Notifications (Android Only)
+                    </button>
+                </div>
+
+                <!-- Call Controls Section -->
+                <div class="section">
+                    <h2>Call Controls</h2>
+                    <button id="btnEndCall" class="btn btn-danger">End Call</button>
+                </div>
+
+                <!-- VoIP Events Log Section -->
+                <div class="section">
+                    <h2>VoIP Events Log</h2>
+                    <button id="btnClearLog" class="btn btn-small">Clear Log</button>
+                    <div id="eventLog" class="event-log"></div>
+                </div>
+            </div>
+        </div>
+        <script src="cordova.js"></script>
+        <script src="js/index.js"></script>
+    </body>
+</html>

@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.pushwoosh.demovoip" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>demovoip</name>
+    <description>Pushwoosh VoIP Sample App</description>
+    <author email="support@pushwoosh.com" href="https://www.pushwoosh.com">
+        Pushwoosh Team
+    </author>
+    <content src="index.html" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <platform name="android">
+        <preference name="GradleVersion" value="8.9" />
+        <preference name="AndroidGradlePluginVersion" value="8.5.1" />
+        <preference name="android-minSdkVersion" value="24" />
+        <preference name="android-targetSdkVersion" value="35" />
+    </platform>
+    <hook type="after_prepare" src="hooks/after_prepare/010_setup_gradle_wrapper.js" />
+    <hook type="after_prepare" src="hooks/after_prepare/015_fix_agp_version.js" />
+    <hook type="after_prepare" src="hooks/after_prepare/020_copy_google_services.js" />
+    <hook type="after_platform_add" src="hooks/after_platform_add/010_install_plugin.js" />
+
+</widget>

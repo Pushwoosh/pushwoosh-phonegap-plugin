@@ -1,5 +1,7 @@
 package com.pushwoosh.plugin.pushnotifications.calls;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -7,7 +9,8 @@ import androidx.annotation.Nullable;
 
 import com.pushwoosh.calls.PushwooshVoIPMessage;
 import com.pushwoosh.calls.listener.CallEventListener;
-import com.pushwoosh.plugin.pushnotifications.PushNotifications;
+import com.pushwoosh.internal.platform.AndroidPlatformModule;
+import com.pushwoosh.internal.utils.PWLog;
 
 public class PWCordovaCallEventListener implements CallEventListener {
     private static final Object sCurrentCallLock = new Object();
@@ -19,6 +22,20 @@ public class PWCordovaCallEventListener implements CallEventListener {
         synchronized (sCurrentCallLock) {
             currentCallInfo = pushwooshVoIPMessage.getRawPayload();
         }
+        
+        try {
+            Context context = AndroidPlatformModule.getApplicationContext();
+            Intent launchIntent = context != null ? context.getPackageManager().getLaunchIntentForPackage(context.getPackageName()) : null;
+
+            if (launchIntent != null) {
+                launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                context.startActivity(launchIntent);
+                PWLog.info("PWCordovaCallEventListener", "Launched main activity for call");
+            }
+        } catch (Exception e) {
+            PWLog.error("PWCordovaCallEventListener", "Failed to launch activity", e);
+        }
+
         PushwooshCallsAdapter.onAnswer(pushwooshVoIPMessage);
     }
 
@@ -54,6 +71,19 @@ public class PWCordovaCallEventListener implements CallEventListener {
     @Override
     public void onCallRemoved(@NonNull PushwooshVoIPMessage pushwooshVoIPMessage) {
         //stub
+    }
+
+    @Override
+    public void onCallCancelled(@NonNull PushwooshVoIPMessage pushwooshVoIPMessage) {
+        PushwooshCallsAdapter.onCallCancelled(pushwooshVoIPMessage);
+        synchronized (sCurrentCallLock) {
+            currentCallInfo = null;
+        }
+    }
+
+    @Override
+    public void onCallCancellationFailed(@Nullable String callId, @Nullable String reason) {
+        PushwooshCallsAdapter.onCallCancellationFailed(callId, reason);
     }
 
     public static Bundle getCurrentCallInfo() {

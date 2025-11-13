@@ -864,6 +864,8 @@ public class PushNotifications extends CordovaPlugin {
 		callbackContextMap.put("reject", new ArrayList<CallbackContext>());
 		callbackContextMap.put("hangup", new ArrayList<CallbackContext>());
 		callbackContextMap.put("voipPushPayload", new ArrayList<CallbackContext>());
+		callbackContextMap.put("voipDidCancelCall", new ArrayList<CallbackContext>());
+		callbackContextMap.put("voipDidFailToCancelCall", new ArrayList<CallbackContext>());
 	}
 
 	@Override

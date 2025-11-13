@@ -180,9 +180,22 @@ public class PushwooshCallsAdapter implements CallsAdapter {
         PushNotifications.emitVoipEvent("hangup", parseVoIPMessage(voIPMessage));
     }
 
-  public static void onCreateIncomingConnection(Bundle bundle) {
+    public static void onCreateIncomingConnection(Bundle bundle) {
         PushwooshVoIPMessage voipMessage = new PushwooshVoIPMessage(bundle);
         PushNotifications.emitVoipEvent("voipPushPayload", parseVoIPMessage(voipMessage));
+    }
+
+    public static void onCallCancelled(PushwooshVoIPMessage voIPMessage) {
+        PushNotifications.emitVoipEvent("voipDidCancelCall", parseVoIPMessage(voIPMessage));
+    }
+
+    public static void onCallCancellationFailed(String callId, String reason) {
+        org.json.JSONObject payload = new org.json.JSONObject();
+        try {
+            payload.put("callId", callId != null ? callId : "");
+            payload.put("reason", reason != null ? reason : "");
+        } catch (org.json.JSONException ignored) {}
+        PushNotifications.emitVoipEvent("voipDidFailToCancelCall", payload);
     }
 
     private static org.json.JSONObject parseVoIPMessage(PushwooshVoIPMessage message) {
@@ -190,10 +203,15 @@ public class PushwooshCallsAdapter implements CallsAdapter {
         try {
             Bundle rawBundle = message.getRawPayload();
             org.json.JSONObject rawPayloadJson = JsonUtils.bundleToJsonWithUserData(rawBundle);
-            
+
             payload.put("callerName", message.getCallerName())
+                    .put("callId", message.getCallId())
                     .put("rawPayload", rawPayloadJson)
                     .put("hasVideo", message.getHasVideo());
+
+            if (rawBundle != null && rawBundle.containsKey("handleType")) {
+                payload.put("handleType", rawBundle.get("handleType"));
+            }
         } catch (org.json.JSONException ignored) {}
         return payload;
     }

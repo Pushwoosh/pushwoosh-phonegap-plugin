@@ -13,7 +13,7 @@
 #import "PushNotification.h"
 #import "PWLog.h"
 #import <PushwooshInboxUI/PushwooshInboxUI.h>
-#import <PushwooshFramework/PWInAppManager.h>
+#import <PushwooshCore/PWInAppManager.h>
 #import <PushwooshFramework/PushNotificationManager.h>
 #import <PushwooshFramework/PWInbox.h>
 #import "PWBackward.h"
@@ -33,7 +33,6 @@
 #import <UserNotifications/UserNotifications.h>
 
 #import <objc/runtime.h>
-
 
 #define WRITEJS(VAL) [NSString stringWithFormat:@"setTimeout(function() { %@; }, 0);", VAL]
 #define PW_COMMUNICATION_ENABLED_KEY @"PushwooshCommunicationEnabled"
@@ -121,7 +120,7 @@ API_AVAILABLE(ios(10))
 - (void)pluginInitialize {
     [super pluginInitialize];
     pw_PushNotificationPlugin = self;
-    
+
 #if PW_VOIP_ENABLED
     callbackIds = [[NSMutableDictionary alloc] initWithCapacity:5];
     [callbackIds setObject:[NSMutableArray array] forKey:@"initializeVoIPParameters"];
@@ -139,6 +138,13 @@ API_AVAILABLE(ios(10))
     [callbackIds setObject:[NSMutableArray array] forKey:@"playDTMF"];
     [callbackIds setObject:[NSMutableArray array] forKey:@"voipDidFailToRegisterTokenWithError"];
     [callbackIds setObject:[NSMutableArray array] forKey:@"voipDidRegisterTokenSuccessfully"];
+    [callbackIds setObject:[NSMutableArray array] forKey:@"voipDidCancelCall"];
+    [callbackIds setObject:[NSMutableArray array] forKey:@"voipDidFailToCancelCall"];
+
+    // Set delegate early so VoIP events work even before initializeVoIPParameters is called
+    if (@available(iOS 14.0, *)) {
+        PushwooshVoIPImplementation.delegate = self;
+    }
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveCallFromRecents:) name:@"RecentsCallNotification" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAudioRouteChange:) name:AVAudioSessionRouteChangeNotification object:nil];
@@ -182,7 +188,7 @@ API_AVAILABLE(ios(10))
 
 - (void)setApiToken:(CDVInvokedUrlCommand *)command {
     NSString *token = command.arguments[0];
-    [[PWSettings settings] setApiToken:token];
+    [[PWPreferences preferences] setApiToken:token];
 }
 
 - (void)onDeviceReady:(CDVInvokedUrlCommand *)command {
@@ -756,7 +762,7 @@ API_AVAILABLE(ios(10.0)) {
     if(callbackIds[eventName] != nil) {
         [callbackIds[eventName] addObject:command.callbackId];
     }
-    
+
     if (pendingCallFromRecents && [eventName isEqual:@"sendCall"]) {
         NSDictionary *callData = pendingCallFromRecents;
         CDVPluginResult* pluginResult = nil;
@@ -900,6 +906,29 @@ API_AVAILABLE(ios(10.0)) {
     }
 }
 
+// MARK: - voipDidCancelCall callback
+- (void)voipDidCancelCallWithVoipMessage:(PWVoIPMessage *)voipMessage {
+    for (id callbackId in callbackIds[@"voipDidCancelCall"]) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self handleVoIPMessage:voipMessage]];
+        [pluginResult setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+    }
+}
+
+// MARK: - voipDidFailToCancelCall callback
+- (void)voipDidFailToCancelCallWithCallId:(NSString *)callId reason:(NSString *)reason {
+    for (id callbackId in callbackIds[@"voipDidFailToCancelCall"]) {
+        CDVPluginResult* pluginResult = nil;
+        NSDictionary *failureData = @{
+            @"callId": callId ?: @"",
+            @"reason": reason ?: @"Unknown reason"
+        };
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:failureData];
+        [pluginResult setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+    }
+}
+
 // MARK: - Answer Call
 - (void)answerCall:(CXProvider *)provider perform:(CXAnswerCallAction *)action voipMessage:(PWVoIPMessage *)voipMessage {
     [self setupAudioSession];
@@ -1020,6 +1049,8 @@ API_AVAILABLE(ios(10.0)) {
     [payload addEntriesFromDictionary:@{@"callerName": voipMessage.callerName}];
     [payload addEntriesFromDictionary:@{@"handleType": @(voipMessage.handleType)}];
     [payload addEntriesFromDictionary:@{@"hasVideo": @(voipMessage.hasVideo)}];
+    [payload addEntriesFromDictionary:@{@"callId": voipMessage.callId ?: @""}];
+    [payload addEntriesFromDictionary:@{@"cancelCall": @(voipMessage.cancelCall)}];
     return payload;
 }
 #endif

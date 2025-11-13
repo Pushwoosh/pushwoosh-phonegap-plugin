@@ -506,6 +506,8 @@ PushNotification.prototype.notificationCallback = function(notification) {
  *                             - "playDTMF": Triggered when a DTMF tone is played.
  *                             - "voipDidFailToRegisterTokenWithError": Triggered when VoIP token registration fails (iOS only).
  *                             - "voipDidRegisterTokenSuccessfully": Triggered when VoIP token registration succeeds (iOS only).
+ *                             - "voipDidCancelCall": Triggered when a call is remotely cancelled via VoIP push.
+ *                             - "voipDidFailToCancelCall": Triggered when a call cancellation attempt fails.
  *
  * @param {Function} success - Callback function to be invoked when the event occurs.
  * @param {Function} fail - Callback function to be invoked if the registration fails.
@@ -534,6 +536,8 @@ PushNotification.prototype.registerEvent = function(eventName, success, fail) {
  *                             - "playDTMF": Triggered when a DTMF tone is played.
  *                             - "voipDidFailToRegisterTokenWithError": Triggered when VoIP token registration fails (iOS only).
  *                             - "voipDidRegisterTokenSuccessfully": Triggered when VoIP token registration succeeds (iOS only).
+ *                             - "voipDidCancelCall": Triggered when a call is remotely cancelled via VoIP push.
+ *                             - "voipDidFailToCancelCall": Triggered when a call cancellation attempt fails.
  *
  * @param {Function} success - Callback function to be invoked when the event is successfully unregistered.
  * @param {Function} fail - Callback function to be invoked if the unregistration fails.
