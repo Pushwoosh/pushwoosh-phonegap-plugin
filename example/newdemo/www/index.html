@@ -1,132 +1,147 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
-    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover, user-scalable=no">
     <meta name="color-scheme" content="light dark">
     <link rel="stylesheet" href="css/index.css">
-    <style>
-        .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .label {
-            flex-grow: 1;
-        }
-    </style>
+    <title>Pushwoosh Demo</title>
 </head>
-
 <body>
     <div class="app">
-        <div id="deviceready" class="blink">
-            <div class="scroll-view">
-                <div class="scroll-content" id="scroll-content">
-                    <img src="img/logo.png" alt="Your Image" class="top-image">
+        <!-- Header -->
+        <div class="header">
+            <img src="img/logo.png" alt="Pushwoosh" class="logo">
+            <h1>Pushwoosh Demo</h1>
+            <p class="subtitle">Test Push Notifications</p>
+        </div>
 
-                    <div class="container">
-                        <label class="label" for="switcher">REGISTER FOR NOTIFICATIONS:</label>
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Registration Section -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔔</span>
+                    <h2>Registration</h2>
+                </div>
+                <div class="card">
+                    <div class="toggle-container">
+                        <label for="switcher">Push Notifications</label>
                         <div class="ios-switch">
                             <input type="checkbox" id="switcher">
                             <label for="switcher"></label>
                         </div>
                     </div>
-
-                    <div class="gap"></div>
-
-                    <div class="container_enabled">
-                            <input type="text" id="textField1" placeholder="KEY">
-                            <div class="input-gap"></div>
-                            <input type="text" id="textField2" placeholder="VALUE">
-                    </div>
-
-                    <div class="gap"></div>
-
-                    <div class="container_setTags">
-                        <button class="btn_get" id="setTags">SET TAGS</button>
-                    </div>
-
-                    <div class="gap"></div>
-
-                    <div class="container_btns">
-                        <button class="btn_get" id="endCall">END CALL</button>
-                    </div>
-
-                    <div class="gap"></div>
-
-                    <div class="container_lang">
-                        <button class="btn" id="setLangBtn">SET LANGUAGE</button>
-                        <div class="input-container">
-                            <input type="text" id="textField3" placeholder="'en'">
-                        </div>
-                    </div>
-
-                    <div class="gap"></div>
-
-                    <div class="container_userId">
-                        <button class="btn" id="setUserBtn">SET USER ID</button>
-                        <div class="input-container">
-                            <input type="text" id="textField4" placeholder="USER ID">
-                        </div>
-                    </div>
-
-                    <div class="gap"></div>
-
-                    <div class="container_postEvent">
-                        <button class="btn" id="setPostEventBtn">POST EVENT</button>
-                        <div class="input-container">
-                            <input type="text" id="textField5" placeholder="EVENT NAME">
-                        </div>
-                    </div>
-
-                    <div class="gap"></div>
-
-                    <div class="container_btns">
-                        <button class="btn_get" id="getTags">GET TAGS</button>
-                    </div>
-
-                    <div class="gap"></div>
-
-                    <div class="container_btns">
-                        <button class="btn_get" id="getPushToken">GET PUSH TOKEN</button>
-                    </div>
-
-                    <div class="gap"></div>
-
-                    <div class="container_btns">
-                        <button class="btn_get" id="getHwid">GET HWID</button>
-                    </div>
-
-                    <div class="gap"></div>
-
-                    <div class="container_btns">
-                        <button class="btn_get" id="resetBadges">RESET BADGES</button>
-                    </div>
-
-                    <div class="gap"></div>
-
-                    <div class="container_btns">
-                        <button class="btn_get" id="localNotification">SEND LOCAL NOTIFICATION</button>
-                    </div>
-
-                    <div class="gap"></div>
-
-                    <div class="container_btns">
-                        <button class="btn_get" id="clearNotificationCenter">CLEAR NOTIFICATION CENTER</button>
-                    </div>
-
                 </div>
+                <button class="btn btn-primary" id="getNotificationStatus">
+                    <span class="btn-icon">📊</span>
+                    Get Notification Status
+                </button>
+            </div>
+
+            <!-- VoIP Section -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📞</span>
+                    <h2>VoIP Calls</h2>
+                </div>
+                <button class="btn btn-danger" id="endCall">
+                    <span class="btn-icon">📵</span>
+                    End Call
+                </button>
+            </div>
+
+            <!-- Tags Section -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🏷️</span>
+                    <h2>Tags</h2>
+                </div>
+                <div class="card">
+                    <div class="input-group">
+                        <input type="text" id="textField1" placeholder="Key">
+                        <input type="text" id="textField2" placeholder="Value">
+                    </div>
+                    <button class="btn btn-primary" id="setTags">Set Tags</button>
+                </div>
+                <button class="btn btn-secondary" id="getTags">Get Tags</button>
+            </div>
+
+            <!-- User Settings Section -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">👤</span>
+                    <h2>User Settings</h2>
+                </div>
+                <div class="card">
+                    <div class="input-row">
+                        <input type="text" id="textField4" placeholder="User ID">
+                        <button class="btn btn-small" id="setUserBtn">Set</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="input-row">
+                        <input type="text" id="textField3" placeholder="Language (e.g., 'en')">
+                        <button class="btn btn-small" id="setLangBtn">Set</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Events Section -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📈</span>
+                    <h2>Events</h2>
+                </div>
+                <div class="card">
+                    <div class="input-row">
+                        <input type="text" id="textField5" placeholder="Event Name">
+                        <button class="btn btn-small" id="setPostEventBtn">Post</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Device Info Section -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📱</span>
+                    <h2>Device Info</h2>
+                </div>
+                <button class="btn btn-secondary" id="getPushToken">Get Push Token</button>
+                <button class="btn btn-secondary" id="getHwid">Get HWID</button>
+            </div>
+
+            <!-- Notifications Section -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">💬</span>
+                    <h2>Local Notifications</h2>
+                </div>
+                <button class="btn btn-secondary" id="localNotification">Send Local Notification</button>
+                <button class="btn btn-secondary" id="clearNotificationCenter">Clear Notification Center</button>
+                <button class="btn btn-secondary" id="resetBadges">Reset Badges</button>
             </div>
         </div>
     </div>
+
+    <!-- Modal for displaying notification status -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Notification Status</h2>
+                <span class="close" id="closeModal">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Status will be injected here -->
+            </div>
+        </div>
+    </div>
+
     <script src="cordova.js"></script>
     <script src="js/index.js"></script>
 </body>
-
 </html>
