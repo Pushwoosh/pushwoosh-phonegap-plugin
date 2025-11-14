@@ -1330,16 +1330,40 @@ void pwplugin_didRegisterWithDeviceToken(id self, SEL _cmd, id application, NSDa
     if ([self respondsToSelector:@selector(application: pwplugin_didRegisterWithDeviceToken:)]) {
         [self application:application pwplugin_didRegisterWithDeviceToken:deviceToken];
     }
-    
+
     [[Pushwoosh sharedInstance] handlePushRegistration:deviceToken];
+
+    PushNotification *pushHandler = pw_PushNotificationPlugin;
+    if (pushHandler && pushHandler.callbackIds[@"registerDevice"]) {
+        const unsigned char *tokenBytes = (const unsigned char *)[deviceToken bytes];
+        NSMutableString *token = [NSMutableString string];
+        for (NSInteger i = 0; i < [deviceToken length]; i++) {
+            [token appendFormat:@"%02x", (unsigned int)tokenBytes[i]];
+        }
+
+        NSMutableDictionary *results = [PushNotificationManager getRemoteNotificationStatus];
+        results[@"pushToken"] = token;
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
+        [pushHandler.commandDelegate sendPluginResult:pluginResult callbackId:pushHandler.callbackIds[@"registerDevice"]];
+        pushHandler.callbackIds[@"registerDevice"] = nil;
+    }
 }
 
 void pwplugin_didFailToRegisterForRemoteNotificationsWithError(id self, SEL _cmd, UIApplication *application, NSError *error) {
     if ([self respondsToSelector:@selector(application:pwplugin_didFailToRegisterForRemoteNotificationsWithError:)]) {
         [self application:application pwplugin_didFailToRegisterForRemoteNotificationsWithError:error];
     }
-    
+
     [[Pushwoosh sharedInstance] handlePushRegistrationFailure:error];
+
+    PushNotification *pushHandler = pw_PushNotificationPlugin;
+    if (pushHandler && pushHandler.callbackIds[@"registerDevice"]) {
+        NSMutableDictionary *results = [NSMutableDictionary dictionary];
+        results[@"error"] = [NSString stringWithFormat:@"%@", error];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:results];
+        [pushHandler.commandDelegate sendPluginResult:pluginResult callbackId:pushHandler.callbackIds[@"registerDevice"]];
+        pushHandler.callbackIds[@"registerDevice"] = nil;
+    }
 }
 
 BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id application, id notificationSettings) {
