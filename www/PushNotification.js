@@ -641,9 +641,11 @@ PushNotification.prototype.unmute = function(success, error) {
 // Android calls
 /**
  * Request call permission and register phone account
+ * @param {Function} success - Callback invoked with permission result
+ * @param {Function} error - Callback invoked if the operation fails
  */
-PushNotification.prototype.requestCallPermission = function() {
-	exec(null, null, "PushNotification", "requestCallPermission", []);
+PushNotification.prototype.requestCallPermission = function(success, error) {
+	exec(success, error, "PushNotification", "requestCallPermission", []);
 }
 
 /**
@@ -831,6 +833,10 @@ PushNotification.prototype.setApiToken = function(token) {
 
 PushNotification.prototype.setVoipAppCode = function(appCode) {
 	exec(null, null, "PushNotification", "setVoipAppCode", [appCode]);
+}
+
+PushNotification.prototype.setIncomingCallTimeout = function(timeoutSeconds) {
+	exec(null, null, "PushNotification", "setIncomingCallTimeout", [timeoutSeconds]);
 }
 
 module.exports = new PushNotification();

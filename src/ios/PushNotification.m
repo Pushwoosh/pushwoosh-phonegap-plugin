@@ -634,7 +634,9 @@ API_AVAILABLE(ios(10.0)) {
 #if PW_VOIP_ENABLED
 // MARK: - Voip settings
 - (void)requestCallPermission:(CDVInvokedUrlCommand *)command {
-    //stub, android only
+    //stub, android only - iOS doesn't require call permission
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)getCallPermissionStatus:(CDVInvokedUrlCommand *)command {
@@ -720,6 +722,28 @@ API_AVAILABLE(ios(10.0)) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"VoIP Parameters Initialized"];
     } else {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid initialization parameters"];
+    }
+
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+// MARK: - Set Incoming Call Timeout
+- (void)setIncomingCallTimeout:(CDVInvokedUrlCommand *)command {
+    CDVPluginResult* pluginResult = nil;
+
+    NSNumber *timeoutNumber = [command.arguments objectAtIndex:0];
+
+    if ([timeoutNumber isKindOfClass:[NSNumber class]]) {
+        NSTimeInterval timeout = [timeoutNumber doubleValue];
+
+        if (@available(iOS 14.0, *)) {
+            [PushwooshVoIPImplementation setIncomingCallTimeout:timeout];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Incoming call timeout set"];
+        } else {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"VoIP requires iOS 14.0 or later"];
+        }
+    } else {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid timeout parameter"];
     }
 
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

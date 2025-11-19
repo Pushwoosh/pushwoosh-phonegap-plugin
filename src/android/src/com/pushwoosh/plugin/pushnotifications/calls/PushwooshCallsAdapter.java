@@ -9,6 +9,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 
 import com.pushwoosh.Pushwoosh;
+import com.pushwoosh.calls.CallPermissionsCallback;
 import com.pushwoosh.calls.PushwooshCallReceiver;
 import com.pushwoosh.calls.PushwooshCallSettings;
 import com.pushwoosh.calls.PushwooshVoIPMessage;
@@ -40,11 +41,17 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     }
 
     @Override
-    public boolean requestCallPermission(JSONArray data, CallbackContext callbackContext) {
+    public boolean requestCallPermission(JSONArray data, final CallbackContext callbackContext) {
         try {
-            PushwooshCallSettings.requestCallPermissions();
+            PushwooshCallSettings.requestCallPermissions(new CallPermissionsCallback() {
+                @Override
+                public void onPermissionResult(boolean granted, java.util.List<String> grantedPerms, java.util.List<String> deniedPerms) {
+                    callbackContext.success(granted ? 1 : 0);
+                }
+            });
         } catch (Exception e) {
             PWLog.error(TAG, "Failed to request call permissions: " + e.getMessage());
+            callbackContext.error("Failed to request call permissions: " + e.getMessage());
             return false;
         }
         return true;
@@ -116,6 +123,18 @@ public class PushwooshCallsAdapter implements CallsAdapter {
             return true;
         }  catch (Exception e) {
             PWLog.error("Failed to fetch custom sound name");
+            return false;
+        }
+    }
+
+    @Override
+    public boolean setIncomingCallTimeout(JSONArray data, CallbackContext callbackContext) {
+        try {
+            double timeout = data.getDouble(0);
+            PushwooshCallSettings.setIncomingCallTimeout(timeout);
+            return true;
+        } catch (Exception e) {
+            PWLog.error("Failed to set incoming call timeout: " + e.getMessage());
             return false;
         }
     }

@@ -50,6 +50,12 @@ public class NoopCallsAdapter implements CallsAdapter{
     }
 
     @Override
+    public boolean setIncomingCallTimeout(JSONArray data, CallbackContext callbackContext) {
+        PWLog.error(TAG,"Method not implemented");
+        return false;
+    }
+
+    @Override
     public boolean mute() {
         PWLog.error(TAG,"Method not implemented");
         return false;

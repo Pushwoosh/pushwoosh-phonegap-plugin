@@ -28,6 +28,7 @@ type InboxNotification = {
 	isActionPerformed?: boolean;
 }
 
+
 type AuthOptions = Record<string, number|string>
 
 type RemoteNotificationStatus = Record<string,string|number|boolean>
@@ -95,7 +96,7 @@ export interface PushNotification {
 	speakerOff(success?: () => void, error?: (err: Error | string) => void): void;
 	mute(success?: () => void, error?: (err: Error | string) => void): void;
 	unmute(success?: () => void, error?: (err: Error | string) => void): void;
-	requestCallPermission(): void;
+	requestCallPermission(success?: (granted: boolean) => void, error?: (err: Error | string) => void): void;
 	getCallPermissionStatus(success?: (status: number) => void, error?: (err: Error | string) => void): void;
 	endCall(success?: () => void, error?: (err: Error | string) => void): void;
 }

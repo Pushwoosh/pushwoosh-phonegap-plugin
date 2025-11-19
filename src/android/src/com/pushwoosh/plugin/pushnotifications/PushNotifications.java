@@ -1104,6 +1104,11 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@CordovaMethod
+	private boolean setIncomingCallTimeout(JSONArray data, final CallbackContext callbackContext) {
+		return callsAdapter.setIncomingCallTimeout(data, callbackContext);
+	}
+
+	@CordovaMethod
 	private boolean mute() {
 		return callsAdapter.mute();
 	}
