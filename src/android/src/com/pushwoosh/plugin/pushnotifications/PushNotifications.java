@@ -10,6 +10,7 @@
 
 package com.pushwoosh.plugin.pushnotifications;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,6 +34,7 @@ import com.pushwoosh.inbox.data.InboxMessage;
 import com.pushwoosh.inbox.exception.InboxMessagesException;
 import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
 import com.pushwoosh.internal.platform.utils.GeneralUtils;
+import com.pushwoosh.internal.platform.AndroidPlatformModule;
 import com.pushwoosh.internal.utils.JsonUtils;
 import com.pushwoosh.internal.utils.PWLog;
 import com.pushwoosh.notification.LocalNotification;
@@ -75,7 +77,6 @@ public class PushNotifications extends CordovaPlugin {
 	private static AtomicBoolean sAppReady = new AtomicBoolean();
 	private static PushNotifications sInstance;
 
-	//	private CallbackContext callbackContext;
 	private static CordovaInterface cordovaInterface;
 	private static CallsAdapter callsAdapter;
 
@@ -108,6 +109,25 @@ public class PushNotifications extends CordovaPlugin {
 		return cordovaInterface;
 	}
 
+	/**
+	 * Checks if Cordova WebView is ready to receive events.
+	 * Returns false if CordovaInterface is null, Activity is null/finishing/destroyed.
+	 */
+	private static boolean isCordovaReady() {
+		if (cordovaInterface == null) {
+			return false;
+		}
+		try {
+			android.app.Activity activity = cordovaInterface.getActivity();
+			if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
+				return false;
+			}
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 	public static HashMap<String, ArrayList<CallbackContext>> getCallbackContextMap() {
 		return callbackContextMap;
 	}
@@ -125,9 +145,24 @@ public class PushNotifications extends CordovaPlugin {
 
 	@Override
 	public void onDestroy() {
+		PWLog.noise(TAG, "onDestroy()");
+
 		super.onDestroy();
-		PWLog.noise("OnDestroy");
 		sAppReady.set(false);
+	}
+
+	@Override
+	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+		PWLog.noise(TAG, "initialize()");
+		
+		cordovaInterface = cordova;
+		callsAdapter = CallsAdapterFactory.create(cordova.getActivity().getApplicationContext());
+		callbackContextMap.put("answer", new ArrayList<CallbackContext>());
+		callbackContextMap.put("reject", new ArrayList<CallbackContext>());
+		callbackContextMap.put("hangup", new ArrayList<CallbackContext>());
+		callbackContextMap.put("voipPushPayload", new ArrayList<CallbackContext>());
+		callbackContextMap.put("voipDidCancelCall", new ArrayList<CallbackContext>());
+		callbackContextMap.put("voipDidFailToCancelCall", new ArrayList<CallbackContext>());
 	}
 
 	private JSONObject getPushFromIntent(Intent intent) {
@@ -152,6 +187,8 @@ public class PushNotifications extends CordovaPlugin {
 
 	@CordovaMethod
 	private boolean onDeviceReady(JSONArray data, CallbackContext callbackContext) {
+		PWLog.noise(TAG, "onDeviceReady()");
+
 		JSONObject params = null;
 		try {
 			params = data.getJSONObject(0);
@@ -160,34 +197,37 @@ public class PushNotifications extends CordovaPlugin {
 			return false;
 		}
 
+		String appid = null;
 		try {
-
-			String appid = null;
 			if (params.has("appid")) {
 				appid = params.getString("appid");
 			} else {
 				appid = params.getString("pw_appid");
 			}
-
-			Pushwoosh.getInstance().setAppId(appid);
-			Pushwoosh.getInstance().setSenderId(params.getString("projectid"));
-
-
-			synchronized (sStartPushLock) {
-				if (sReceivedPushData != null) {
-					doOnPushReceived(sReceivedPushData);
-				}
-
-				if (sStartPushData != null) {
-					doOnPushOpened(sStartPushData);
-				}
-			}
-
-			sAppReady.set(true);
-		} catch (Exception e) {
-			PWLog.error(TAG, "Missing pw_appid parameter. Did you follow the guide correctly?", e);
+		} catch (JSONException e) {
+			PWLog.error(TAG, "Missing appid parameter. Did you follow the guide correctly?", e);
 			return false;
 		}
+
+		String projectid = params.optString("projectid", "");
+
+		Pushwoosh.getInstance().setAppId(appid);
+		Pushwoosh.getInstance().setSenderId(projectid);
+
+		try {
+			processPendingPushNotifications();
+		} catch (Exception e) {
+			PWLog.error(TAG, "Failed to process pending push notifications", e);
+		}
+
+		sAppReady.set(true);
+
+		try {
+			processPersistedVoIPEvents();
+		} catch (Exception e) {
+			PWLog.error(TAG, "Failed to process persisted VoIP events", e);
+		}
+
 		return true;
 	}
 
@@ -857,18 +897,6 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@Override
-	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
-		cordovaInterface = cordova;
-		callsAdapter = CallsAdapterFactory.create(cordova.getActivity().getApplicationContext());
-		callbackContextMap.put("answer", new ArrayList<CallbackContext>());
-		callbackContextMap.put("reject", new ArrayList<CallbackContext>());
-		callbackContextMap.put("hangup", new ArrayList<CallbackContext>());
-		callbackContextMap.put("voipPushPayload", new ArrayList<CallbackContext>());
-		callbackContextMap.put("voipDidCancelCall", new ArrayList<CallbackContext>());
-		callbackContextMap.put("voipDidFailToCancelCall", new ArrayList<CallbackContext>());
-	}
-
-	@Override
 	public boolean execute(String action, JSONArray data, CallbackContext callbackId) {
 		PWLog.debug(TAG, "Plugin Method Called: " + action);
 
@@ -1128,17 +1156,75 @@ public class PushNotifications extends CordovaPlugin {
 		return callsAdapter.speakerOff();
 	}
 
-	public static void emitVoipEvent(@NonNull String type, @NonNull JSONObject payload) {
-		ArrayList<CallbackContext> callbackContexts = getCallbackContexts().get(type);
-		if (callbackContexts == null) return;
+	private void processPendingPushNotifications() {
+		PWLog.noise(TAG, "processPendingPushNotifications()");
+		synchronized (sStartPushLock) {
+			if (sReceivedPushData != null) {
+				doOnPushReceived(sReceivedPushData);
+			}
 
-		for (final CallbackContext callbackContext : callbackContexts) {
-			getCordovaInterface().getThreadPool().execute(() -> {
-				PluginResult result = new PluginResult(PluginResult.Status.OK, payload);
-				result.setKeepCallback(true);
-				callbackContext.sendPluginResult(result);
-			});
+			if (sStartPushData != null) {
+				doOnPushOpened(sStartPushData);
+			}
 		}
+	}
+
+	private void processPersistedVoIPEvents() {
+		PWLog.noise(TAG, "processPersistedVoIPEvents()");
+		Context context = AndroidPlatformModule.getApplicationContext();
+		if (context == null) {
+			return;
+		}
+
+		List<VoIPEventStorage.StoredEvent> storedEvents = VoIPEventStorage.loadEvents(context);
+		if (storedEvents.isEmpty()) {
+			return;
+		}
+
+		PWLog.info(TAG, "Processing " + storedEvents.size() + " persisted VoIP events");
+
+		for (VoIPEventStorage.StoredEvent event : storedEvents) {
+			emitVoipEvent(event.type, event.payload);
+		}
+
+		VoIPEventStorage.clearEvents(context);
+	}
+
+	private static void bufferVoipEvent(@NonNull String type, @NonNull JSONObject payload) {
+		Context context = AndroidPlatformModule.getApplicationContext();
+		if (context != null) {
+			VoIPEventStorage.saveEvent(context, type, payload);
+		}
+	}
+
+	public static void emitVoipEvent(@NonNull String type, @NonNull JSONObject payload) {
+		PWLog.noise(TAG, "emitVoipEvent(), event type: " + type);
+
+		if (!isCordovaReady()) {
+			PWLog.info(TAG, "Buffering VoIP event '" + type + "': Cordova not ready");
+			bufferVoipEvent(type, payload);
+			return;
+		}
+
+		ArrayList<CallbackContext> callbackContexts = getCallbackContexts().get(type);
+		if (callbackContexts != null && !callbackContexts.isEmpty()) {
+			for (final CallbackContext callbackContext : callbackContexts) {
+				getCordovaInterface().getThreadPool().execute(() -> {
+					PluginResult result = new PluginResult(PluginResult.Status.OK, payload);
+					result.setKeepCallback(true);
+					callbackContext.sendPluginResult(result);
+				});
+			}
+			return;
+		}
+
+		if (!sAppReady.get()) {
+			PWLog.info(TAG, "Buffering VoIP event '" + type + "': JS not ready");
+			bufferVoipEvent(type, payload);
+			return;
+		}
+
+		PWLog.warn(TAG, "No callback contexts registered for event: " + type);
 	}
 
 	private static JSONObject inboxMessageToJson(InboxMessage message) {

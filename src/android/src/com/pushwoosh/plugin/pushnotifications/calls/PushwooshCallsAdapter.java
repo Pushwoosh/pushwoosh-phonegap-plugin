@@ -30,6 +30,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
 
     @Override
     public boolean setVoipAppCode(JSONArray data, CallbackContext callbackContext) {
+        PWLog.noise(TAG, "setVoipAppCode()");
         try {
             String appCode = data.getString(0);
             Pushwoosh.getInstance().addAlternativeAppCode(appCode);
@@ -42,6 +43,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
 
     @Override
     public boolean requestCallPermission(JSONArray data, final CallbackContext callbackContext) {
+        PWLog.noise(TAG, "requestCallPermission()");
         try {
             PushwooshCallSettings.requestCallPermissions(new CallPermissionsCallback() {
                 @Override
@@ -59,6 +61,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
 
     @Override
     public boolean getCallPermissionStatus(JSONArray data, CallbackContext callbackContext) {
+        PWLog.noise(TAG, "getCallPermissionStatus()");
         try {
             int status = PushwooshCallSettings.getCallPermissionStatus();
             callbackContext.success(status);
@@ -71,6 +74,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
 
     @Override
     public boolean registerEvent(JSONArray data, CallbackContext callbackContext) {
+        PWLog.noise(TAG, "registerEvent()");
         try {
 
             String eventType = data.getString(0);
@@ -86,6 +90,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
 
     @Override
     public boolean unregisterEvent(JSONArray data, CallbackContext callbackContext) {
+        PWLog.noise(TAG, "unregisterEvent()");
         try {
             String eventType = data.getString(0);
             ArrayList<CallbackContext> callbackContextList = getCallbackContextMap().get(eventType);
@@ -104,6 +109,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
 
     @Override
     public boolean endCall(JSONArray data, CallbackContext callbackContext) {
+        PWLog.noise(TAG, "endCall()");
         Context context = AndroidPlatformModule.getApplicationContext();
         Intent endCallIntent = new Intent(context, PushwooshCallReceiver.class);
         endCallIntent.putExtras(PWCordovaCallEventListener.getCurrentCallInfo());
@@ -115,6 +121,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
 
     @Override
     public boolean initializeVoIPParameters(JSONArray data, CallbackContext callbackContext) {
+        PWLog.noise(TAG, "initializeVoIPParameters()");
         try {
             String callSound = data.getString(1);
             if (callSound!= null && !callSound.isEmpty()){
@@ -129,6 +136,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
 
     @Override
     public boolean setIncomingCallTimeout(JSONArray data, CallbackContext callbackContext) {
+        PWLog.noise(TAG, "setIncomingCallTimeout()");
         try {
             double timeout = data.getDouble(0);
             PushwooshCallSettings.setIncomingCallTimeout(timeout);
@@ -141,6 +149,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
 
     @Override
     public boolean mute() {
+        PWLog.noise(TAG, "mute()");
         try {
             AudioManager audioManager = (AudioManager) getCordovaInterface().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
             audioManager.setMicrophoneMute(true);
@@ -153,6 +162,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
 
     @Override
     public boolean unmute() {
+        PWLog.noise(TAG, "unmute()");
         try {
             AudioManager audioManager = (AudioManager) getCordovaInterface().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
             audioManager.setMicrophoneMute(false);
@@ -165,6 +175,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
 
     @Override
     public boolean speakerOn() {
+        PWLog.noise(TAG, "speakerOn()");
         try {
             AudioManager audioManager = (AudioManager) getCordovaInterface().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
             audioManager.setSpeakerphoneOn(true);
@@ -177,6 +188,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
 
     @Override
     public boolean speakerOff() {
+        PWLog.noise(TAG, "speakerOff()");
         try {
             AudioManager audioManager = (AudioManager) getCordovaInterface().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
             audioManager.setSpeakerphoneOn(false);
@@ -188,27 +200,33 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     }
 
     public static void onAnswer(PushwooshVoIPMessage voIPMessage) {
+        PWLog.noise(TAG, "onAnswer()");
         PushNotifications.emitVoipEvent("answer", parseVoIPMessage(voIPMessage));
     }
 
     public static void onReject(PushwooshVoIPMessage voIPMessage) {
+        PWLog.noise(TAG, "onReject()");
         PushNotifications.emitVoipEvent("reject", parseVoIPMessage(voIPMessage));
     }
 
     public static void onDisconnect(PushwooshVoIPMessage voIPMessage) {
+        PWLog.noise(TAG, "onDisconnect()");
         PushNotifications.emitVoipEvent("hangup", parseVoIPMessage(voIPMessage));
     }
 
     public static void onCreateIncomingConnection(Bundle bundle) {
+        PWLog.noise(TAG, "onCreateIncomingConnection()");
         PushwooshVoIPMessage voipMessage = new PushwooshVoIPMessage(bundle);
         PushNotifications.emitVoipEvent("voipPushPayload", parseVoIPMessage(voipMessage));
     }
 
     public static void onCallCancelled(PushwooshVoIPMessage voIPMessage) {
+        PWLog.noise(TAG, "onCallCancelled()");
         PushNotifications.emitVoipEvent("voipDidCancelCall", parseVoIPMessage(voIPMessage));
     }
 
     public static void onCallCancellationFailed(String callId, String reason) {
+        PWLog.noise(TAG, "onCallCancellationFailed()");
         org.json.JSONObject payload = new org.json.JSONObject();
         try {
             payload.put("callId", callId != null ? callId : "");
@@ -218,6 +236,7 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     }
 
     private static org.json.JSONObject parseVoIPMessage(PushwooshVoIPMessage message) {
+        PWLog.noise(TAG, "parseVoIPMessage()");
         org.json.JSONObject payload = new org.json.JSONObject();
         try {
             Bundle rawBundle = message.getRawPayload();
