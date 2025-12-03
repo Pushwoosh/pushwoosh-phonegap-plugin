@@ -1,6 +1,7 @@
 var path = require("path");
 var fs = require("fs");
-const { log } = require("console");
+
+var TAG = "[utils.js]";
 /**
  * Get the platform version for the current execution
  * @param {object} context
@@ -47,14 +48,16 @@ function getPlatformPath(context) {
  */
 function getWwwPath(context) {
     var platformPath = getPlatformPath(context);
-    console.log("platformPath: ", platformPath);
+    console.log(TAG, "platformPath:", platformPath);
     var platform = context.opts.plugin.platform;
-    console.log("platform: ", platform);
+    console.log(TAG, "platform:", platform);
     var wwwfolder;
     if (platform === "android") {
         var platformVersion = getPlatformVersion(context);
+        console.log(TAG, "platformVersion:", platformVersion);
         var majorPlatformVersion = platformVersion.split(".")[0];
-        if (parseInt(majorPlatformVersion) >= 7) { 
+        console.log(TAG, "majorPlatformVersion:", majorPlatformVersion);
+        if (parseInt(majorPlatformVersion) >= 7) {
             wwwfolder = "app/src/main/assets/www";
         } else {
             wwwfolder = "assets/www";
@@ -62,6 +65,7 @@ function getWwwPath(context) {
     } else if (platform === "ios") {
         wwwfolder = "www";
     }
+    console.log(TAG, "wwwfolder:", wwwfolder);
     return path.join(platformPath, wwwfolder);
 }
 
