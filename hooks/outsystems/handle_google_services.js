@@ -3,6 +3,8 @@ var fs = require("fs");
 var AdmZip = require("adm-zip");
 var utils = require("./utils");
 
+var TAG = "[handle_google_services.js]";
+
 /**
  * Searches the resources folder for a zip file with the name equal
  * to the FCMResourcesFile preference value and resturns an absolute path
@@ -139,33 +141,51 @@ function extractAppId() {
 }
 
 module.exports = function(context) {
+    console.log(TAG, "Hook started");
+    console.log(TAG, "Platform:", context.opts.plugin.platform);
+
     return new Promise(function(resolve, reject) {
         var wwwpath = utils.getWwwPath(context);
+        console.log(TAG, "WWW path:", wwwpath);
+
         var configPath = path.join(wwwpath, "google-services");
+        console.log(TAG, "Config path:", configPath);
 
         var prefZipFilename = "google-services";
         var zipFile = getZipFile(configPath, prefZipFilename);
+        console.log(TAG, "Zip file found:", zipFile || "NOT FOUND");
 
         // if zip file is present, lets unzip it!
         if (!zipFile) {
+            console.log(TAG, "ERROR: Configuration zip file not found");
             return reject(
                 "Failed to install Pushwoosh plugin. Reason: Configuration zip file not found."
             );
         }
+
+        console.log(TAG, "Unzipping:", zipFile);
         var unzipedResourcesDir = unzip(zipFile, configPath, prefZipFilename);
+        console.log(TAG, "Unzipped to:", unzipedResourcesDir);
+
         var platform = context.opts.plugin.platform;
         var targetDir = getGoogleServiceTargetDir(context);
+        console.log(TAG, "Target directory:", targetDir);
+
         var copyWithSuccess = copyGoogleServiceFile(
             unzipedResourcesDir,
             targetDir,
             platform
         );
+        console.log(TAG, "Copy result:", copyWithSuccess ? "SUCCESS" : "FAILED");
 
         if (!copyWithSuccess) {
+            console.log(TAG, "ERROR: Unable to copy google services file");
             return reject(
                 "Failed to install pushwoosh plugin. Reason: Unable to copy google services file to project."
             );
         }
+
+        console.log(TAG, "Hook completed successfully");
         return resolve();
     });
 };

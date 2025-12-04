@@ -3,6 +3,8 @@ var fs = require("fs");
 var AdmZip = require("adm-zip");
 var utils = require("./utils");
 
+var TAG = "[add_fcm_router.js]";
+
 
 /**
  * Searches the resources folder for a zip file with the name equal
@@ -16,14 +18,13 @@ var utils = require("./utils");
  */
 function getZipFile(resourcesFolder, prefZipFilename) {
     try {
-        var zipFile;   
+        var zipFile;
         var dirFiles = fs.readdirSync(resourcesFolder);
         dirFiles.forEach(function(file) {
             if (file.match(/\.zip$/)) {
                 var filename = path.basename(file, ".zip");
                 if (filename === prefZipFilename) {
                     zipFile = path.join(resourcesFolder, file);
-                    console.log("[PUSHWOOSH HELPER] zipFile found: " + zipFile);
                 }
             }
         });
@@ -46,7 +47,6 @@ function unzip(zipFile, unzippedTargetDir, prefZipFilename) {
     var zip = new AdmZip(zipFile);
     var targetDir = path.join(unzippedTargetDir, prefZipFilename);
     zip.extractAllTo(targetDir, true);
-    console.log("[PUSHWOOSH HELPER] extracted zip to targetDir");
     return targetDir;
 }
 
@@ -65,7 +65,7 @@ function getPackageSpecificPath() {
 function copyJavaFile(srcFile) {
 	try {
 	    if (!fs.existsSync(srcFile)) {
-	      throw new Error("[PUSHWOOSH HELPER] Source file not found:", srcFile);
+	      throw new Error("Source file not found: " + srcFile);
 	    }
 
 	    const destinationPath = path.join("platforms/android/app/src/main/java", getPackageSpecificPath());
@@ -73,10 +73,9 @@ function copyJavaFile(srcFile) {
 		    fs.mkdirSync(destinationPath, { recursive: true });
 		}
 	    fs.copyFileSync(srcFile, path.join(destinationPath, "FirebaseMessagingRouterService.java"));
-	    console.log("[PUSHWOOSH HELPER] Copied " + srcFile + " to " + destinationPath);
         return true;
 	} catch (error) {
-    console.error("[PUSHWOOSH HELPER] Error copying FirebaseMessagingRouterService file:", error.message);
+    console.error(TAG, "Error copying FirebaseMessagingRouterService:", error.message);
     return false;
   }
 }
@@ -84,7 +83,7 @@ function copyJavaFile(srcFile) {
 function addService(manifestPath, serviceName, serviceTemplate) {
   fs.readFile(manifestPath, 'utf8', (err, data) => {
     if (err) {
-      console.error('Error reading manifest file:', err);
+      console.error(TAG, 'Error reading manifest file:', err);
       return;
     }
 
@@ -92,7 +91,7 @@ function addService(manifestPath, serviceName, serviceTemplate) {
     const applicationMatch = applicationRegex.exec(data);
 
     if (!applicationMatch) {
-      console.error('<application> tag not found in manifest');
+      console.error(TAG, '<application> tag not found in manifest');
       return;
     }
 
@@ -102,33 +101,49 @@ function addService(manifestPath, serviceName, serviceTemplate) {
 
     fs.writeFile(manifestPath, updatedManifest, 'utf8', (err) => {
       if (err) {
-        console.error('Error writing updated manifest:', err);
+        console.error(TAG, 'Error writing updated manifest:', err);
         throw new Error('Error writing updated manifest:', err);
       }
-      console.log('Service element added successfully!');
+      console.log(TAG, 'Service element added successfully!');
     });
   });
 }
 
 module.exports = function(context) {
+    console.log(TAG, "Hook started");
+    console.log(TAG, "Platform:", context.opts.plugin.platform);
+
     return new Promise(function(resolve, reject) {
-        var wwwpath = utils.getWwwPath(context);    
+        var wwwpath = utils.getWwwPath(context);
+        console.log(TAG, "WWW path:", wwwpath);
+
     	var configPath = path.join(wwwpath, "FirebaseMessagingRouterService");
+        console.log(TAG, "Config path:", configPath);
+
         var prefZipFilename = "FirebaseMessagingRouterService";
         var zipFile = getZipFile(configPath, prefZipFilename);
+        console.log(TAG, "Zip file found:", zipFile || "NOT FOUND");
 
         // if zip file is present, lets unzip it!
         if (zipFile) {
+            console.log(TAG, "Unzipping:", zipFile);
         	var unzippedResourcesDir = unzip(zipFile, configPath, prefZipFilename);
+            console.log(TAG, "Unzipped to:", unzippedResourcesDir);
+
 	        var unzippedFile = path.join(unzippedResourcesDir, "FirebaseMessagingRouterService.java");
 	        var copyWithSuccess = copyJavaFile(unzippedFile);
+            console.log(TAG, "Copy result:", copyWithSuccess ? "SUCCESS" : "FAILED");
+
             if (!copyWithSuccess) {
+                console.log(TAG, "ERROR: Unable to copy FirebaseMessagingRouterService");
                 return reject(
                     "Failed to install pushwoosh plugin. Reason: Unable to copy FirebaseMessagingRouterService file to project."
                 );
             }
 
             const manifestPath = context.opts.projectRoot + '/platforms/android/app/src/main/AndroidManifest.xml';
+            console.log(TAG, "Manifest path:", manifestPath);
+
             const serviceName = ".FirebaseMessagingRouterService";
             const serviceTemplate = `
                 <service android:name="${serviceName}" android:exported="false">
@@ -138,11 +153,16 @@ module.exports = function(context) {
                 </service>`;
 
             if (fs.existsSync(manifestPath)) {
-                console.log("manifest exists");
+                console.log(TAG, "Manifest exists, adding service");
                 addService(manifestPath, serviceName, serviceTemplate);
+            } else {
+                console.log(TAG, "Manifest NOT found at:", manifestPath);
             }
+        } else {
+            console.log(TAG, "No FCM router zip found, skipping");
         }
 
+        console.log(TAG, "Hook completed successfully");
         return resolve();
     });
 };

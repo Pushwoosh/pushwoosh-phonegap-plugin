@@ -4,6 +4,8 @@ var AdmZip = require("adm-zip");
 var utils = require("./utils");
 var FSUtils = require("../huawei/FSUtils");
 
+var TAG = "[handle_agconnect_services.js]";
+
 var ROOT_BUILD_GRADLE_FILE = "platforms/android/build.gradle";
 var ROOT_REPOSITORIES_GRADLE_FILE = "platforms/android/repositories.gradle";
 var APP_REPOSITORIES_GRADLE_FILE = "platforms/android/app/repositories.gradle";
@@ -166,53 +168,76 @@ function updatePluginBuildGradle(file) {
 }
 
 module.exports = function(context) {
+    console.log(TAG, "Hook started");
+    console.log(TAG, "Platform:", context.opts.plugin.platform);
+
     return new Promise(function(resolve, reject) {
         var wwwpath = utils.getWwwPath(context);
+        console.log(TAG, "WWW path:", wwwpath);
 
         var configPath = path.join(wwwpath, "agconnect-services");
+        console.log(TAG, "Config path:", configPath);
 
         var prefZipFilename = "agconnect-services";
         var zipFile = getZipFile(configPath, prefZipFilename);
+        console.log(TAG, "Zip file found:", zipFile || "NOT FOUND");
 
         if (!zipFile) {
-            console.log("agconnect-services.zip not found. Skipping Huawei initialization.");
+            console.log(TAG, "agconnect-services.zip not found. Skipping Huawei initialization.");
+            return resolve();
         }
+
+        console.log(TAG, "Unzipping:", zipFile);
         var unzipedResourcesDir = unzip(zipFile, configPath, prefZipFilename);
+        console.log(TAG, "Unzipped to:", unzipedResourcesDir);
+
         var platform = context.opts.plugin.platform;
         var targetDir = getServiceFileTargetDir(context);
+        console.log(TAG, "Target directory:", targetDir);
+
         var copyWithSuccess = copyServiceFile(
             unzipedResourcesDir,
             targetDir,
             platform
         );
+        console.log(TAG, "Copy result:", copyWithSuccess ? "SUCCESS" : "FAILED");
 
         if (copyWithSuccess) {
+            console.log(TAG, "Updating Gradle files for Huawei integration");
+
             if (!FSUtils.exists(ROOT_BUILD_GRADLE_FILE)) {
-                console.log(
-                    "root build.gradle file does not exist. Huawei integration cannot be proceeded."
-                );
+                console.log(TAG, "ERROR: root build.gradle does not exist at:", ROOT_BUILD_GRADLE_FILE);
                 return resolve();
             }
 
             if (!FSUtils.exists(APP_BUILD_GRADLE_FILE)) {
-                console.log(
-                    "app/build.gradle file does not exist. Huawei integration cannot be proceeded."
-                );
+                console.log(TAG, "ERROR: app/build.gradle does not exist at:", APP_BUILD_GRADLE_FILE);
                 return resolve();
             }
-        
+
+            console.log(TAG, "Adding AGConnect dependency to root build.gradle");
             var rootGradleContent = FSUtils.readFile(ROOT_BUILD_GRADLE_FILE, "UTF-8");
             var lines = rootGradleContent.split(NEW_LINE);
-        
+
             var depAddedLines = addAGConnectDependency(lines);
             var repoAddedLines = addHuaweiRepo(depAddedLines);
             FSUtils.writeFile(ROOT_BUILD_GRADLE_FILE, repoAddedLines.join(NEW_LINE));
-        
+            console.log(TAG, "Root build.gradle updated");
+
+            console.log(TAG, "Updating repositories.gradle files");
             updateRepositoriesGradle(ROOT_REPOSITORIES_GRADLE_FILE);
             updateRepositoriesGradle(APP_REPOSITORIES_GRADLE_FILE);
+
+            console.log(TAG, "Updating app build.gradle");
             updateAppBuildGradle(APP_BUILD_GRADLE_FILE);
+
+            console.log(TAG, "Updating plugin build.gradle");
             updatePluginBuildGradle(PLUGIN_BUILD_GRADLE_FILE);
+
+            console.log(TAG, "Huawei integration completed");
         }
+
+        console.log(TAG, "Hook completed successfully");
         return resolve();
     });
 };
