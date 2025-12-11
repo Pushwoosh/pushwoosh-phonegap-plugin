@@ -4,7 +4,6 @@ import org.apache.cordova.CallbackContext;
 import org.json.JSONArray;
 
 public interface CallsAdapter {
-    public boolean setVoipAppCode(JSONArray data, CallbackContext callbackContext);
     public boolean requestCallPermission(JSONArray data, final CallbackContext callbackContext);
     public boolean getCallPermissionStatus(JSONArray data, final CallbackContext callbackContext);
     public boolean registerEvent(JSONArray data, final CallbackContext callbackContext);

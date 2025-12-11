@@ -1097,11 +1097,6 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@CordovaMethod
-	private boolean setVoipAppCode(JSONArray data, CallbackContext callbackContext) {
-		return callsAdapter.setVoipAppCode(data, callbackContext);
-	}
-
-	@CordovaMethod
 	private boolean requestCallPermission(JSONArray data, final CallbackContext callbackContext) {
 		return callsAdapter.requestCallPermission(data, callbackContext);
 	}

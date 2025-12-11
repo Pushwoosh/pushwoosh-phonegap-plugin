@@ -28,7 +28,6 @@ function onDeviceReady() {
     pushwooshInitialize(pushwoosh);
 
     // VoIP initialization
-    pushwoosh.setVoipAppCode("7BCDB-76CBE");
     pushwoosh.initializeVoIPParameters(true, "ring.caf", 2, function(success) {
         console.log("VoIP Success:", success);
     }, function(error) {

@@ -7,11 +7,6 @@ import org.json.JSONArray;
 
 public class NoopCallsAdapter implements CallsAdapter{
     private static final String TAG = "NoopCallsAdapter";
-    @Override
-    public boolean setVoipAppCode(JSONArray data, CallbackContext callbackContext) {
-        PWLog.error(TAG,"Method not implemented");
-        return false;
-    }
 
     @Override
     public boolean requestCallPermission(JSONArray data, CallbackContext callbackContext) {

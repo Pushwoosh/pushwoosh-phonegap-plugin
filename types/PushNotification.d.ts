@@ -89,7 +89,6 @@ export interface PushNotification {
 	registerSMSNumber(phoneNumber: string, success?: () => void, fail?: (error: Error|string) => void): void;
 	registerWhatsappNumber(phoneNumber: string, success?: () => void, fail?: (error: Error|string) => void): void;
 	setApiToken(apiToken: string): void;
-	setVoipAppCode(appCode: string): void;
 	registerEvent(eventName: string, success: (...args: any[]) => void, fail?: (error?: Error | string) => void): void;
 	initializeVoIPParameters(supportsVideo?: boolean, ringtoneSound?: string, handleTypes?: number, success?: () => void, error?: (err: Error | string) => void): void;
 	speakerOn(success?: () => void, error?: (err: Error | string) => void): void;

@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
 
-import com.pushwoosh.Pushwoosh;
 import com.pushwoosh.calls.CallPermissionsCallback;
 import com.pushwoosh.calls.PushwooshCallReceiver;
 import com.pushwoosh.calls.PushwooshCallSettings;
@@ -27,19 +26,6 @@ import java.util.ArrayList;
 
 public class PushwooshCallsAdapter implements CallsAdapter {
     public static final String TAG = "PushwooshCallsAdapter";
-
-    @Override
-    public boolean setVoipAppCode(JSONArray data, CallbackContext callbackContext) {
-        PWLog.noise(TAG, "setVoipAppCode()");
-        try {
-            String appCode = data.getString(0);
-            Pushwoosh.getInstance().addAlternativeAppCode(appCode);
-        } catch (JSONException e) {
-            PWLog.error(TAG, "No parameters passed (missing parameters)", e);
-            return false;
-        }
-        return true;
-    }
 
     @Override
     public boolean requestCallPermission(JSONArray data, final CallbackContext callbackContext) {

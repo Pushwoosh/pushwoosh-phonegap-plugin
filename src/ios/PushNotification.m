@@ -643,11 +643,6 @@ API_AVAILABLE(ios(10.0)) {
     //stub, android only
 }
 
-- (void)setVoipAppCode:(CDVInvokedUrlCommand *)command {
-    NSString *voipAppCode = command.arguments[0];
-    [PushwooshVoIPImplementation setPushwooshVoIPAppId:voipAppCode];
-}
-
 // MARK: - VoIP, CallKit callbacks
 - (void)receiveCallFromRecents:(NSNotification *) notification {
     NSString* callID = notification.object[@"callId"];

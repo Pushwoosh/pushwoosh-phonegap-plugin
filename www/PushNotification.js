@@ -831,10 +831,6 @@ PushNotification.prototype.setApiToken = function(token) {
 	exec(null, null, "PushNotification", "setApiToken", [token]);
 }
 
-PushNotification.prototype.setVoipAppCode = function(appCode) {
-	exec(null, null, "PushNotification", "setVoipAppCode", [appCode]);
-}
-
 PushNotification.prototype.setIncomingCallTimeout = function(timeoutSeconds) {
 	exec(null, null, "PushNotification", "setIncomingCallTimeout", [timeoutSeconds]);
 }
