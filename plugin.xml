@@ -98,13 +98,13 @@
         <framework src="org.jetbrains.kotlin:kotlin-stdlib:1.1.60" />
         <framework src="com.google.android.material:material:1.12.0"/>
 
-        <framework src="com.pushwoosh:pushwoosh:6.7.49"/>
-		<framework src="com.pushwoosh:pushwoosh-amazon:6.7.49"/>
-        <framework src="com.pushwoosh:pushwoosh-firebase:6.7.49"/>
-		<framework src="com.pushwoosh:pushwoosh-badge:6.7.49"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox:6.7.49"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox-ui:6.7.49"/>
-		<framework src="com.pushwoosh:pushwoosh-huawei:6.7.49"/>
+        <framework src="com.pushwoosh:pushwoosh:6.7.50"/>
+		<framework src="com.pushwoosh:pushwoosh-amazon:6.7.50"/>
+        <framework src="com.pushwoosh:pushwoosh-firebase:6.7.50"/>
+		<framework src="com.pushwoosh:pushwoosh-badge:6.7.50"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox:6.7.50"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox-ui:6.7.50"/>
+		<framework src="com.pushwoosh:pushwoosh-huawei:6.7.50"/>
     </platform>
 
 	<!-- ios -->
@@ -143,10 +143,10 @@
         
         <podspec>
             <config>
-                <source url="https://github.com/CocoaPods/Specs.git"/>
+                <source url="https://cdn.cocoapods.org/"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="PushwooshXCFramework" spec="7.0.10" />
+                <pod name="PushwooshXCFramework" spec="7.0.12" />
                 <pod name="PushwooshInboxUIXCFramework" spec="7.0.3" />
             </pods>
         </podspec>

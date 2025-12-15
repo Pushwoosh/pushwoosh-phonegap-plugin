@@ -1088,8 +1088,8 @@ public class PushNotifications extends CordovaPlugin {
 	@CordovaMethod
 	private boolean setApiToken(JSONArray data, final CallbackContext callbackContext) {
 		try {
-			String appCode = data.getString(0);
-			Pushwoosh.getInstance().addAlternativeAppCode(appCode);
+			String apiToken = data.getString(0);
+			Pushwoosh.getInstance().setApiToken(apiToken);
 		} catch (JSONException e) {
 			PWLog.error(TAG, "No parameters passed (missing parameters)", e);
 		}
