@@ -45,6 +45,10 @@ BOOL initSupportsVideo = NO;
 NSString *ringtoneSound;
 NSInteger handleType;
 
+// Early captured launch notification (before SDK initialization)
+static NSDictionary *gEarlyLaunchNotification = nil;
+static BOOL gEarlyLaunchNotificationCaptured = NO;
+
 @interface PWCommonJSBridge: NSObject <PWJavaScriptInterface>
 
 @property (nonatomic) CDVPlugin *plugin;
@@ -221,9 +225,20 @@ API_AVAILABLE(ios(10))
     }
     
     _deviceReady = YES;
-    
-    if (self.pushwoosh.launchNotification) {
-        NSDictionary *notification = [self createNotificationDataForPush:self.pushwoosh.launchNotification onStart:YES];
+
+    // Check early captured launch notification first (captured in +load before SDK init)
+    // Then fallback to SDK's launchNotification (in case SDK was initialized early)
+    NSDictionary *launchPush = nil;
+    if (gEarlyLaunchNotificationCaptured && gEarlyLaunchNotification) {
+        launchPush = gEarlyLaunchNotification;
+        gEarlyLaunchNotification = nil;
+        gEarlyLaunchNotificationCaptured = NO;
+    } else if (self.pushwoosh.launchNotification) {
+        launchPush = self.pushwoosh.launchNotification;
+    }
+
+    if (launchPush) {
+        NSDictionary *notification = [self createNotificationDataForPush:launchPush onStart:YES];
         [self dispatchPushReceive:notification];
         [self dispatchPushAccept:notification];
     }
@@ -1471,6 +1486,26 @@ BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id applicat
 - (void)dealloc {
     self.pushManager = nil;
     self.startPushData = nil;
+}
+
+@end
+
+#pragma mark - Early Launch Notification Capture
+
+@implementation PushNotification (EarlyLaunchCapture)
+
++ (void)load {
+    [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification
+                                                      object:nil
+                                                       queue:nil
+                                                  usingBlock:^(NSNotification *notification) {
+        NSDictionary *launchOptions = notification.userInfo;
+        NSDictionary *remoteNotification = launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey];
+        if (remoteNotification) {
+            gEarlyLaunchNotification = [remoteNotification copy];
+            gEarlyLaunchNotificationCaptured = YES;
+        }
+    }];
 }
 
 @end
