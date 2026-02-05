@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="8.3.59">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="8.3.60">
 
 	<name>Pushwoosh</name>
 
@@ -146,7 +146,7 @@
                 <source url="https://cdn.cocoapods.org/"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="PushwooshXCFramework" spec="7.0.21" />
+                <pod name="PushwooshXCFramework" spec="7.0.22" />
                 <pod name="PushwooshInboxUIXCFramework" spec="7.0.3" />
             </pods>
         </podspec>

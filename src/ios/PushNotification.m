@@ -49,6 +49,9 @@ NSInteger handleType;
 static NSDictionary *gEarlyLaunchNotification = nil;
 static BOOL gEarlyLaunchNotificationCaptured = NO;
 
+// Early captured notification response (before delegate is set)
+static UNNotificationResponse *gEarlyNotificationResponse = nil;
+
 @interface PWCommonJSBridge: NSObject <PWJavaScriptInterface>
 
 @property (nonatomic) CDVPlugin *plugin;
@@ -226,21 +229,31 @@ API_AVAILABLE(ios(10))
     
     _deviceReady = YES;
 
-    // Check early captured launch notification first (captured in +load before SDK init)
-    // Then fallback to SDK's launchNotification (in case SDK was initialized early)
-    NSDictionary *launchPush = nil;
-    if (gEarlyLaunchNotificationCaptured && gEarlyLaunchNotification) {
-        launchPush = gEarlyLaunchNotification;
-        gEarlyLaunchNotification = nil;
-        gEarlyLaunchNotificationCaptured = NO;
-    } else if (self.pushwoosh.launchNotification) {
-        launchPush = self.pushwoosh.launchNotification;
+    // Check early captured notification response (from PWEarlyNotificationDelegate)
+    if (@available(iOS 10.0, *)) {
+        if (gEarlyNotificationResponse) {
+            NSDictionary *userInfo = gEarlyNotificationResponse.notification.request.content.userInfo;
+            NSDictionary *pushPayload = [userInfo objectForKey:@"pw_push"] ?: userInfo;
+            NSDictionary *notification = [self createNotificationDataForPush:pushPayload onStart:YES];
+            gEarlyNotificationResponse = nil;
+
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self dispatchPushReceive:notification];
+                [self dispatchPushAccept:notification];
+            });
+
+            [[NSUserDefaults standardUserDefaults] synchronize];
+            return;
+        }
     }
 
-    if (launchPush) {
-        NSDictionary *notification = [self createNotificationDataForPush:launchPush onStart:YES];
-        [self dispatchPushReceive:notification];
-        [self dispatchPushAccept:notification];
+    // Fallback: Check SDK's launchNotification
+    if (self.pushwoosh.launchNotification) {
+        NSDictionary *notification = [self createNotificationDataForPush:self.pushwoosh.launchNotification onStart:YES];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self dispatchPushReceive:notification];
+            [self dispatchPushAccept:notification];
+        });
     }
 
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -1490,22 +1503,40 @@ BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id applicat
 
 @end
 
+#pragma mark - Early Notification Center Delegate
+
+@interface PWEarlyNotificationDelegate : NSObject <UNUserNotificationCenterDelegate>
+@end
+
+@implementation PWEarlyNotificationDelegate
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+didReceiveNotificationResponse:(UNNotificationResponse *)response
+         withCompletionHandler:(void (^)(void))completionHandler API_AVAILABLE(ios(10.0)) {
+    gEarlyNotificationResponse = response;
+    completionHandler();
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+       willPresentNotification:(UNNotification *)notification
+         withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler API_AVAILABLE(ios(10.0)) {
+    completionHandler(UNNotificationPresentationOptionBadge | UNNotificationPresentationOptionSound | UNNotificationPresentationOptionAlert);
+}
+
+@end
+
+static PWEarlyNotificationDelegate *gEarlyDelegate = nil;
+
 #pragma mark - Early Launch Notification Capture
 
 @implementation PushNotification (EarlyLaunchCapture)
 
 + (void)load {
-    [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification
-                                                      object:nil
-                                                       queue:nil
-                                                  usingBlock:^(NSNotification *notification) {
-        NSDictionary *launchOptions = notification.userInfo;
-        NSDictionary *remoteNotification = launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey];
-        if (remoteNotification) {
-            gEarlyLaunchNotification = [remoteNotification copy];
-            gEarlyLaunchNotificationCaptured = YES;
-        }
-    }];
+    // Set early delegate synchronously
+    if (@available(iOS 10.0, *)) {
+        gEarlyDelegate = [[PWEarlyNotificationDelegate alloc] init];
+        [UNUserNotificationCenter currentNotificationCenter].delegate = gEarlyDelegate;
+    }
 }
 
 @end
