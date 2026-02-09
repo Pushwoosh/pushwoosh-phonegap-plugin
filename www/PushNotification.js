@@ -9,20 +9,226 @@
 //
 // MIT Licensed
 
+/**
+ * @fileoverview Pushwoosh Cordova Plugin - Integration Guide
+ *
+ * @description
+ * Pushwoosh is a customer engagement platform for push notifications, in-app messages,
+ * emails, SMS, and WhatsApp. This Cordova plugin wraps native iOS and Android Pushwoosh SDKs
+ * and provides a JavaScript bridge for hybrid mobile applications built with Cordova / PhoneGap.
+ *
+ * @section Installation
+ *
+ * Using npm:
+ * ```bash
+ * cordova plugin add pushwoosh-cordova-plugin
+ * ```
+ *
+ * Using git:
+ * ```bash
+ * cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git
+ * ```
+ *
+ * @section Quick Start
+ *
+ * Step 1: Initialize the plugin on deviceready event
+ *
+ * ```javascript
+ * document.addEventListener('deviceready', function() {
+ *     var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+ *
+ *     pushwoosh.onDeviceReady({
+ *         appid: "XXXXX-XXXXX",
+ *         projectid: "YOUR_FCM_SENDER_ID"
+ *     });
+ *
+ *     pushwoosh.registerDevice(
+ *         function(status) {
+ *             console.log("Registered with push token: " + status.pushToken);
+ *         },
+ *         function(error) {
+ *             console.error("Failed to register: " + error);
+ *         }
+ *     );
+ * }, false);
+ * ```
+ *
+ * Step 2: Handle push notification events
+ *
+ * ```javascript
+ * // Notification received while app is in foreground
+ * document.addEventListener('push-receive', function(event) {
+ *     var notification = event.notification;
+ *     console.log("Push received: " + JSON.stringify(notification));
+ * });
+ *
+ * // Notification opened by user
+ * document.addEventListener('push-notification', function(event) {
+ *     var notification = event.notification;
+ *     console.log("Push opened: " + JSON.stringify(notification));
+ * });
+ * ```
+ *
+ * @section Common Use Cases
+ *
+ * User identification and cross-device tracking:
+ *
+ * ```javascript
+ * var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+ *
+ * // After user login
+ * pushwoosh.setUserId("user_12345");
+ * pushwoosh.setEmail("user@example.com");
+ * ```
+ *
+ * User segmentation with tags:
+ *
+ * ```javascript
+ * var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+ *
+ * pushwoosh.setTags(
+ *     { subscription: "premium", age: 25, interests: ["sports", "music"] },
+ *     function() { console.log("Tags set successfully"); },
+ *     function(error) { console.error("Failed to set tags: " + error); }
+ * );
+ *
+ * pushwoosh.getTags(
+ *     function(tags) {
+ *         console.log("Tags: " + JSON.stringify(tags));
+ *     },
+ *     function(error) {
+ *         console.error("Get tags error: " + error);
+ *     }
+ * );
+ * ```
+ *
+ * Trigger In-App Messages with events:
+ *
+ * ```javascript
+ * var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+ *
+ * pushwoosh.setUserId("user_12345");
+ * pushwoosh.postEvent("purchase_complete", {
+ *     productName: "Premium Plan",
+ *     amount: "9.99"
+ * });
+ * ```
+ *
+ * Schedule a local notification:
+ *
+ * ```javascript
+ * var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+ *
+ * pushwoosh.createLocalNotification({
+ *     msg: "Your order is ready!",
+ *     seconds: 60,
+ *     userData: { orderId: "12345" }
+ * });
+ * ```
+ *
+ * Message Inbox with custom styling:
+ *
+ * ```javascript
+ * var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+ *
+ * pushwoosh.presentInboxUI({
+ *     dateFormat: "dd.MM.yyyy",
+ *     accentColor: "#3498db",
+ *     backgroundColor: "#ffffff",
+ *     titleColor: "#333333",
+ *     descriptionColor: "#666666",
+ *     dateColor: "#999999",
+ *     listEmptyMessage: "No messages yet"
+ * });
+ *
+ * // Or load messages programmatically
+ * pushwoosh.loadMessages(
+ *     function(messages) {
+ *         messages.forEach(function(msg) {
+ *             console.log(msg.title + ": " + msg.message);
+ *         });
+ *     },
+ *     function(error) {
+ *         console.error("Failed to load messages: " + error);
+ *     }
+ * );
+ *
+ * pushwoosh.unreadMessagesCount(function(count) {
+ *     console.log("Unread messages: " + count);
+ * });
+ * ```
+ *
+ * Multi-channel communication:
+ *
+ * ```javascript
+ * var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+ *
+ * pushwoosh.setEmail("user@example.com");
+ * pushwoosh.setEmails(["work@example.com", "personal@example.com"]);
+ * pushwoosh.registerSMSNumber("+1234567890");
+ * pushwoosh.registerWhatsappNumber("+1234567890");
+ * ```
+ *
+ * Handle launch notification (app opened via push):
+ *
+ * ```javascript
+ * var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+ *
+ * pushwoosh.getLaunchNotification(function(notification) {
+ *     if (notification) {
+ *         console.log("App launched from push: " + JSON.stringify(notification));
+ *         // Navigate to the relevant screen
+ *     }
+ * });
+ * ```
+ *
+ * Enable/disable Pushwoosh communication (e.g. for GDPR):
+ *
+ * ```javascript
+ * var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+ *
+ * // User opted out
+ * pushwoosh.setCommunicationEnabled(false);
+ *
+ * // User opted in
+ * pushwoosh.setCommunicationEnabled(true);
+ *
+ * // Check current status
+ * pushwoosh.isCommunicationEnabled(function(enabled) {
+ *     console.log("Communication enabled: " + enabled);
+ * });
+ * ```
+ *
+ * @section Plugin Preferences
+ *
+ * Configure these in your config.xml:
+ *
+ * - LOG_LEVEL (default: "DEBUG") - Logging level
+ * - IOS_FOREGROUND_ALERT_TYPE (default: "ALERT") - iOS foreground notification display type
+ * - ANDROID_FOREGROUND_PUSH (default: "true") - Show notifications when app is in foreground on Android
+ * - PW_VOIP_IOS_ENABLED (default: "false") - Enable VoIP calling features on iOS
+ * - PW_VOIP_ANDROID_ENABLED (default: "false") - Enable VoIP calling features on Android
+ *
+ * @section Events
+ *
+ * The plugin dispatches the following DOM events:
+ *
+ * - "push-receive" - Fired when a notification is received while the app is in foreground.
+ *   Access the notification payload via event.notification.
+ * - "push-notification" - Fired when a notification is opened by the user.
+ *   Access the notification payload via event.notification.
+ *
+ * @module pushwoosh-cordova-plugin
+ */
+
 var exec = window.cordova.exec;
 
-//Class: PushNotification
-//Class to interact with Pushwoosh Push Notifications plugin
-//
-//Example:
-//(start code)
-//	    	    var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
-//				pushwoosh.onDeviceReady({ 
-//					appid : "XXXXX-XXXXX",
-//					projectid: "XXXXXXXXXXXXXXX", 
-//					serviceName: "XXXX" 
-//				});
-//(end)
+/**
+ * PushNotification class provides the JavaScript API for interacting with the Pushwoosh SDK.
+ * Access it via: `var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");`
+ *
+ * @class PushNotification
+ */
 function PushNotification() {}
 
 //Function: onDeviceReady
