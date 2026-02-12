@@ -139,30 +139,49 @@ public class PushNotifications extends CordovaPlugin {
 	private final Handler handler = new Handler(Looper.getMainLooper());
 
 	public PushNotifications () {
-		sInstance = this;
-		sAppReady.set(false);
+		synchronized (PushNotifications.class) {
+			if (sInstance == null) {
+				sInstance = this;
+				sAppReady.set(false);
+			}
+		}
 	}
 
 	@Override
 	public void onDestroy() {
-		PWLog.noise(TAG, "onDestroy()");
-
+		synchronized (PushNotifications.class) {
+			if (this == sInstance) {
+				sInstance = null;
+				sAppReady.set(false);
+			}
+		}
+		// TODO: implement per-instance callback ownership tracking (ownCallbacks Set<CallbackContext>)
+		//  and clean up only this instance's callbacks from callbackContextMap here.
+		//  Without this, dead callbacks from destroyed secondary WebViews remain in the map
+		//  and cause harmless "Application attempted to call on a destroyed WebView" warnings.
 		super.onDestroy();
-		sAppReady.set(false);
 	}
 
 	@Override
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
-		PWLog.noise(TAG, "initialize()");
-		
+		super.initialize(cordova, webView);
+
+		if (this != sInstance) {
+			return;
+		}
+
 		cordovaInterface = cordova;
-		callsAdapter = CallsAdapterFactory.create(cordova.getActivity().getApplicationContext());
-		callbackContextMap.put("answer", new ArrayList<CallbackContext>());
-		callbackContextMap.put("reject", new ArrayList<CallbackContext>());
-		callbackContextMap.put("hangup", new ArrayList<CallbackContext>());
-		callbackContextMap.put("voipPushPayload", new ArrayList<CallbackContext>());
-		callbackContextMap.put("voipDidCancelCall", new ArrayList<CallbackContext>());
-		callbackContextMap.put("voipDidFailToCancelCall", new ArrayList<CallbackContext>());
+
+		if (callsAdapter == null) {
+			callsAdapter = CallsAdapterFactory.create(cordova.getActivity().getApplicationContext());
+		}
+
+		callbackContextMap.putIfAbsent("answer", new ArrayList<CallbackContext>());
+		callbackContextMap.putIfAbsent("reject", new ArrayList<CallbackContext>());
+		callbackContextMap.putIfAbsent("hangup", new ArrayList<CallbackContext>());
+		callbackContextMap.putIfAbsent("voipPushPayload", new ArrayList<CallbackContext>());
+		callbackContextMap.putIfAbsent("voipDidCancelCall", new ArrayList<CallbackContext>());
+		callbackContextMap.putIfAbsent("voipDidFailToCancelCall", new ArrayList<CallbackContext>());
 	}
 
 	private JSONObject getPushFromIntent(Intent intent) {
@@ -1205,9 +1224,13 @@ public class PushNotifications extends CordovaPlugin {
 		if (callbackContexts != null && !callbackContexts.isEmpty()) {
 			for (final CallbackContext callbackContext : callbackContexts) {
 				getCordovaInterface().getThreadPool().execute(() -> {
-					PluginResult result = new PluginResult(PluginResult.Status.OK, payload);
-					result.setKeepCallback(true);
-					callbackContext.sendPluginResult(result);
+					try {
+						PluginResult result = new PluginResult(PluginResult.Status.OK, payload);
+						result.setKeepCallback(true);
+						callbackContext.sendPluginResult(result);
+					} catch (Exception e) {
+						PWLog.warn(TAG, "Failed to deliver VoIP event: " + e.getMessage());
+					}
 				});
 			}
 			return;
