@@ -1,8 +1,11 @@
 package com.pushwoosh.plugin.pushnotifications.calls;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,6 +39,27 @@ public class PWCordovaCallEventListener implements CallEventListener {
         }
     }
 
+    private static boolean isAppInForeground(Context context) {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (activityManager == null) {
+            return false;
+        }
+
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
+        if (appProcesses == null) {
+            return false;
+        }
+
+        String packageName = context.getPackageName();
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+                    && appProcess.processName.equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void launchMainActivity() {
         PWLog.noise(TAG, "launchMainActivity()");
         try {
@@ -44,13 +68,19 @@ public class PWCordovaCallEventListener implements CallEventListener {
                 PWLog.error(TAG, "cant launch activity: context is null");
                 return;
             }
+
+            if (isAppInForeground(context)) {
+                PWLog.noise(TAG, "App already in foreground, skipping activity launch");
+                return;
+            }
+
             Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
             if (launchIntent == null) {
                 PWLog.error(TAG, "cant launch activity: launchIntent is null");
                 return;
             }
 
-            launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             context.startActivity(launchIntent);
         } catch (Exception e) {
             PWLog.error(TAG, "Failed to launch activity", e);
