@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+        <meta name="color-scheme" content="light dark">
+        <link rel="stylesheet" href="css/index.css">
+        <title>Second WebView - Personal Cabinet</title>
+        <style>
+            body { background-color: #fff8e1; }
+            .status-indicator { background-color: #fff8e1; }
+            .section h2 { color: #e65100; }
+            .btn-primary {
+                background: linear-gradient(135deg, #ff9800 0%, #e65100 100%);
+                box-shadow: 0 4px 12px rgba(230, 81, 0, 0.4);
+            }
+            .btn-primary:active {
+                box-shadow: 0 2px 6px rgba(230, 81, 0, 0.4);
+            }
+            .status.ready {
+                background-color: #e65100;
+            }
+            .form-group input[type="text"]:focus {
+                border-color: #e65100;
+            }
+            @media screen and (prefers-color-scheme: dark) {
+                body { background-color: #1a1200; }
+                .status-indicator { background-color: #1a1200; }
+                .section h2 { color: #ffb74d; }
+                .scroll-content { background-color: #1a1200; }
+                .form-group input[type="text"]:focus { border-color: #ff9800; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="app">
+            <div class="scroll-content">
+                <!-- Header -->
+                <div id="deviceready" class="status-indicator">
+                    <div class="status listening">Connecting to Device...</div>
+                    <div class="status ready">Second WebView Ready</div>
+                </div>
+
+                <!-- Info Section -->
+                <div class="section">
+                    <h2>Personal Cabinet (2nd WebView)</h2>
+                    <p style="font-size:14px; color:#888; margin:0;">
+                        This simulates a second CordovaActivity with its own WebView,
+                        like the client's plugin for personal cabinet / video consultations.
+                    </p>
+                </div>
+
+                <!-- Pushwoosh Init Section -->
+                <div class="section">
+                    <h2>Pushwoosh Setup</h2>
+
+                    <div class="form-group">
+                        <label for="pushAppId2">App ID / VoIP App Code</label>
+                        <input type="text" id="pushAppId2" value="7BCDB-76CBE">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pushProjectId2">FCM Project ID (Android)</label>
+                        <input type="text" id="pushProjectId2" value="843884467752">
+                    </div>
+
+                    <button id="btnInitPushwoosh2" class="btn btn-primary">Initialize Pushwoosh</button>
+                </div>
+
+                <!-- VoIP Parameters Section -->
+                <div class="section">
+                    <h2>VoIP Parameters</h2>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="supportsVideo2" checked>
+                            <span>Supports Video</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ringtoneSound2">Ringtone Sound</label>
+                        <input type="text" id="ringtoneSound2" value="ring.caf" placeholder="ring.caf">
+                    </div>
+
+                    <button id="btnInitVoIP2" class="btn btn-primary">Initialize VoIP Parameters</button>
+                </div>
+
+                <!-- Call Permissions Section -->
+                <div class="section">
+                    <h2>Call Permissions</h2>
+                    <button id="btnRequestCallPermission2" class="btn btn-secondary">
+                        Request Call Permission (Android Only)
+                    </button>
+                    <div id="permissionStatus2" class="status-text"></div>
+                </div>
+
+                <!-- Call Controls Section -->
+                <div class="section">
+                    <h2>Call Controls</h2>
+                    <button id="btnEndCall2" class="btn btn-danger">End Call</button>
+                </div>
+
+                <!-- Navigation Section -->
+                <div class="section">
+                    <h2>Navigation</h2>
+                    <button id="btnClose" class="btn btn-secondary">Close & Return to Main WebView</button>
+                </div>
+
+            </div>
+        </div>
+        <script src="cordova.js"></script>
+        <script>
+            var pushwoosh = null;
+
+            var VOIP_EVENTS = [
+                'voipPushPayload',
+                'answer',
+                'reject',
+                'hangup',
+                'muted',
+                'unmuted',
+                'held',
+                'unheld',
+                'dtmf',
+                'audioInterruption',
+                'callFailed',
+                'providerDidActivate',
+                'providerDidDeactivate',
+                'incomingCallSuccess',
+                'incomingCallFailure',
+                'playDTMF',
+                'voipDidFailToRegisterTokenWithError',
+                'voipDidRegisterTokenSuccessfully',
+                'voipDidCancelCall',
+                'voipDidFailToCancelCall'
+            ];
+
+            document.addEventListener('deviceready', function() {
+                console.log('[2nd WebView] deviceready');
+                document.getElementById('deviceready').classList.add('ready');
+
+                pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+
+                registerVoIPEvents();
+
+                // Auto-initialize with default values
+                var appId = document.getElementById('pushAppId2').value;
+                var projectId = document.getElementById('pushProjectId2').value;
+                if (appId) {
+                    initializePushwoosh(appId, projectId);
+                }
+            }, false);
+
+            function initializePushwoosh(appId, projectId) {
+                console.log('[2nd WebView] Initializing Pushwoosh with App ID:', appId);
+                logEvent('init', 'Initializing Pushwoosh...');
+
+                pushwoosh.onDeviceReady({
+                    "appid": appId,
+                    "projectid": projectId || ""
+                });
+
+                pushwoosh.getPushToken(function(token) {
+                    console.log('[2nd WebView] Push Token:', token);
+                    logEvent('getPushToken', token || '(empty)');
+                });
+
+                pushwoosh.getPushwooshHWID(function(hwid) {
+                    console.log('[2nd WebView] HWID:', hwid);
+                    logEvent('getHWID', hwid || '(empty)');
+                });
+
+                pushwoosh.registerDevice(
+                    function(status) {
+                        console.log('[2nd WebView] registerDevice SUCCESS:', JSON.stringify(status));
+                        logEvent('registerDevice OK', status.pushToken || '');
+                    },
+                    function(error) {
+                        console.log('[2nd WebView] registerDevice ERROR:', JSON.stringify(error));
+                        logEvent('registerDevice ERROR', JSON.stringify(error));
+                    }
+                );
+            }
+
+            function registerVoIPEvents() {
+                VOIP_EVENTS.forEach(function(eventName) {
+                    pushwoosh.registerEvent(
+                        eventName,
+                        function(data) {
+                            console.log('[2nd WebView] VoIP Event: ' + eventName + ' => ' + JSON.stringify(data));
+                            logEvent(eventName, JSON.stringify(data, null, 2));
+                        },
+                        function(error) {
+                            console.error('[2nd WebView] Failed to register event ' + eventName + ':', error);
+                        }
+                    );
+                });
+                logEvent('registerEvents', 'Registered ' + VOIP_EVENTS.length + ' VoIP events');
+            }
+
+            function logEvent(eventName, data) {
+                console.log('[2nd WebView] ' + eventName + ': ' + (data || ''));
+            }
+
+            // UI event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('btnInitPushwoosh2').addEventListener('click', function() {
+                    if (!pushwoosh) {
+                        alert('Wait for device ready.');
+                        return;
+                    }
+                    var appId = document.getElementById('pushAppId2').value;
+                    var projectId = document.getElementById('pushProjectId2').value;
+                    if (!appId) {
+                        alert('Please enter App ID');
+                        return;
+                    }
+                    initializePushwoosh(appId, projectId);
+                });
+
+                document.getElementById('btnInitVoIP2').addEventListener('click', function() {
+                    if (!pushwoosh) {
+                        alert('Wait for device ready.');
+                        return;
+                    }
+                    var supportsVideo = document.getElementById('supportsVideo2').checked;
+                    var ringtoneSound = document.getElementById('ringtoneSound2').value;
+                    pushwoosh.initializeVoIPParameters(
+                        supportsVideo,
+                        ringtoneSound,
+                        2, // Phone Number handle type
+                        function() {
+                            console.log('[2nd WebView] VoIP parameters initialized');
+                            logEvent('initVoIP', 'VoIP parameters initialized');
+                        },
+                        function(error) {
+                            console.log('[2nd WebView] VoIP init failed:', error);
+                            logEvent('initVoIP ERROR', error);
+                        }
+                    );
+                });
+
+                document.getElementById('btnRequestCallPermission2').addEventListener('click', function() {
+                    if (!pushwoosh) {
+                        alert('Wait for device ready.');
+                        return;
+                    }
+                    logEvent('requestCallPermission', 'Requesting...');
+                    pushwoosh.requestCallPermission(
+                        function(granted) {
+                            var msg = 'Call permission ' + (granted ? 'granted' : 'denied');
+                            console.log('[2nd WebView] ' + msg);
+                            logEvent('requestCallPermission', msg);
+                            document.getElementById('permissionStatus2').textContent = msg;
+                        },
+                        function(error) {
+                            console.error('[2nd WebView] Call permission error:', error);
+                            logEvent('requestCallPermission ERROR', error);
+                            document.getElementById('permissionStatus2').textContent = 'Error: ' + error;
+                        }
+                    );
+                });
+
+                document.getElementById('btnEndCall2').addEventListener('click', function() {
+                    if (!pushwoosh) {
+                        alert('Wait for device ready.');
+                        return;
+                    }
+                    pushwoosh.endCall(
+                        function() {
+                            console.log('[2nd WebView] Call ended');
+                            logEvent('endCall', 'Call ended successfully');
+                        },
+                        function(error) {
+                            console.log('[2nd WebView] End call failed:', error);
+                            logEvent('endCall ERROR', error);
+                        }
+                    );
+                });
+
+                document.getElementById('btnClose').addEventListener('click', function() {
+                    if (window.SecondWebView) {
+                        SecondWebView.close();
+                    } else {
+                        logEvent('close', 'SecondWebView plugin not available');
+                    }
+                });
+
+            });
+        </script>
+    </body>
+</html>

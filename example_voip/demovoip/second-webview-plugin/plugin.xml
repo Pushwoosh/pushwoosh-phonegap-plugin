@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="second-webview-plugin"
+        version="1.0.0">
+
+    <name>SecondWebView</name>
+    <description>Opens a second CordovaActivity/CDVViewController to reproduce multi-WebView VoIP bug</description>
+
+    <js-module src="www/secondwebview.js" name="SecondWebView">
+        <clobbers target="SecondWebView" />
+    </js-module>
+
+    <!-- Android -->
+    <platform name="android">
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.REORDER_TASKS" />
+        </config-file>
+
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="SecondWebView">
+                <param name="android-package" value="com.pushwoosh.demovoip.SecondWebViewPlugin" />
+            </feature>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <activity android:name="com.pushwoosh.demovoip.SecondWebViewActivity"
+                      android:label="Second WebView"
+                      android:theme="@style/Theme.AppCompat.NoActionBar"
+                      android:exported="false" />
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <meta-data android:name="com.pushwoosh.cordova.CALL_EVENT_HANDLER"
+                       android:value="com.pushwoosh.demovoip.DemoCallEventHandler" />
+        </config-file>
+
+        <source-file src="src/android/SecondWebViewActivity.java" target-dir="src/com/pushwoosh/demovoip" />
+        <source-file src="src/android/SecondWebViewPlugin.java" target-dir="src/com/pushwoosh/demovoip" />
+        <source-file src="src/android/DemoCallEventHandler.java" target-dir="src/com/pushwoosh/demovoip" />
+    </platform>
+</plugin>

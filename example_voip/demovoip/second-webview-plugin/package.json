@@ -1,0 +1,19 @@
+{
+  "name": "second-webview-plugin",
+  "version": "1.0.0",
+  "description": "Opens a second CordovaActivity/CDVViewController to reproduce multi-WebView VoIP bug",
+  "cordova": {
+    "id": "second-webview-plugin",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios"
+  ],
+  "author": "Pushwoosh",
+  "license": "MIT"
+}
