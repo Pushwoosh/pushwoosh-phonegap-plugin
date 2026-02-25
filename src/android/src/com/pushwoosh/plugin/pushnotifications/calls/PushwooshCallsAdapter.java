@@ -96,11 +96,18 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     @Override
     public boolean endCall(JSONArray data, CallbackContext callbackContext) {
         PWLog.noise(TAG, "endCall()");
+        Bundle callInfo = PWCordovaCallEventListener.getCurrentCallInfo();
+        if (callInfo == null) {
+            PWLog.warn(TAG, "endCall: no active call info, nothing to end");
+            callbackContext.error("No active call");
+            return true;
+        }
         Context context = AndroidPlatformModule.getApplicationContext();
         Intent endCallIntent = new Intent(context, PushwooshCallReceiver.class);
-        endCallIntent.putExtras(PWCordovaCallEventListener.getCurrentCallInfo());
+        endCallIntent.putExtras(callInfo);
         endCallIntent.setAction("ACTION_END_CALL");
         getCordovaInterface().getActivity().getApplicationContext().sendBroadcast(endCallIntent);
+        callbackContext.success();
 
         return true;
     }

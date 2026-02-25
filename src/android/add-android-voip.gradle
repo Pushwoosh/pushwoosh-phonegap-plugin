@@ -16,12 +16,17 @@ def callsSrc = pluginDir ? new File(pluginDir, 'src/android/src/com/pushwoosh/pl
 def applyVoip = {
     if (voipEnabled) {
         println "[${pluginId}] PW_VOIP_ANDROID_ENABLED=true — enabling VoIP (dependency + sources)"
-        dependencies { implementation "com.pushwoosh:pushwoosh-calls:6.7.55" }
+        dependencies { implementation "com.pushwoosh:pushwoosh-calls:6.7.57" }
         if (callsSrc?.exists()) {
             android.sourceSets.main.java.srcDirs += callsSrc
             println "[${pluginId}] Added optional sources: ${callsSrc}"
         } else {
             println "[${pluginId}] WARN optional sources not found at ${callsSrc}"
+        }
+        def voipProguardFile = pluginDir ? new File(pluginDir, 'src/android/proguard-pushwoosh-voip.pro') : null
+        if (voipProguardFile?.exists()) {
+            android.buildTypes.all { proguardFiles voipProguardFile }
+            println "[${pluginId}] Added VoIP ProGuard rules: ${voipProguardFile}"
         }
     } else {
         println "[${pluginId}] PW_VOIP_ANDROID_ENABLED=false — VoIP disabled"

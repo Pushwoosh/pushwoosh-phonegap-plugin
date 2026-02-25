@@ -126,7 +126,15 @@ API_AVAILABLE(ios(10))
 
 - (void)pluginInitialize {
     [super pluginInitialize];
-    pw_PushNotificationPlugin = self;
+
+    @synchronized ([PushNotification class]) {
+        if (pw_PushNotificationPlugin != nil) {
+            NSLog(@"[PW] pluginInitialize: already initialized, skipping re-initialization from secondary WebView");
+            return;
+        }
+
+        pw_PushNotificationPlugin = self;
+    }
 
 #if PW_VOIP_ENABLED
     callbackIds = [[NSMutableDictionary alloc] initWithCapacity:5];
@@ -1497,6 +1505,11 @@ BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id applicat
 }
 
 - (void)dealloc {
+    @synchronized ([PushNotification class]) {
+        if (pw_PushNotificationPlugin == self) {
+            pw_PushNotificationPlugin = nil;
+        }
+    }
     self.pushManager = nil;
     self.startPushData = nil;
 }
