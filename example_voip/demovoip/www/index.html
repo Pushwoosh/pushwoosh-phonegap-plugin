@@ -11,61 +11,6 @@
         <title>Pushwoosh VoIP Demo</title>
     </head>
     <body>
-        <!-- Welcome Screen -->
-        <div id="welcomeScreen" class="welcome-overlay">
-            <div class="welcome-content">
-                <h2>Welcome to Pushwoosh VoIP Demo</h2>
-                <div class="welcome-instructions">
-                    <p><strong>How to use this app:</strong></p>
-                    <ol>
-                        <li>Enter your App ID (VoIP App Code) and FCM Project ID</li>
-                        <li>Click "Initialize Pushwoosh" to start the SDK</li>
-                        <li>Initialize VoIP Parameters to configure video support and ringtone</li>
-                        <li>Request Call Permission on Android if needed</li>
-                        <li>Use End Call button to terminate active calls</li>
-                        <li>Monitor VoIP events in the Event Log below</li>
-                    </ol>
-                    <p><strong>Testing VoIP Calls:</strong></p>
-                    <p>To receive incoming VoIP calls, send a VoIP push notification from the Pushwoosh Control Panel using your App ID.</p>
-                </div>
-                <div class="welcome-footer">
-                    <label class="welcome-checkbox">
-                        <input type="checkbox" id="dontShowAgain">
-                        <span>Don't show this again</span>
-                    </label>
-                    <button id="btnGetStarted" class="btn btn-primary">Get Started</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cancelled Call Modal -->
-        <div id="cancelledCallModal" class="call-modal hidden">
-            <div class="call-modal-content">
-                <div class="call-modal-icon">📞</div>
-                <h2>Call Cancelled</h2>
-                <p class="call-modal-subtitle">The caller has ended the call</p>
-                <div class="call-details">
-                    <div class="call-detail-item">
-                        <span class="call-detail-label">Caller:</span>
-                        <span id="cancelledCallerName" class="call-detail-value">Unknown</span>
-                    </div>
-                    <div class="call-detail-item">
-                        <span class="call-detail-label">Call ID:</span>
-                        <span id="cancelledCallId" class="call-detail-value">N/A</span>
-                    </div>
-                    <div class="call-detail-item">
-                        <span class="call-detail-label">Handle Type:</span>
-                        <span id="cancelledHandleType" class="call-detail-value">N/A</span>
-                    </div>
-                    <div class="call-detail-item">
-                        <span class="call-detail-label">Video:</span>
-                        <span id="cancelledHasVideo" class="call-detail-value">No</span>
-                    </div>
-                </div>
-                <button id="btnDismissCancelledCall" class="btn btn-primary">OK</button>
-            </div>
-        </div>
-
         <div class="app">
             <div class="scroll-content">
                 <!-- Device Status -->
@@ -89,34 +34,6 @@
                     </div>
 
                     <button id="btnInitPushwoosh" class="btn btn-primary">Initialize Pushwoosh</button>
-                </div>
-
-                <!-- VoIP Parameters Section -->
-                <div class="section">
-                    <h2>VoIP Parameters</h2>
-
-                    <div class="form-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="supportsVideo" checked>
-                            <span>Supports Video</span>
-                        </label>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="ringtoneSound">Ringtone Sound</label>
-                        <input type="text" id="ringtoneSound" value="ring.caf" placeholder="ring.caf">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="handleType">Handle Type</label>
-                        <select id="handleType">
-                            <option value="1">Generic - Generic handle type</option>
-                            <option value="2" selected>Phone Number - Phone number handle</option>
-                            <option value="3">Email Address - Email address handle</option>
-                        </select>
-                    </div>
-
-                    <button id="btnInitVoIP" class="btn btn-primary">Initialize VoIP Parameters</button>
                 </div>
 
                 <!-- Call Timeout Section -->

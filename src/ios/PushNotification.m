@@ -38,6 +38,24 @@
 #define PW_COMMUNICATION_ENABLED_KEY @"PushwooshCommunicationEnabled"
 #define PW_COMMUNICATION_ENABLED_PLIST_KEY @"Pushwoosh_ALLOW_SERVER_COMMUNICATION"
 
+// Wraps a Cordova callback ID together with the command delegate that owns it.
+// This allows VoIP events to be dispatched to the correct WebView when multiple
+// CDVViewControllers (WebViews) are active simultaneously.
+@interface PWCallbackEntry : NSObject
+@property (nonatomic, copy) NSString *callbackId;
+@property (nonatomic, weak) id<CDVCommandDelegate> commandDelegate;
++ (instancetype)entryWithCallbackId:(NSString *)callbackId delegate:(id<CDVCommandDelegate>)delegate;
+@end
+
+@implementation PWCallbackEntry
++ (instancetype)entryWithCallbackId:(NSString *)callbackId delegate:(id<CDVCommandDelegate>)delegate {
+    PWCallbackEntry *entry = [PWCallbackEntry new];
+    entry.callbackId = callbackId;
+    entry.commandDelegate = delegate;
+    return entry;
+}
+@end
+
 NSMutableDictionary *callbackIds;
 NSDictionary* pendingCallFromRecents;
 BOOL monitorAudioRouteChange = NO;
@@ -45,12 +63,32 @@ BOOL initSupportsVideo = NO;
 NSString *ringtoneSound;
 NSInteger handleType;
 
-// Early captured launch notification (before SDK initialization)
-static NSDictionary *gEarlyLaunchNotification = nil;
-static BOOL gEarlyLaunchNotificationCaptured = NO;
+// Sends a plugin result to all registered callbacks for a given event,
+// using each callback's own command delegate (supports multi-WebView).
+static void pw_dispatchVoIPEvent(NSString *eventName, CDVPluginResult *pluginResult) {
+    @synchronized (callbackIds) {
+        NSMutableArray *live = callbackIds[eventName];
+        if (live.count == 0) {
+            return;
+        }
+        NSArray *snapshot = [live copy];
+        [pluginResult setKeepCallbackAsBool:YES];
+        NSMutableArray *stale = nil;
+        for (PWCallbackEntry *entry in snapshot) {
+            id<CDVCommandDelegate> delegate = entry.commandDelegate;
+            if (delegate) {
+                [delegate sendPluginResult:pluginResult callbackId:entry.callbackId];
+            } else {
+                if (!stale) stale = [NSMutableArray array];
+                [stale addObject:entry];
+            }
+        }
+        if (stale) {
+            [live removeObjectsInArray:stale];
+        }
+    }
+}
 
-// Early captured notification response (before delegate is set)
-static UNNotificationResponse *gEarlyNotificationResponse = nil;
 
 @interface PWCommonJSBridge: NSObject <PWJavaScriptInterface>
 
@@ -237,31 +275,10 @@ API_AVAILABLE(ios(10))
     
     _deviceReady = YES;
 
-    // Check early captured notification response (from PWEarlyNotificationDelegate)
-    if (@available(iOS 10.0, *)) {
-        if (gEarlyNotificationResponse) {
-            NSDictionary *userInfo = gEarlyNotificationResponse.notification.request.content.userInfo;
-            NSDictionary *pushPayload = [userInfo objectForKey:@"pw_push"] ?: userInfo;
-            NSDictionary *notification = [self createNotificationDataForPush:pushPayload onStart:YES];
-            gEarlyNotificationResponse = nil;
-
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self dispatchPushReceive:notification];
-                [self dispatchPushAccept:notification];
-            });
-
-            [[NSUserDefaults standardUserDefaults] synchronize];
-            return;
-        }
-    }
-
-    // Fallback: Check SDK's launchNotification
     if (self.pushwoosh.launchNotification) {
         NSDictionary *notification = [self createNotificationDataForPush:self.pushwoosh.launchNotification onStart:YES];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self dispatchPushReceive:notification];
-            [self dispatchPushAccept:notification];
-        });
+        [self dispatchPushReceive:notification];
+        [self dispatchPushAccept:notification];
     }
 
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -705,19 +722,9 @@ API_AVAILABLE(ios(10.0)) {
         if([outputs count] > 0) {
             AVAudioSessionPortDescription *output = outputs[0];
             if(![output.portType isEqual: @"Speaker"] && [reasonValue isEqual:@4]) {
-                for (id callbackId in callbackIds[@"speakerOn"]) {
-                    CDVPluginResult* pluginResult = nil;
-                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"speakerOn event called successfully"];
-                    [pluginResult setKeepCallbackAsBool:YES];
-                    [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-                }
+                pw_dispatchVoIPEvent(@"speakerOn", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"speakerOn event called successfully"]);
             } else if([output.portType isEqual: @"Speaker"] && [reasonValue isEqual:@3]) {
-                for (id callbackId in callbackIds[@"speakerOff"]) {
-                    CDVPluginResult* pluginResult = nil;
-                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"speakerOff event called successfully"];
-                    [pluginResult setKeepCallbackAsBool:YES];
-                    [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-                }
+                pw_dispatchVoIPEvent(@"speakerOff", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"speakerOff event called successfully"]);
             }
         }
     }
@@ -741,11 +748,14 @@ API_AVAILABLE(ios(10.0)) {
 
     if ([supportsVideoNumber isKindOfClass:[NSNumber class]] &&
         [handleTypesNumber isKindOfClass:[NSNumber class]]) {
-        
+
         BOOL supportsVideo = [supportsVideoNumber boolValue];
         NSInteger handleTypes = [handleTypesNumber integerValue];
 
-        PushwooshVoIPImplementation.delegate = self;
+        // Always pin delegate to the primary plugin instance so it survives
+        // secondary WebView deallocation.
+        PushNotification *primary = pw_PushNotificationPlugin ?: self;
+        PushwooshVoIPImplementation.delegate = primary;
         [PushwooshVoIPImplementation initializeVoIP:supportsVideo
                                        ringtoneSound:ringtoneSound
                                           handleTypes:handleTypes];
@@ -782,29 +792,17 @@ API_AVAILABLE(ios(10.0)) {
 
 // MARK: - Incoming Call Payload
 - (void)voipDidReceiveIncomingCallWithPayload:(PWVoIPMessage *)payload {
-    for (id callbackId in callbackIds[@"voipPushPayload"]) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self handleVoIPMessage:payload]];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-    }
+    pw_dispatchVoIPEvent(@"voipPushPayload", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self handleVoIPMessage:payload]]);
 }
 
 // MARK: - Incoming Call Success
 - (void)voipDidReportIncomingCallSuccessfullyWithVoipMessage:(PWVoIPMessage *)voipMessage {
-    for (id callbackId in callbackIds[@"incomingCallSuccess"]) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self handleVoIPMessage:voipMessage]];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-    }
+    pw_dispatchVoIPEvent(@"incomingCallSuccess", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self handleVoIPMessage:voipMessage]]);
 }
 
 // MARK: - Incoming Call Failure
 - (void)voipDidFailToReportIncomingCallWithError:(NSError *)error {
-    for (id callbackId in callbackIds[@"incomingCallFailure"]) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"Error incoming call: %@", error.localizedDescription]];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-    }
+    pw_dispatchVoIPEvent(@"incomingCallFailure", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"Error incoming call: %@", error.localizedDescription]]);
 }
 
 - (void)pwProviderDidBegin:(CXProvider *)provider {}
@@ -814,8 +812,11 @@ API_AVAILABLE(ios(10.0)) {
 // MARK: - Register event func
 - (void)registerEvent:(CDVInvokedUrlCommand*)command {
     NSString* eventName = [command.arguments objectAtIndex:0];
-    if(callbackIds[eventName] != nil) {
-        [callbackIds[eventName] addObject:command.callbackId];
+    @synchronized (callbackIds) {
+        if(callbackIds[eventName] != nil) {
+            PWCallbackEntry *entry = [PWCallbackEntry entryWithCallbackId:command.callbackId delegate:self.commandDelegate];
+            [callbackIds[eventName] addObject:entry];
+        }
     }
 
     if (pendingCallFromRecents && [eventName isEqual:@"sendCall"]) {
@@ -830,15 +831,25 @@ API_AVAILABLE(ios(10.0)) {
 // MARK: - Unregister event func
 - (void)unregisterEvent:(CDVInvokedUrlCommand*)command {
     NSString* eventName = [command.arguments objectAtIndex:0];
-    
-    if(callbackIds[eventName] != nil) {
-        [callbackIds[eventName] removeAllObjects];
-        
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"Successfully unregistered from %@ event", eventName]];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    } else {
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[NSString stringWithFormat:@"Event %@ not found or not supported", eventName]];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+
+    @synchronized (callbackIds) {
+        if(callbackIds[eventName] != nil) {
+            NSMutableArray *toRemove = [NSMutableArray array];
+            for (PWCallbackEntry *entry in callbackIds[eventName]) {
+                if (entry.commandDelegate == self.commandDelegate) {
+                    [toRemove addObject:entry];
+                }
+            }
+            [callbackIds[eventName] removeObjectsInArray:toRemove];
+
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                messageAsString:[NSString stringWithFormat:@"Successfully unregistered from %@ event", eventName]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        } else {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                messageAsString:[NSString stringWithFormat:@"Event %@ not found or not supported", eventName]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        }
     }
 }
 
@@ -921,13 +932,8 @@ API_AVAILABLE(ios(10.0)) {
                                @"callId": action.handle.value,
                                @"isVideo": action.video ? @YES : @NO,
                                @"message": @"sendCall event called successfully"};
-    for (id callbackId in callbackIds[@"sendCall"]) {
-        CDVPluginResult* pluginResult = nil;
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:callData];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-    }
-    
+    pw_dispatchVoIPEvent(@"sendCall", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:callData]);
+
     if ([callbackIds[@"sendCall"] count] == 0) {
         pendingCallFromRecents = callData;
     }
@@ -935,85 +941,50 @@ API_AVAILABLE(ios(10.0)) {
 
 // MARK: - voipDidFailToRegisterTokenWithError callback
 - (void)voipDidFailToRegisterTokenWithError:(NSError *)error {
-    for (id callbackId in callbackIds[@"voipDidFailToRegisterTokenWithError"]) {
-        CDVPluginResult* pluginResult = nil;
-        NSDictionary *errorData = @{
-            @"error": error.localizedDescription ?: @"Unknown error",
-            @"code": @(error.code),
-            @"domain": error.domain ?: @"Unknown domain"
-        };
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:errorData];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-    }
+    NSDictionary *errorData = @{
+        @"error": error.localizedDescription ?: @"Unknown error",
+        @"code": @(error.code),
+        @"domain": error.domain ?: @"Unknown domain"
+    };
+    pw_dispatchVoIPEvent(@"voipDidFailToRegisterTokenWithError", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:errorData]);
 }
 
 // MARK: - voipDidRegisterTokenSuccessfully callback
 - (void)voipDidRegisterTokenSuccessfully {
-    for (id callbackId in callbackIds[@"voipDidRegisterTokenSuccessfully"]) {
-        CDVPluginResult* pluginResult = nil;
-        NSDictionary *successData = @{
-            @"message": @"VoIP token registered successfully"
-        };
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:successData];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-    }
+    pw_dispatchVoIPEvent(@"voipDidRegisterTokenSuccessfully", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:@{@"message": @"VoIP token registered successfully"}]);
 }
 
 // MARK: - voipDidCancelCall callback
 - (void)voipDidCancelCallWithVoipMessage:(PWVoIPMessage *)voipMessage {
-    for (id callbackId in callbackIds[@"voipDidCancelCall"]) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self handleVoIPMessage:voipMessage]];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-    }
+    pw_dispatchVoIPEvent(@"voipDidCancelCall", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self handleVoIPMessage:voipMessage]]);
 }
 
 // MARK: - voipDidFailToCancelCall callback
 - (void)voipDidFailToCancelCallWithCallId:(NSString *)callId reason:(NSString *)reason {
-    for (id callbackId in callbackIds[@"voipDidFailToCancelCall"]) {
-        CDVPluginResult* pluginResult = nil;
-        NSDictionary *failureData = @{
-            @"callId": callId ?: @"",
-            @"reason": reason ?: @"Unknown reason"
-        };
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:failureData];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-    }
+    NSDictionary *failureData = @{
+        @"callId": callId ?: @"",
+        @"reason": reason ?: @"Unknown reason"
+    };
+    pw_dispatchVoIPEvent(@"voipDidFailToCancelCall", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:failureData]);
 }
 
 // MARK: - Answer Call
 - (void)answerCall:(CXProvider *)provider perform:(CXAnswerCallAction *)action voipMessage:(PWVoIPMessage *)voipMessage {
     [self setupAudioSession];
     [action fulfill];
-        
-    for (id callbackId in callbackIds[@"answer"]) {
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self handleVoIPMessage:voipMessage]];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-    }
+
+    pw_dispatchVoIPEvent(@"answer", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self handleVoIPMessage:voipMessage]]);
 }
 
 // MARK: - End Call
 - (void)endCall:(CXProvider *)provider perform:(CXEndCallAction *)action voipMessage:(PWVoIPMessage *)voipMessage {
     NSArray<CXCall *> *calls = self.callController.callObserver.calls;
     if([calls count] == 1) {
+        NSDictionary *msg = [self handleVoIPMessage:voipMessage];
         if(calls[0].hasConnected) {
-            for (id callbackId in callbackIds[@"hangup"]) {
-                CDVPluginResult* pluginResult = nil;
-                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self handleVoIPMessage:voipMessage]];
-                [pluginResult setKeepCallbackAsBool:YES];
-                [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-            }
+            pw_dispatchVoIPEvent(@"hangup", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:msg]);
         } else {
-            for (id callbackId in callbackIds[@"reject"]) {
-                CDVPluginResult* pluginResult = nil;
-                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self handleVoIPMessage:voipMessage]];
-                [pluginResult setKeepCallbackAsBool:YES];
-                [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-            }
+            pw_dispatchVoIPEvent(@"reject", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:msg]);
         }
     }
     monitorAudioRouteChange = NO;
@@ -1023,12 +994,7 @@ API_AVAILABLE(ios(10.0)) {
 // MARK: - Muted Call
 - (void)mutedCall:(CXProvider *)provider perform:(CXSetMutedCallAction *)action {
     BOOL isMuted = action.muted;
-    for (id callbackId in callbackIds[@"muted"]) {
-        CDVPluginResult* pluginResult = nil;
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:isMuted ? @"true" : @"false"];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-    }
+    pw_dispatchVoIPEvent(@"muted", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:isMuted ? @"true" : @"false"]);
     [action fulfill];
 }
 
@@ -1045,13 +1011,7 @@ API_AVAILABLE(ios(10.0)) {
 // MARK: - On Hold Call
 - (void)heldCall:(CXProvider *)provider perform:(CXSetHeldCallAction *)action {
     BOOL isOnHold = action.isOnHold;
-    for (id callbackId in callbackIds[@"held"]) {
-        CDVPluginResult* pluginResult = nil;
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:isOnHold ? @"true" : @"false"];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-    }
-    
+    pw_dispatchVoIPEvent(@"held", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:isOnHold ? @"true" : @"false"]);
     [action fulfill];
 }
 
@@ -1059,13 +1019,8 @@ API_AVAILABLE(ios(10.0)) {
 - (void)playDTMF:(CXProvider *)provider perform:(CXPlayDTMFCallAction *)action {
     NSString *digits = action.digits;
     [action fulfill];
-    
-    for (id callbackId in callbackIds[@"playDTMF"]) {
-        CDVPluginResult* pluginResult = nil;
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:digits];
-        [pluginResult setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
-    }
+
+    pw_dispatchVoIPEvent(@"playDTMF", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:digits]);
 }
 
 - (void)setupAudioSession {
@@ -1516,43 +1471,6 @@ BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id applicat
 
 @end
 
-#pragma mark - Early Notification Center Delegate
-
-@interface PWEarlyNotificationDelegate : NSObject <UNUserNotificationCenterDelegate>
-@end
-
-@implementation PWEarlyNotificationDelegate
-
-- (void)userNotificationCenter:(UNUserNotificationCenter *)center
-didReceiveNotificationResponse:(UNNotificationResponse *)response
-         withCompletionHandler:(void (^)(void))completionHandler API_AVAILABLE(ios(10.0)) {
-    gEarlyNotificationResponse = response;
-    completionHandler();
-}
-
-- (void)userNotificationCenter:(UNUserNotificationCenter *)center
-       willPresentNotification:(UNNotification *)notification
-         withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler API_AVAILABLE(ios(10.0)) {
-    completionHandler(UNNotificationPresentationOptionBadge | UNNotificationPresentationOptionSound | UNNotificationPresentationOptionAlert);
-}
-
-@end
-
-static PWEarlyNotificationDelegate *gEarlyDelegate = nil;
-
-#pragma mark - Early Launch Notification Capture
-
-@implementation PushNotification (EarlyLaunchCapture)
-
-+ (void)load {
-    // Set early delegate synchronously
-    if (@available(iOS 10.0, *)) {
-        gEarlyDelegate = [[PWEarlyNotificationDelegate alloc] init];
-        [UNUserNotificationCenter currentNotificationCenter].delegate = gEarlyDelegate;
-    }
-}
-
-@end
 
 @implementation UIApplication (InternalPushRuntime)
 
