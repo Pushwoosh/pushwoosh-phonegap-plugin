@@ -128,6 +128,23 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     }
 
     @Override
+    public boolean setRingtone(JSONArray data, CallbackContext callbackContext) {
+        PWLog.noise(TAG, "setRingtone()");
+        try {
+            String callSound = data.getString(0);
+            if (callSound != null && !callSound.isEmpty()) {
+                PushwooshCallSettings.setCallSound(callSound);
+            }
+            callbackContext.success();
+            return true;
+        } catch (Exception e) {
+            PWLog.error("Failed to set ringtone: " + e.getMessage());
+            callbackContext.error("Failed to set ringtone");
+            return false;
+        }
+    }
+
+    @Override
     public boolean setIncomingCallTimeout(JSONArray data, CallbackContext callbackContext) {
         PWLog.noise(TAG, "setIncomingCallTimeout()");
         try {

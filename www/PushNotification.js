@@ -753,28 +753,36 @@ PushNotification.prototype.unregisterEvent = function(eventName, success, fail) 
 };
 
 /**
- * Initializes VoIP call parameters for the native calling system.
+ * VoIP Push API Reference
  *
- * This method configures options related to VoIP calls such as video support,
- * custom ringtone, and handle type used for identifying the caller.
- * These parameters affect how the call will be displayed and handled by the system (e.g., CallKit on iOS).
+ * Call parameters are configured server-side when sending a VoIP push via /createMessage API.
+ * Set "voip_push": true and pass parameters in platform-specific root_params:
  *
- * If no parameters are provided, defaults will be used.
- * Handles optional argument shifting when called with fewer parameters.
+ * iOS (ios_root_params):
+ *   callerName      {string}  - Caller name ("unknown caller" if omitted)
+ *   video           {boolean} - Video call support
+ *   supportsHolding {boolean} - Hold functionality
+ *   supportsDTMF    {boolean} - DTMF signal support
+ *   handleType      {number}  - 1: generic, 2: phone number, 3: email
+ *   callId          {string}  - Unique call ID (used with cancelCall)
+ *   cancelCall      {boolean} - Cancel call with specified callId
  *
- * @param {boolean} [supportsVideo] - Indicates whether video calls are supported. Defaults to `false`.
- * @param {string} [ringtoneSound] - The name of the custom ringtone sound file (e.g., `"mySound.caf"`). Defaults to an empty string.
- * @param {number} [handleTypes] - Type of call handle to use (iOS-only, Android does not require this setting):
- *   - `1` – Generic
- *   - `2` – Phone number
- *   - `3` – Email address
- *   Defaults to `1` if not provided.
- * @param {Function} success - Callback invoked when the parameters are successfully initialized.
- * @param {Function} error - Callback invoked if initialization fails.
+ * Android (android_root_params):
+ *   callerName      {string}  - Caller name ("unknown caller" if omitted)
+ *   video           {boolean} - Video call support
+ *   callId          {number}  - Unique call ID (used with cancelCall)
+ *   cancelCall      {boolean} - Cancel call with specified callId
+ */
+
+/**
+ * @deprecated VoIP is now auto-initialized. Use {@link setRingtone} to customize the ringtone sound.
+ * All parameters except ringtoneSound are ignored. Only ringtoneSound is forwarded to setRingtone().
  *
- * @example
- * PushNotification.initializeVoIPParameters(true, "ringtone.caf", 2, onSuccess, onError);
- * PushNotification.initializeVoIPParameters(onSuccess, onError); // Use default values
+ * @param {boolean} [supportsVideo] - Ignored.
+ * @param {string} [ringtoneSound] - Forwarded to setRingtone().
+ * @param {number} [handleTypes] - Ignored.
+ * @param {Function} success - Callback invoked on success.
+ * @param {Function} error - Callback invoked on failure.
  */
 PushNotification.prototype.initializeVoIPParameters = function(supportsVideo, ringtoneSound, handleTypes, success, error) {
     if (typeof handleTypes === "function") {
@@ -1036,6 +1044,18 @@ PushNotification.prototype.enableHuaweiPushNotifications = function() {
 PushNotification.prototype.setApiToken = function(token) {
 	exec(null, null, "PushNotification", "setApiToken", [token]);
 }
+
+/**
+ * Sets custom ringtone sound for incoming VoIP calls.
+ * Call this at any time; the new ringtone takes effect on the next incoming call.
+ *
+ * @param {string} ringtoneSound - The name of the ringtone sound file (e.g., "ring.caf").
+ * @param {Function} success - Callback invoked when the ringtone is successfully set.
+ * @param {Function} error - Callback invoked if the operation fails.
+ */
+PushNotification.prototype.setRingtone = function(ringtoneSound, success, error) {
+	exec(success, error, "PushNotification", "setRingtone", [ringtoneSound || ""]);
+};
 
 PushNotification.prototype.setIncomingCallTimeout = function(timeoutSeconds) {
 	exec(null, null, "PushNotification", "setIncomingCallTimeout", [timeoutSeconds]);

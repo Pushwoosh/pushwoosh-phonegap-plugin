@@ -45,13 +45,13 @@
 Using npm:
 
 ```bash
-cordova plugin add pushwoosh-cordova-plugin@8.3.66
+cordova plugin add pushwoosh-cordova-plugin@8.3.67
 ```
 
 Using git:
 
 ```bash
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.66
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.67
 ```
 
 ## AI-Assisted Integration
@@ -107,18 +107,30 @@ Use Context7 MCP to fetch Pushwoosh Cordova plugin documentation for presentInbo
 
 ## Quick Start
 
-### 1. Initialize the Plugin
+### Initialization
 
 ```javascript
 document.addEventListener('deviceready', function() {
     var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
 
-    pushwoosh.onDeviceReady({
-        appid: "YOUR_PUSHWOOSH_APP_ID",
-        projectid: "YOUR_FCM_SENDER_ID",
-        serviceName: "YOUR_SERVICE_NAME"
+    // 1. Register notification callbacks before initialization
+    document.addEventListener('push-receive', function(event) {
+        var notification = event.notification;
+        console.log("Push received: " + JSON.stringify(notification));
     });
 
+    document.addEventListener('push-notification', function(event) {
+        var notification = event.notification;
+        console.log("Push opened: " + JSON.stringify(notification));
+    });
+
+    // 2. Initialize Pushwoosh
+    pushwoosh.onDeviceReady({
+        appid: "XXXXX-XXXXX",             // Pushwoosh Application ID
+        projectid: "000000000000"          // Firebase Sender ID (Android)
+    });
+
+    // 3. Register the device to receive push notifications
     pushwoosh.registerDevice(
         function(status) {
             console.log("Registered with push token: " + status.pushToken);
@@ -130,44 +142,36 @@ document.addEventListener('deviceready', function() {
 }, false);
 ```
 
-### 2. Handle Push Notifications
-
-```javascript
-// Notification received while app is in foreground
-document.addEventListener('push-receive', function(event) {
-    var notification = event.notification;
-    console.log("Push received: " + JSON.stringify(notification));
-});
-
-// Notification opened by user
-document.addEventListener('push-notification', function(event) {
-    var notification = event.notification;
-    console.log("Push opened: " + JSON.stringify(notification));
-});
-```
-
-### 3. Set User Tags
+### User ID and Events
 
 ```javascript
 var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
 
+pushwoosh.setUserId("user_123");
+
+pushwoosh.postEvent("purchase", {
+    product: "Premium Plan",
+    price: "9.99"
+});
+```
+
+### Tags
+
+```javascript
+var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+
+// Set tags
 pushwoosh.setTags(
-    { username: "john_doe", age: 25, interests: ["sports", "tech"] },
+    { age: 25, name: "John", favorite_categories: ["sports", "news"] },
     function() { console.log("Tags set successfully"); },
     function(error) { console.error("Failed to set tags: " + error); }
 );
-```
 
-### 4. Post Events for In-App Messages
-
-```javascript
-var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
-
-pushwoosh.setUserId("user_12345");
-pushwoosh.postEvent("purchase_complete", {
-    productName: "Premium Plan",
-    amount: "9.99"
-});
+// Get tags
+pushwoosh.getTags(
+    function(tags) { console.log("Tags: " + JSON.stringify(tags)); },
+    function(error) { console.error("Failed to get tags: " + error); }
+);
 ```
 
 ## API Reference

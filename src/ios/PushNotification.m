@@ -63,12 +63,98 @@ BOOL initSupportsVideo = NO;
 NSString *ringtoneSound;
 NSInteger handleType;
 
-// Sends a plugin result to all registered callbacks for a given event,
-// using each callback's own command delegate (supports multi-WebView).
+// In-memory buffer for VoIP events (primary, fast)
+static NSMutableArray *pw_voipEventBuffer = nil;
+// NSUserDefaults key for persistent VoIP event buffer (fallback, survives process death)
+static NSString *const kPWVoIPBufferKey = @"PushwooshVoIPBufferedEvents";
+
+static NSMutableArray *pw_getVoIPBuffer(void) {
+    if (!pw_voipEventBuffer) {
+        pw_voipEventBuffer = [NSMutableArray new];
+    }
+    return pw_voipEventBuffer;
+}
+
+static void pw_bufferVoIPEvent(NSString *eventName, NSDictionary *payload) {
+    NSDictionary *entry = @{@"event": eventName, @"payload": payload ?: @{}};
+
+    // Primary: in-memory
+    [pw_getVoIPBuffer() addObject:entry];
+
+    // Secondary: persist to NSUserDefaults (survives process death)
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSMutableArray *diskBuffer = [[defaults arrayForKey:kPWVoIPBufferKey] mutableCopy] ?: [NSMutableArray new];
+    [diskBuffer addObject:entry];
+    [defaults setObject:diskBuffer forKey:kPWVoIPBufferKey];
+    [defaults synchronize];
+}
+
+static NSArray *pw_loadBufferedVoIPEvents(NSString *eventName) {
+    // Try in-memory first
+    NSMutableArray *matched = [NSMutableArray new];
+    for (NSDictionary *entry in pw_getVoIPBuffer()) {
+        if ([entry[@"event"] isEqualToString:eventName]) {
+            [matched addObject:entry[@"payload"]];
+        }
+    }
+    if (matched.count > 0) {
+        return matched;
+    }
+
+    // Fallback: NSUserDefaults (new process, in-memory is empty)
+    NSArray *diskBuffer = [[NSUserDefaults standardUserDefaults] arrayForKey:kPWVoIPBufferKey] ?: @[];
+    for (NSDictionary *entry in diskBuffer) {
+        if ([entry[@"event"] isEqualToString:eventName]) {
+            [matched addObject:entry[@"payload"]];
+        }
+    }
+    return matched;
+}
+
+static void pw_clearBufferedVoIPEvents(NSString *eventName) {
+    // Clear in-memory
+    NSMutableArray *buffer = pw_getVoIPBuffer();
+    NSMutableArray *remaining = [NSMutableArray new];
+    for (NSDictionary *entry in buffer) {
+        if (![entry[@"event"] isEqualToString:eventName]) {
+            [remaining addObject:entry];
+        }
+    }
+    [buffer setArray:remaining];
+
+    // Clear NSUserDefaults
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSArray *diskBuffer = [defaults arrayForKey:kPWVoIPBufferKey] ?: @[];
+    NSMutableArray *diskRemaining = [NSMutableArray new];
+    for (NSDictionary *entry in diskBuffer) {
+        if (![entry[@"event"] isEqualToString:eventName]) {
+            [diskRemaining addObject:entry];
+        }
+    }
+    if (diskRemaining.count > 0) {
+        [defaults setObject:diskRemaining forKey:kPWVoIPBufferKey];
+    } else {
+        [defaults removeObjectForKey:kPWVoIPBufferKey];
+    }
+    [defaults synchronize];
+}
+
+// Sends a plugin result to all registered callbacks for a given event.
+// If no callbacks are registered yet, buffers in-memory for later replay.
 static void pw_dispatchVoIPEvent(NSString *eventName, CDVPluginResult *pluginResult) {
     @synchronized (callbackIds) {
         NSMutableArray *live = callbackIds[eventName];
         if (live.count == 0) {
+            id msg = pluginResult.message;
+            NSDictionary *payload;
+            if ([msg isKindOfClass:[NSDictionary class]]) {
+                payload = msg;
+            } else if (msg) {
+                payload = @{@"value": msg};
+            } else {
+                payload = @{};
+            }
+            pw_bufferVoIPEvent(eventName, payload);
             return;
         }
         NSArray *snapshot = [live copy];
@@ -739,33 +825,34 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 // MARK: - Initialize CallKit Parameters
+// Deprecated: VoIP is auto-initialized. This method now only sets the ringtone.
 - (void)initializeVoIPParameters:(CDVInvokedUrlCommand *)command {
-    CDVPluginResult* pluginResult = nil;
-
-    NSNumber *supportsVideoNumber = [command.arguments objectAtIndex:0];
     NSString *ringtoneSound = [command.arguments objectAtIndex:1];
-    NSNumber *handleTypesNumber = [command.arguments objectAtIndex:2];
 
-    if ([supportsVideoNumber isKindOfClass:[NSNumber class]] &&
-        [handleTypesNumber isKindOfClass:[NSNumber class]]) {
-
-        BOOL supportsVideo = [supportsVideoNumber boolValue];
-        NSInteger handleTypes = [handleTypesNumber integerValue];
-
-        // Always pin delegate to the primary plugin instance so it survives
-        // secondary WebView deallocation.
-        PushNotification *primary = pw_PushNotificationPlugin ?: self;
-        PushwooshVoIPImplementation.delegate = primary;
-        [PushwooshVoIPImplementation initializeVoIP:supportsVideo
-                                       ringtoneSound:ringtoneSound
-                                          handleTypes:handleTypes];
-
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"VoIP Parameters Initialized"];
-    } else {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid initialization parameters"];
+    if ([ringtoneSound isKindOfClass:[NSString class]] && ringtoneSound.length > 0) {
+        if (@available(iOS 14.0, *)) {
+            [PushwooshVoIPImplementation setRingtone:ringtoneSound];
+        }
     }
 
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"VoIP Parameters Initialized"];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+// MARK: - Set Ringtone
+- (void)setRingtone:(CDVInvokedUrlCommand *)command {
+    NSString *ringtoneSound = [command.arguments objectAtIndex:0];
+
+    if ([ringtoneSound isKindOfClass:[NSString class]] && ringtoneSound.length > 0) {
+        if (@available(iOS 14.0, *)) {
+            [PushwooshVoIPImplementation setRingtone:ringtoneSound];
+        }
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Ringtone set"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    } else {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Invalid ringtone sound"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }
 }
 
 // MARK: - Set Incoming Call Timeout
@@ -816,6 +903,22 @@ API_AVAILABLE(ios(10.0)) {
         if(callbackIds[eventName] != nil) {
             PWCallbackEntry *entry = [PWCallbackEntry entryWithCallbackId:command.callbackId delegate:self.commandDelegate];
             [callbackIds[eventName] addObject:entry];
+        }
+
+        // Replay buffered VoIP events for this event type
+        NSArray *buffered = pw_loadBufferedVoIPEvents(eventName);
+        if (buffered.count > 0) {
+            for (NSDictionary *payload in buffered) {
+                CDVPluginResult *result;
+                if (payload.count == 1 && payload[@"value"]) {
+                    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:payload[@"value"]];
+                } else {
+                    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:payload];
+                }
+                [result setKeepCallbackAsBool:YES];
+                [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+            }
+            pw_clearBufferedVoIPEvents(eventName);
         }
     }
 
