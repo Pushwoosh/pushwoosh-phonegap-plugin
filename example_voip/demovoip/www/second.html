@@ -112,11 +112,6 @@
                         <input type="text" id="pushAppId2" value="7BCDB-76CBE">
                     </div>
 
-                    <div class="form-group">
-                        <label for="pushProjectId2">FCM Project ID (Android)</label>
-                        <input type="text" id="pushProjectId2" value="843884467752">
-                    </div>
-
                     <button id="btnInitPushwoosh2" class="btn btn-primary">Initialize Pushwoosh</button>
                 </div>
 
@@ -188,19 +183,17 @@
 
                 // Auto-initialize with default values
                 var appId = document.getElementById('pushAppId2').value;
-                var projectId = document.getElementById('pushProjectId2').value;
                 if (appId) {
-                    initializePushwoosh(appId, projectId);
+                    initializePushwoosh(appId);
                 }
             }, false);
 
-            function initializePushwoosh(appId, projectId) {
-                console.log(TAG + '[INIT_PUSHWOOSH] appId=' + appId + ', projectId=' + (projectId || ''));
+            function initializePushwoosh(appId) {
+                console.log(TAG + '[INIT_PUSHWOOSH] appId=' + appId);
                 logEventToUI('init', 'Initializing Pushwoosh...');
 
                 pushwoosh.onDeviceReady({
-                    "appid": appId,
-                    "projectid": projectId || ""
+                    "appid": appId
                 });
 
                 // Auto-initialize VoIP parameters with defaults
@@ -299,12 +292,11 @@
                         return;
                     }
                     var appId = document.getElementById('pushAppId2').value;
-                    var projectId = document.getElementById('pushProjectId2').value;
                     if (!appId) {
                         alert('Please enter App ID');
                         return;
                     }
-                    initializePushwoosh(appId, projectId);
+                    initializePushwoosh(appId);
                 });
 
                 document.getElementById('btnRequestCallPermission2').addEventListener('click', function() {

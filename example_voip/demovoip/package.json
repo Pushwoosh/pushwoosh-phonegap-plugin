@@ -28,7 +28,6 @@
     ],
     "plugins": {
       "pushwoosh-cordova-plugin": {
-        "PW_VOIP_ANDROID_ENABLED": "true",
         "LOG_LEVEL": "NOISE"
       },
       "second-webview-plugin": {}

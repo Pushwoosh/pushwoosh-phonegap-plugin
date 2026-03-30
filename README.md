@@ -45,13 +45,13 @@
 Using npm:
 
 ```bash
-cordova plugin add pushwoosh-cordova-plugin@8.3.67
+cordova plugin add pushwoosh-cordova-plugin@8.3.68
 ```
 
 Using git:
 
 ```bash
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.67
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.68
 ```
 
 ## AI-Assisted Integration
@@ -126,8 +126,7 @@ document.addEventListener('deviceready', function() {
 
     // 2. Initialize Pushwoosh
     pushwoosh.onDeviceReady({
-        appid: "XXXXX-XXXXX",             // Pushwoosh Application ID
-        projectid: "000000000000"          // Firebase Sender ID (Android)
+        appid: "XXXXX-XXXXX"              // Pushwoosh Application ID
     });
 
     // 3. Register the device to receive push notifications

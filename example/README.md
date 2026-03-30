@@ -11,7 +11,7 @@
 cordova plugin add pushwoosh-cordova-plugin
 ```
 
-### 2. Navigate to the js folder within the www directory and open the file named index.js. Add your App ID and FCM Sender ID
+### 2. Navigate to the js folder within the www directory and open the file named index.js. Add your App ID
 
 ```
 /**
@@ -20,7 +20,6 @@ cordova plugin add pushwoosh-cordova-plugin
 * Should be called on every app launch
 * Parameters:
 * "config.appid" - Pushwoosh application code
-* "config.projectid" - GCM project number for android platform
 * "config.serviceName" - MPNS service name for wp8 platform
 */
 
@@ -33,9 +32,8 @@ function initPushwoosh() {
       // handle push open here
 	 });
 
- pushwoosh.onDeviceReady({        
+ pushwoosh.onDeviceReady({
    appid: "XXXXX-XXXXX",
-   projectid: "XXXXXXXXXXXXXXX",
    serviceName: "XXXX"
  });
 }

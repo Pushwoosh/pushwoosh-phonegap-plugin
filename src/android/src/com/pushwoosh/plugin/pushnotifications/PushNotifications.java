@@ -228,10 +228,7 @@ public class PushNotifications extends CordovaPlugin {
 			return false;
 		}
 
-		String projectid = params.optString("projectid", "");
-
 		Pushwoosh.getInstance().setAppId(appid);
-		Pushwoosh.getInstance().setSenderId(projectid);
 
 		try {
 			processPendingPushNotifications();

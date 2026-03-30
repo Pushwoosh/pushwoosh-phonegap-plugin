@@ -1,5 +1,4 @@
 	interface PushwooshConfig {
-	projectid: string,
 	appid: string,
 	serviceName?: string
 }

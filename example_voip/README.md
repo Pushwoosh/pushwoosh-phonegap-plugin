@@ -34,7 +34,6 @@ Open the app and set your VoIP App Code in the UI, or modify the default value i
 
 ```html
 <input type="text" id="pushAppId" value="YOUR-APP-ID">
-<input type="text" id="pushProjectId" value="YOUR-FCM-PROJECT-ID">
 ```
 
 ### 3. [Android] Configure Firebase
@@ -81,7 +80,7 @@ cordova build android
 ## App Features
 
 ### Push Notifications Setup
-- Initialize Pushwoosh SDK with App ID and FCM Project ID
+- Initialize Pushwoosh SDK with App ID
 - Automatically set VoIP App Code
 
 ### VoIP Parameters

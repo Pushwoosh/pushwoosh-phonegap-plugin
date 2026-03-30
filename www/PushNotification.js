@@ -38,8 +38,7 @@
  *     var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
  *
  *     pushwoosh.onDeviceReady({
- *         appid: "XXXXX-XXXXX",
- *         projectid: "YOUR_FCM_SENDER_ID"
+ *         appid: "XXXXX-XXXXX"
  *     });
  *
  *     pushwoosh.registerDevice(
@@ -237,16 +236,14 @@ function PushNotification() {}
 //
 //Parameters:
 // "config.appid" - Pushwoosh application code
-// "config.projectid" - GCM project number for android platform
 // "config.serviceName" - MPNS service name for wp8 platform
 //
 //Example:
 //(start code)
-//	//initialize Pushwoosh with projectid: "GOOGLE_PROJECT_NUMBER", appid : "PUSHWOOSH_APP_ID", serviceName : "WINDOWS_PHONE_SERVICE". This will trigger all pending push notifications on start.
-//	pushwoosh.onDeviceReady({ 
+//	//initialize Pushwoosh with appid : "PUSHWOOSH_APP_ID", serviceName : "WINDOWS_PHONE_SERVICE". This will trigger all pending push notifications on start.
+//	pushwoosh.onDeviceReady({
 //		appid : "XXXXX-XXXXX",
-//		projectid: "XXXXXXXXXXXXXXX", 
-//		serviceName: "XXXX" 
+//		serviceName: "XXXX"
 //	});
 //(end)
 PushNotification.prototype.onDeviceReady = function(config) {

@@ -61,9 +61,8 @@ function onDeviceReady() {
 
     // Auto-initialize with default values
     const appId = document.getElementById('pushAppId').value;
-    const projectId = document.getElementById('pushProjectId').value;
     if (appId) {
-        initializePushwoosh(appId, projectId);
+        initializePushwoosh(appId);
 
         // Auto-call registerDevice after initialization to test callbacks
         setTimeout(function() {
@@ -93,13 +92,12 @@ function setupPushNotificationEvents() {
     });
 }
 
-function initializePushwoosh(appId, projectId) {
-    console.log(TAG + '[INIT_PUSHWOOSH] appId=' + appId + ', projectId=' + (projectId || ''));
+function initializePushwoosh(appId) {
+    console.log(TAG + '[INIT_PUSHWOOSH] appId=' + appId);
 
     // Initialize Pushwoosh
     pushwoosh.onDeviceReady({
-        "appid": appId,
-        "projectid": projectId || ""
+        "appid": appId
     });
 
     // Auto-initialize VoIP parameters with defaults
@@ -150,8 +148,6 @@ function setupUIEventListeners() {
     // Initialize Pushwoosh button
     document.getElementById('btnInitPushwoosh').addEventListener('click', function() {
         const appId = document.getElementById('pushAppId').value;
-        const projectId = document.getElementById('pushProjectId').value;
-
         if (!appId) {
             alert('Please enter App ID');
             return;
@@ -162,7 +158,7 @@ function setupUIEventListeners() {
             return;
         }
 
-        initializePushwoosh(appId, projectId);
+        initializePushwoosh(appId);
     });
 
     // Set Call Timeout button

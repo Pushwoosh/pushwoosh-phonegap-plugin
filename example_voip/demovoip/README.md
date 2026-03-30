@@ -31,7 +31,6 @@ By default, the test App ID is used: `7BCDB-76CBE`
 To use your own App ID, change the values in `www/index.html`:
 ```html
 <input type="text" id="pushAppId" value="YOUR-APP-ID">
-<input type="text" id="pushProjectId" value="YOUR-FCM-PROJECT-ID">
 ```
 
 #### Google Services (Android)
@@ -71,7 +70,7 @@ demovoip/
 ## Application Features
 
 ### Push Notifications Setup
-- Initialize Pushwoosh SDK with App ID and FCM Project ID
+- Initialize Pushwoosh SDK with App ID
 - Automatically set VoIP App Code
 
 ### VoIP Parameters
