@@ -8,7 +8,9 @@ def voipEnabled = _rawVoip.toString().trim().toLowerCase() in ['1','true','yes',
 def pluginId = 'pushwoosh-cordova-plugin'
 def pluginDirCandidates = [
         file("${rootDir}/../plugins/${pluginId}"),
-        file("${rootDir}/../../plugins/${pluginId}")
+        file("${rootDir}/../../plugins/${pluginId}"),
+        file("${rootDir}/../node_modules/${pluginId}"),
+        file("${rootDir}/../../node_modules/${pluginId}")
 ]
 def pluginDir = pluginDirCandidates.find { it.exists() }
 def callsSrc = pluginDir ? new File(pluginDir, 'src/android/src/com/pushwoosh/plugin/pushnotifications/calls') : null
@@ -29,30 +31,27 @@ def applyVoip = {
             println "[${pluginId}] Added VoIP ProGuard rules: ${voipProguardFile}"
         }
 
-        // Inject VoIP permissions into the app's AndroidManifest via manifest placeholder
-        // This works for both Cordova and Capacitor builds
+        // Inject VoIP permissions directly into the app's AndroidManifest
         def appProject = rootProject.subprojects.find { it.name == 'app' }
         if (appProject) {
-            appProject.afterEvaluate {
-                def mainManifest = new File(appProject.projectDir, 'src/main/AndroidManifest.xml')
-                if (mainManifest.exists()) {
-                    def content = mainManifest.text
-                    def permsToAdd = [
-                        'android.permission.MANAGE_OWN_CALLS',
-                        'android.permission.ANSWER_PHONE_CALLS'
-                    ]
-                    def modified = false
-                    permsToAdd.each { perm ->
-                        if (!content.contains(perm)) {
-                            content = content.replace('</manifest>',
-                                "    <uses-permission android:name=\"${perm}\" />\n</manifest>")
-                            modified = true
-                        }
+            def mainManifest = new File(appProject.projectDir, 'src/main/AndroidManifest.xml')
+            if (mainManifest.exists()) {
+                def content = mainManifest.text
+                def permsToAdd = [
+                    'android.permission.MANAGE_OWN_CALLS',
+                    'android.permission.ANSWER_PHONE_CALLS'
+                ]
+                def modified = false
+                permsToAdd.each { perm ->
+                    if (!content.contains(perm)) {
+                        content = content.replace('</manifest>',
+                            "    <uses-permission android:name=\"${perm}\" />\n</manifest>")
+                        modified = true
                     }
-                    if (modified) {
-                        mainManifest.text = content
-                        println "[${pluginId}] Injected VoIP permissions into app AndroidManifest"
-                    }
+                }
+                if (modified) {
+                    mainManifest.text = content
+                    println "[${pluginId}] Injected VoIP permissions into app AndroidManifest"
                 }
             }
         }
