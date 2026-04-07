@@ -27,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/Pushwoosh/pushwoosh-phonegap-3.0-plugin/issues"
   },
-  "homepage": "https://github.com/Pushwoosh/pushwoosh-phonegap-3.0-plugin#readme"
+  "homepage": "https://github.com/Pushwoosh/pushwoosh-phonegap-3.0-plugin#readme",
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  }
 }
