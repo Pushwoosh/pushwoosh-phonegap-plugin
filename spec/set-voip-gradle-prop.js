@@ -15,21 +15,28 @@ module.exports = function (ctx) {
   const vars = (entry && entry.variables) || {};
   const val = String(vars.PW_VOIP_ANDROID_ENABLED || 'false').toLowerCase();
 
-  // Write to platforms/android/gradle.properties
-  const gradleProps = path.join(projectRoot, 'platforms', 'android', 'gradle.properties');
-  if (!fs.existsSync(path.dirname(gradleProps))) return; // android platform not added yet
-
-  let contents = fs.existsSync(gradleProps) ? fs.readFileSync(gradleProps, 'utf8') : '';
   const line = `PW_VOIP_ANDROID_ENABLED=${val}\n`;
   const re = /^PW_VOIP_ANDROID_ENABLED=.*$/m;
 
-  if (re.test(contents)) {
-    contents = contents.replace(re, line.trim());
-  } else {
-    if (contents.length && !contents.endsWith('\n')) contents += '\n';
-    contents += line;
-  }
+  // Write to both Cordova and Capacitor gradle.properties
+  const gradlePropsPaths = [
+    path.join(projectRoot, 'platforms', 'android', 'gradle.properties'), // Cordova
+    path.join(projectRoot, 'android', 'gradle.properties'),              // Capacitor
+  ];
 
-  fs.writeFileSync(gradleProps, contents, 'utf8');
-  console.log(`[pushwoosh-cordova-plugin] Wrote PW_VOIP_ANDROID_ENABLED=${val} to gradle.properties`);
+  gradlePropsPaths.forEach(function (gradleProps) {
+    if (!fs.existsSync(path.dirname(gradleProps))) return;
+
+    let contents = fs.existsSync(gradleProps) ? fs.readFileSync(gradleProps, 'utf8') : '';
+
+    if (re.test(contents)) {
+      contents = contents.replace(re, line.trim());
+    } else {
+      if (contents.length && !contents.endsWith('\n')) contents += '\n';
+      contents += line;
+    }
+
+    fs.writeFileSync(gradleProps, contents, 'utf8');
+    console.log(`[pushwoosh-cordova-plugin] Wrote PW_VOIP_ANDROID_ENABLED=${val} to ${gradleProps}`);
+  });
 };
