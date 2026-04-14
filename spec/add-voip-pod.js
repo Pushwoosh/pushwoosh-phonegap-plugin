@@ -28,9 +28,8 @@ module.exports = function (context) {
     }
 
     let podfileContent = fs.readFileSync(podfilePath, 'utf8');
-    const voipPodLine = `pod 'PushwooshXCFramework/PushwooshVoIP'`;
 
-    if (!podfileContent.includes(voipPodLine)) {
+    if (!podfileContent.includes('PushwooshXCFramework/PushwooshVoIP')) {
         const lines = podfileContent.split('\n');
         const index = lines.findIndex(line =>
             line.trim().startsWith(`pod 'PushwooshXCFramework'`) &&
@@ -38,6 +37,11 @@ module.exports = function (context) {
         );
 
         if (index !== -1) {
+            // Extract version from existing pod line to avoid version conflicts
+            const versionMatch = lines[index].match(/'PushwooshXCFramework',\s*'([^']+)'/);
+            const voipPodLine = versionMatch
+                ? `\tpod 'PushwooshXCFramework/PushwooshVoIP', '${versionMatch[1]}'`
+                : `\tpod 'PushwooshXCFramework/PushwooshVoIP'`;
             lines.splice(index + 1, 0, voipPodLine);
             fs.writeFileSync(podfilePath, lines.join('\n'));
 

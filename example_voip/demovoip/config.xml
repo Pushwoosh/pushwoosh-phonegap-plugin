@@ -6,7 +6,7 @@
         Pushwoosh Team
     </author>
     <content src="index.html" />
-    <preference name="LOG_LEVEL" value="NOISE" />
+    <preference name="LOG_LEVEL" value="DEBUG" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <platform name="android">

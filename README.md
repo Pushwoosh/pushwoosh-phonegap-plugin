@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://docs.pushwoosh.com/developer/pushwoosh-sdk/cross-platform-frameworks/cordova/">
+    <img src="pushwoosh.png" alt="Pushwoosh" width="100%">
+  </a>
+</p>
+
 <h1 align="center">Pushwoosh Cordova Plugin</h1>
 
 <p align="center">
@@ -45,13 +51,13 @@
 Using npm:
 
 ```bash
-cordova plugin add pushwoosh-cordova-plugin@8.3.68
+cordova plugin add pushwoosh-cordova-plugin@8.3.69
 ```
 
 Using git:
 
 ```bash
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.68
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.69
 ```
 
 ## AI-Assisted Integration
@@ -268,6 +274,30 @@ Configure these in your `config.xml`:
 | `ANDROID_FOREGROUND_PUSH` | `true` | Show notifications when app is in foreground (Android) |
 | `PW_VOIP_IOS_ENABLED` | `false` | Enable VoIP calling features on iOS |
 | `PW_VOIP_ANDROID_ENABLED` | `false` | Enable VoIP calling features on Android |
+
+## VoIP in Capacitor
+
+This plugin works in Capacitor apps. Capacitor does not execute Cordova hooks, so VoIP dependencies must be added manually to your native projects.
+
+### iOS
+
+Add the VoIP pod to `ios/App/Podfile`:
+
+```ruby
+pod 'PushwooshXCFramework/PushwooshVoIP'
+```
+
+Then run `pod install` in the `ios/App/` directory.
+
+### Android
+
+Add the property to `android/gradle.properties`:
+
+```properties
+PW_VOIP_ANDROID_ENABLED=true
+```
+
+These changes persist across `cap sync` since Capacitor does not regenerate native projects.
 
 ## Support
 

@@ -17,20 +17,24 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "cordova-android": "^14.0.1",
-    "cordova-ios": "^7.1.1",
+    "cordova-ios": "^8.0.1",
     "pushwoosh-cordova-plugin": "file:../..",
     "second-webview-plugin": "file:second-webview-plugin"
   },
   "cordova": {
     "platforms": [
-      "ios",
-      "android"
+      "android",
+      "ios"
     ],
     "plugins": {
+      "second-webview-plugin": {},
       "pushwoosh-cordova-plugin": {
-        "LOG_LEVEL": "NOISE"
-      },
-      "second-webview-plugin": {}
+        "PW_VOIP_ANDROID_ENABLED": "true",
+        "PW_VOIP_IOS_ENABLED": "true",
+        "LOG_LEVEL": "DEBUG",
+        "IOS_FOREGROUND_ALERT_TYPE": "ALERT",
+        "ANDROID_FOREGROUND_PUSH": "true"
+      }
     }
   }
 }

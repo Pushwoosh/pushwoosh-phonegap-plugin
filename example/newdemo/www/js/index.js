@@ -27,56 +27,9 @@ function onDeviceReady() {
 
     pushwooshInitialize(pushwoosh);
 
-    // VoIP initialization
-    pushwoosh.initializeVoIPParameters(true, "ring.caf", 2, function(success) {
-        console.log("VoIP Success:", success);
-    }, function(error) {
-        console.error("VoIP Error:", error);
-    });
-
-    pushwoosh.requestCallPermission();
-
-    // VoIP event listeners
-    pushwoosh.registerEvent("answer",
-        function(payload){
-            console.log("Answer call from " + payload.callerName);
-        },
-        function(error) {
-            console.log("Answer ERROR:", error);
-        }
-    );
-
-    pushwoosh.registerEvent("reject",
-        function(payload){
-            console.log("Reject call from " + payload.callerName);
-        },
-        function(error) {
-            console.log("Reject ERROR:", error);
-        }
-    );
-
-    pushwoosh.registerEvent("hangup",
-        function(payload){
-            console.log("Hangup call from " + payload.callerName);
-        },
-        function(error) {
-            console.log("Hangup ERROR:", error);
-        }
-    );
-
-    pushwoosh.registerEvent("voipPushPayload",
-        function(payload){
-            console.log("Received call with " + JSON.stringify(payload));
-        },
-        function(error) {
-            console.log("VoIP Payload ERROR:", error);
-        }
-    );
-
     // Setup all action handlers
     registerForPushNotificationAction(pushwoosh);
     setupNotificationStatusAction(pushwoosh);
-    endCallAction(pushwoosh);
     setTagsAction(pushwoosh);
     setLanguageAction(pushwoosh);
     setUserIdAction(pushwoosh);
@@ -187,20 +140,6 @@ function setupNotificationStatusAction(pushwoosh) {
                 showStatusModal({ error: error || 'Failed to get status' });
             }
         );
-    });
-}
-
-function endCallAction(pushwoosh) {
-    document.getElementById('endCall').addEventListener('click', function() {
-        pushwoosh.endCall(
-            function() {
-                console.log('endCall success');
-                alert('Call ended successfully');
-            },
-            function(error) {
-                console.warn('endCall failed:', error);
-                alert('Failed to end call: ' + error);
-            });
     });
 }
 

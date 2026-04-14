@@ -7,8 +7,12 @@ def voipEnabled = _rawVoip.toString().trim().toLowerCase() in ['1','true','yes',
 
 def pluginId = 'pushwoosh-cordova-plugin'
 def pluginDirCandidates = [
+        // Cordova: plugin installed under platforms/android/../plugins/
         file("${rootDir}/../plugins/${pluginId}"),
-        file("${rootDir}/../../plugins/${pluginId}")
+        file("${rootDir}/../../plugins/${pluginId}"),
+        // Capacitor: plugin installed under node_modules/
+        file("${rootDir}/../node_modules/${pluginId}"),
+        file("${rootDir}/../../node_modules/${pluginId}")
 ]
 def pluginDir = pluginDirCandidates.find { it.exists() }
 def callsSrc = pluginDir ? new File(pluginDir, 'src/android/src/com/pushwoosh/plugin/pushnotifications/calls') : null
@@ -16,7 +20,7 @@ def callsSrc = pluginDir ? new File(pluginDir, 'src/android/src/com/pushwoosh/pl
 def applyVoip = {
     if (voipEnabled) {
         println "[${pluginId}] PW_VOIP_ANDROID_ENABLED=true — enabling VoIP (dependency + sources)"
-        dependencies { implementation "com.pushwoosh:pushwoosh-calls:6.7.60" }
+        dependencies { implementation "com.pushwoosh:pushwoosh-calls:6.7.63" }
         if (callsSrc?.exists()) {
             android.sourceSets.main.java.srcDirs += callsSrc
             println "[${pluginId}] Added optional sources: ${callsSrc}"
