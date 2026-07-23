@@ -51,13 +51,13 @@
 Using npm:
 
 ```bash
-cordova plugin add pushwoosh-cordova-plugin@8.3.69
+cordova plugin add pushwoosh-cordova-plugin@8.3.70
 ```
 
 Using git:
 
 ```bash
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.69
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.70
 ```
 
 ## AI-Assisted Integration
@@ -298,6 +298,42 @@ PW_VOIP_ANDROID_ENABLED=true
 ```
 
 These changes persist across `cap sync` since Capacitor does not regenerate native projects.
+
+## Forwarding VoIP events to a secondary WebView (iOS)
+
+VoIP events (`answer`, `hangup`, `reject`, `voipPushPayload`, etc.) are delivered to the JavaScript callbacks you register with `registerEvent`. If your app presents the call UI in a **secondary native WebView / view controller** on top of the main Cordova (or Capacitor) WebView, the main WebView is backgrounded and its JavaScript engine is suspended, so those callbacks do not run and the event is missed.
+
+To cover this, the plugin also broadcasts every VoIP event through `NSNotificationCenter`, independent of WebView state. Observe it in the view controller that owns your secondary WebView and inject the event into that WebView yourself.
+
+**Notification**
+
+- Name: `PushwooshVoIPEventDispatched`
+- `userInfo`:
+  - `eventName` (`NSString`) — the event name, same values as `registerEvent` (`"answer"`, `"hangup"`, `"reject"`, `"voipPushPayload"`, ...)
+  - `payload` (`NSDictionary`) — the event payload, identical to the data delivered to JavaScript
+
+**Example (Swift)**
+
+```swift
+NotificationCenter.default.addObserver(
+    forName: Notification.Name("PushwooshVoIPEventDispatched"),
+    object: nil, queue: .main
+) { [weak webView] note in
+    guard
+        let webView = webView,
+        let name = note.userInfo?["eventName"] as? String,
+        let payload = note.userInfo?["payload"] as? [String: Any],
+        let data = try? JSONSerialization.data(withJSONObject: payload),
+        let json = String(data: data, encoding: .utf8)
+    else { return }
+
+    // `window.__pushwooshDispatch` is your own glue inside the secondary WebView's page,
+    // routing the event to your call UI.
+    webView.evaluateJavaScript("window.__pushwooshDispatch('\(name)', \(json))")
+}
+```
+
+The notification fires for every VoIP event and is a no-op when no observer is registered, so it is safe to leave enabled.
 
 ## Support
 

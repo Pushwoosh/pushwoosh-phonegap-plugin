@@ -39,4 +39,17 @@
         <source-file src="src/android/SecondWebViewPlugin.java" target-dir="src/com/pushwoosh/demovoip" />
         <source-file src="src/android/DemoCallEventHandler.java" target-dir="src/com/pushwoosh/demovoip" />
     </platform>
+
+    <!-- iOS -->
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="SecondWebView">
+                <param name="ios-package" value="SecondWebViewPlugin" />
+            </feature>
+        </config-file>
+
+        <source-file src="src/ios/SecondWebViewPlugin.m" />
+
+        <framework src="WebKit.framework" />
+    </platform>
 </plugin>

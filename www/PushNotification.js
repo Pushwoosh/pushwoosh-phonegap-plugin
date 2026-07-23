@@ -714,6 +714,12 @@ PushNotification.prototype.notificationCallback = function(notification) {
  *
  * @param {Function} success - Callback function to be invoked when the event occurs.
  * @param {Function} fail - Callback function to be invoked if the registration fails.
+ *
+ * @remarks iOS: if you present the call UI in a secondary native WebView on top of the main
+ * WebView, the main WebView is backgrounded and these callbacks are suspended. The plugin also
+ * broadcasts every VoIP event via the `PushwooshVoIPEventDispatched` NSNotification so your native
+ * view controller can inject the event into that WebView. See the README section
+ * "Forwarding VoIP events to a secondary WebView (iOS)".
  */
 PushNotification.prototype.registerEvent = function(eventName, success, fail) {
 	exec(success, fail, "PushNotification", "registerEvent", [eventName]);

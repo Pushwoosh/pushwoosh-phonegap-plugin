@@ -68,6 +68,12 @@ static NSMutableArray *pw_voipEventBuffer = nil;
 // NSUserDefaults key for persistent VoIP event buffer (fallback, survives process death)
 static NSString *const kPWVoIPBufferKey = @"PushwooshVoIPBufferedEvents";
 
+// Broadcast for every VoIP event, in addition to the Cordova/JS callback path. Lets native code
+// (e.g. a secondary WebView's view controller shown on top of a backgrounded main WebView, whose
+// JS engine is suspended) receive VoIP events regardless of Cordova WebView state.
+// userInfo: @{ @"eventName": <NSString>, @"payload": <NSDictionary> }.
+static NSString *const PWVoIPEventNotification = @"PushwooshVoIPEventDispatched";
+
 static NSMutableArray *pw_getVoIPBuffer(void) {
     if (!pw_voipEventBuffer) {
         pw_voipEventBuffer = [NSMutableArray new];
@@ -139,31 +145,43 @@ static void pw_clearBufferedVoIPEvents(NSString *eventName) {
     [defaults synchronize];
 }
 
+// Extracts a JSON-serializable payload dictionary from a plugin result's message.
+static NSDictionary *pw_payloadFromResult(CDVPluginResult *pluginResult) {
+    id msg = pluginResult.message;
+    if ([msg isKindOfClass:[NSDictionary class]]) {
+        return msg;
+    } else if (msg) {
+        return @{@"value": msg};
+    }
+    return @{};
+}
+
 // Sends a plugin result to all registered callbacks for a given event.
 // If no callbacks are registered yet, buffers in-memory for later replay.
+// Also broadcasts every event via PWVoIPEventNotification so native code can receive it
+// regardless of Cordova WebView state (see the notification declaration above).
 static void pw_dispatchVoIPEvent(NSString *eventName, CDVPluginResult *pluginResult) {
+    NSDictionary *payload = pw_payloadFromResult(pluginResult);
+
+    @try {
+        [[NSNotificationCenter defaultCenter] postNotificationName:PWVoIPEventNotification
+                                                            object:nil
+                                                          userInfo:@{@"eventName": eventName, @"payload": payload}];
+    } @catch (NSException *exception) {
+        PWLogWarn(@"VoIP event observer threw: %@", exception);
+    }
+
     @synchronized (callbackIds) {
         NSMutableArray *live = callbackIds[eventName];
-        if (live.count == 0) {
-            id msg = pluginResult.message;
-            NSDictionary *payload;
-            if ([msg isKindOfClass:[NSDictionary class]]) {
-                payload = msg;
-            } else if (msg) {
-                payload = @{@"value": msg};
-            } else {
-                payload = @{};
-            }
-            pw_bufferVoIPEvent(eventName, payload);
-            return;
-        }
         NSArray *snapshot = [live copy];
         [pluginResult setKeepCallbackAsBool:YES];
         NSMutableArray *stale = nil;
+        NSUInteger delivered = 0;
         for (PWCallbackEntry *entry in snapshot) {
             id<CDVCommandDelegate> delegate = entry.commandDelegate;
             if (delegate) {
                 [delegate sendPluginResult:pluginResult callbackId:entry.callbackId];
+                delivered++;
             } else {
                 if (!stale) stale = [NSMutableArray array];
                 [stale addObject:entry];
@@ -171,6 +189,16 @@ static void pw_dispatchVoIPEvent(NSString *eventName, CDVPluginResult *pluginRes
         }
         if (stale) {
             [live removeObjectsInArray:stale];
+        }
+
+        // Buffer the event when no LIVE subscriber received it — either the registry was
+        // empty, or it held only dead subscriptions left behind by destroyed WebViews.
+        // Previously the count>0 check above ran before stale entries were culled, so a
+        // dead subscription masked the empty registry and the event was silently dropped
+        // instead of buffered — losing VoIP events (answer/hangup/...) after a WebView was
+        // recreated. Keying off actual deliveries closes that window (#103113).
+        if (delivered == 0) {
+            pw_bufferVoIPEvent(eventName, payload);
         }
     }
 }
@@ -253,7 +281,7 @@ API_AVAILABLE(ios(10))
 
     @synchronized ([PushNotification class]) {
         if (pw_PushNotificationPlugin != nil) {
-            NSLog(@"[PW] pluginInitialize: already initialized, skipping re-initialization from secondary WebView");
+            PWLogInfo(@"pluginInitialize: already initialized, skipping re-initialization from secondary WebView");
             return;
         }
 
@@ -682,7 +710,7 @@ API_AVAILABLE(ios(10.0)) {
         
         [center addNotificationRequest:request withCompletionHandler:^(NSError *_Nullable error) {
             if (error != nil) {
-                NSLog(@"Something went wrong: %@", error);
+                PWLogError(@"Something went wrong: %@", error);
             }
         }];
     } else {
@@ -795,7 +823,7 @@ API_AVAILABLE(ios(10.0)) {
     [self.callController requestTransaction:transaction completion:^(NSError * _Nullable error) {
         if (error == nil) {
         } else {
-            NSLog(@"%@",[error localizedDescription]);
+            PWLogError(@"%@", error.localizedDescription);
         }
     }];
 }
@@ -1007,7 +1035,7 @@ API_AVAILABLE(ios(10.0)) {
         [self.callController requestTransaction:transaction completion:^(NSError * _Nullable error) {
             if (error == nil) {
             } else {
-                NSLog(@"%@",[error localizedDescription]);
+                PWLogError(@"%@", error.localizedDescription);
             }
         }];
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Call ended successfully"];
@@ -1108,7 +1136,7 @@ API_AVAILABLE(ios(10.0)) {
 
 // MARK: - Audio Session Deactivate (Inner)
 - (void)deactivatedAudioSession:(CXProvider *)provider didDeactivate:(AVAudioSession *)audioSession {
-    NSLog(@"Audio session deactivated");
+    PWLogDebug(@"Audio session deactivated");
 }
 
 // MARK: - On Hold Call
@@ -1131,27 +1159,27 @@ API_AVAILABLE(ios(10.0)) {
     NSError *error = nil;
 
     if (![sessionInstance setCategory:AVAudioSessionCategoryPlayAndRecord error:&error]) {
-        NSLog(@"Error setting category: %@", error.localizedDescription);
+        PWLogError(@"Error setting category: %@", error.localizedDescription);
         return;
     }
 
     if (![sessionInstance setMode:AVAudioSessionModeVoiceChat error:&error]) {
-        NSLog(@"Error setting mode: %@", error.localizedDescription);
+        PWLogError(@"Error setting mode: %@", error.localizedDescription);
         return;
     }
 
     NSTimeInterval bufferDuration = 0.005;
     if (![sessionInstance setPreferredIOBufferDuration:bufferDuration error:&error]) {
-        NSLog(@"Error setting buffer duration: %@", error.localizedDescription);
+        PWLogError(@"Error setting buffer duration: %@", error.localizedDescription);
         return;
     }
 
     if (![sessionInstance setPreferredSampleRate:44100 error:&error]) {
-        NSLog(@"Error setting sample rate: %@", error.localizedDescription);
+        PWLogError(@"Error setting sample rate: %@", error.localizedDescription);
         return;
     }
 
-    NSLog(@"Audio session configured successfully");
+    PWLogDebug(@"Audio session configured successfully");
 }
 
 - (NSDictionary *)handleVoIPMessage:(PWVoIPMessage *)voipMessage {
