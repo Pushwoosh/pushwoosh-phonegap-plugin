@@ -146,8 +146,8 @@ cordova prepare android
 ### Android: Firebase FIS_AUTH_ERROR
 Make sure that:
 1. `google-services.json` is in the project root
-2. An Android app with package name `com.pushwoosh.demovoip` is added in Firebase Console
-3. `oauth_client` arrays are populated in `google-services.json`
+2. An Android app with package name `com.example.sampleapp` is added in Firebase Console
+3. A client for package `com.example.sampleapp` is present in `client[]` of `google-services.json` (`oauth_client` is not required)
 
 ### iOS: VoIP events not firing
 Make sure that:

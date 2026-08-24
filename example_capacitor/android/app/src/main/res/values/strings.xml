@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">PW Capacitor VoIP Demo</string>
     <string name="title_activity_main">PW Capacitor VoIP Demo</string>
-    <string name="package_name">com.pushwoosh.demovoip</string>
-    <string name="custom_url_scheme">com.pushwoosh.demovoip</string>
+    <string name="package_name">com.example.sampleapp</string>
+    <string name="custom_url_scheme">com.example.sampleapp</string>
 </resources>

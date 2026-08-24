@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.pushwoosh.demovoip',
+  appId: 'com.example.sampleapp',
   appName: 'PW Capacitor VoIP Demo',
   webDir: 'www',
   android: {

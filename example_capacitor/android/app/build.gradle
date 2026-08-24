@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.pushwoosh.demovoip"
+    namespace "com.example.sampleapp"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.pushwoosh.demovoip"
+        applicationId "com.example.sampleapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

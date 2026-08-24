@@ -1,4 +1,4 @@
-package com.pushwoosh.demovoip;
+package com.example.demovoip;
 
 import android.content.Intent;
 

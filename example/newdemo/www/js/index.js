@@ -329,7 +329,7 @@ function pushwooshInitialize(pushwoosh) {
 
     // Initialize Pushwoosh
     pushwoosh.onDeviceReady({
-        appid: "A8B44-0B460"
+        appid: "XXXXX-XXXXX"
     });
 
     console.log('Pushwoosh initialized');

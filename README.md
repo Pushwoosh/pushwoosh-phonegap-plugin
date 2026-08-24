@@ -51,13 +51,13 @@
 Using npm:
 
 ```bash
-cordova plugin add pushwoosh-cordova-plugin@8.3.70
+cordova plugin add pushwoosh-cordova-plugin@8.3.71
 ```
 
 Using git:
 
 ```bash
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.70
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.71
 ```
 
 ## AI-Assisted Integration
@@ -150,33 +150,39 @@ document.addEventListener('deviceready', function() {
 ### User ID and Events
 
 ```javascript
-var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+// Plugin modules are registered after cordova.js loads, so cordova.require()
+// must be called from deviceready onwards, never at top level.
+document.addEventListener('deviceready', function() {
+    var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
 
-pushwoosh.setUserId("user_123");
+    pushwoosh.setUserId("user_123");
 
-pushwoosh.postEvent("purchase", {
-    product: "Premium Plan",
-    price: "9.99"
-});
+    pushwoosh.postEvent("purchase", {
+        product: "Premium Plan",
+        price: "9.99"
+    });
+}, false);
 ```
 
 ### Tags
 
 ```javascript
-var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
+document.addEventListener('deviceready', function() {
+    var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
 
-// Set tags
-pushwoosh.setTags(
-    { age: 25, name: "John", favorite_categories: ["sports", "news"] },
-    function() { console.log("Tags set successfully"); },
-    function(error) { console.error("Failed to set tags: " + error); }
-);
+    // Set tags
+    pushwoosh.setTags(
+        { age: 25, name: "John", favorite_categories: ["sports", "news"] },
+        function() { console.log("Tags set successfully"); },
+        function(error) { console.error("Failed to set tags: " + error); }
+    );
 
-// Get tags
-pushwoosh.getTags(
-    function(tags) { console.log("Tags: " + JSON.stringify(tags)); },
-    function(error) { console.error("Failed to get tags: " + error); }
-);
+    // Get tags
+    pushwoosh.getTags(
+        function(tags) { console.log("Tags: " + JSON.stringify(tags)); },
+        function(error) { console.error("Failed to get tags: " + error); }
+    );
+}, false);
 ```
 
 ## API Reference

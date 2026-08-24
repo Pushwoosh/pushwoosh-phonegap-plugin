@@ -19,12 +19,12 @@
 
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="SecondWebView">
-                <param name="android-package" value="com.pushwoosh.demovoip.SecondWebViewPlugin" />
+                <param name="android-package" value="com.example.demovoip.SecondWebViewPlugin" />
             </feature>
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
-            <activity android:name="com.pushwoosh.demovoip.SecondWebViewActivity"
+            <activity android:name="com.example.demovoip.SecondWebViewActivity"
                       android:label="Second WebView"
                       android:theme="@style/Theme.AppCompat.NoActionBar"
                       android:exported="false" />
@@ -32,12 +32,12 @@
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
             <meta-data android:name="com.pushwoosh.cordova.CALL_EVENT_HANDLER"
-                       android:value="com.pushwoosh.demovoip.DemoCallEventHandler" />
+                       android:value="com.example.demovoip.DemoCallEventHandler" />
         </config-file>
 
-        <source-file src="src/android/SecondWebViewActivity.java" target-dir="src/com/pushwoosh/demovoip" />
-        <source-file src="src/android/SecondWebViewPlugin.java" target-dir="src/com/pushwoosh/demovoip" />
-        <source-file src="src/android/DemoCallEventHandler.java" target-dir="src/com/pushwoosh/demovoip" />
+        <source-file src="src/android/SecondWebViewActivity.java" target-dir="src/com/example/demovoip" />
+        <source-file src="src/android/SecondWebViewPlugin.java" target-dir="src/com/example/demovoip" />
+        <source-file src="src/android/DemoCallEventHandler.java" target-dir="src/com/example/demovoip" />
     </platform>
 
     <!-- iOS -->
