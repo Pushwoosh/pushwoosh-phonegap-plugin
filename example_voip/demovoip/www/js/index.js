@@ -149,12 +149,12 @@ function setupUIEventListeners() {
     document.getElementById('btnInitPushwoosh').addEventListener('click', function() {
         const appId = document.getElementById('pushAppId').value;
         if (!appId) {
-            alert('Please enter App ID');
+            logEventToUI('initializePushwoosh', 'Please enter App ID');
             return;
         }
 
         if (!pushwoosh) {
-            alert('Pushwoosh not initialized yet. Wait for device ready.');
+            logEventToUI('initializePushwoosh', 'Pushwoosh not ready yet. Wait for device ready.');
             return;
         }
 
@@ -164,36 +164,36 @@ function setupUIEventListeners() {
     // Set Call Timeout button
     document.getElementById('btnSetCallTimeout').addEventListener('click', function() {
         if (!pushwoosh) {
-            alert('Pushwoosh not initialized yet. Wait for device ready.');
+            logEventToUI('setIncomingCallTimeout', 'Pushwoosh not ready yet. Wait for device ready.');
             return;
         }
 
         const timeout = parseFloat(document.getElementById('callTimeout').value);
 
         if (isNaN(timeout) || timeout <= 0) {
-            alert('Please enter a valid timeout value (greater than 0)');
+            logEventToUI('setIncomingCallTimeout', 'Please enter a valid timeout value (greater than 0)');
             return;
         }
 
         pushwoosh.setIncomingCallTimeout(timeout);
         console.log(TAG + '[SET_CALL_TIMEOUT] ' + timeout + 's');
-        alert('Incoming call timeout set to ' + timeout + ' seconds');
+        logEventToUI('setIncomingCallTimeout', timeout + 's');
     });
 
     // Request Call Permission button (Android only)
     document.getElementById('btnRequestCallPermission').addEventListener('click', function() {
         if (!pushwoosh) {
-            alert('Pushwoosh not initialized yet. Wait for device ready.');
+            logEventToUI('requestCallPermission', 'Pushwoosh not ready yet. Wait for device ready.');
             return;
         }
         pushwoosh.requestCallPermission(
             function(granted) {
                 console.log(TAG + '[REQUEST_CALL_PERMISSION] granted=' + granted);
-                alert('Call permission ' + (granted ? 'granted' : 'denied'));
+                logEventToUI('requestCallPermission', 'granted=' + granted);
             },
             function(error) {
                 console.log(TAG + '[REQUEST_CALL_PERMISSION] error: ' + error);
-                alert('Call permission error: ' + error);
+                logEventToUI('requestCallPermission', 'error: ' + error);
             }
         );
     });
@@ -201,7 +201,7 @@ function setupUIEventListeners() {
     // Get Call Permission Status button
     document.getElementById('btnGetCallPermissionStatus').addEventListener('click', function() {
         if (!pushwoosh) {
-            alert('Pushwoosh not initialized yet. Wait for device ready.');
+            logEventToUI('getCallPermissionStatus', 'Pushwoosh not ready yet. Wait for device ready.');
             return;
         }
         pushwoosh.getCallPermissionStatus(
@@ -221,7 +221,7 @@ function setupUIEventListeners() {
     // Register for Push Notifications button
     document.getElementById('btnRegisterPush').addEventListener('click', function() {
         if (!pushwoosh) {
-            alert('Pushwoosh not initialized yet. Wait for device ready.');
+            logEventToUI('registerDevice', 'Pushwoosh not ready yet. Wait for device ready.');
             return;
         }
 
@@ -243,7 +243,7 @@ function setupUIEventListeners() {
     // Get Notification Status button
     document.getElementById('btnGetNotificationStatus').addEventListener('click', function() {
         if (!pushwoosh) {
-            alert('Pushwoosh not initialized yet. Wait for device ready.');
+            logEventToUI('getRemoteNotificationStatus', 'Pushwoosh not ready yet. Wait for device ready.');
             return;
         }
         pushwoosh.getRemoteNotificationStatus(
@@ -276,7 +276,7 @@ function setupUIEventListeners() {
     // End Call button
     document.getElementById('btnEndCall').addEventListener('click', function() {
         if (!pushwoosh) {
-            alert('Pushwoosh not initialized yet. Wait for device ready.');
+            logEventToUI('endCall', 'Pushwoosh not ready yet. Wait for device ready.');
             return;
         }
         pushwoosh.endCall(
@@ -294,7 +294,7 @@ function setupUIEventListeners() {
     // Open Second WebView button
     document.getElementById('btnOpenSecondWebView').addEventListener('click', function() {
         if (!window.SecondWebView) {
-            alert('SecondWebView plugin not installed. Rebuild after adding the plugin.');
+            logEventToUI('SecondWebView', 'SecondWebView plugin not installed. Rebuild after adding the plugin.');
             return;
         }
         logEventToUI('SecondWebView', 'Opening second WebView...');

@@ -288,12 +288,12 @@
             document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('btnInitPushwoosh2').addEventListener('click', function() {
                     if (!pushwoosh) {
-                        alert('Wait for device ready.');
+                        logEventToUI('initializePushwoosh', 'Pushwoosh not ready yet. Wait for device ready.');
                         return;
                     }
                     var appId = document.getElementById('pushAppId2').value;
                     if (!appId) {
-                        alert('Please enter App ID');
+                        logEventToUI('initializePushwoosh', 'Please enter App ID');
                         return;
                     }
                     initializePushwoosh(appId);
@@ -301,7 +301,7 @@
 
                 document.getElementById('btnRequestCallPermission2').addEventListener('click', function() {
                     if (!pushwoosh) {
-                        alert('Wait for device ready.');
+                        logEventToUI('requestCallPermission', 'Pushwoosh not ready yet. Wait for device ready.');
                         return;
                     }
                     console.log(TAG + '[REQUEST_CALL_PERMISSION] calling...');
@@ -322,7 +322,7 @@
 
                 document.getElementById('btnEndCall2').addEventListener('click', function() {
                     if (!pushwoosh) {
-                        alert('Wait for device ready.');
+                        logEventToUI('endCall', 'Pushwoosh not ready yet. Wait for device ready.');
                         return;
                     }
                     console.log(TAG + '[END_CALL] calling...');

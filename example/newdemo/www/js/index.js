@@ -213,7 +213,6 @@ function sendPostEventAction(pushwoosh) {
 
         pushwoosh.postEvent(eventName, { "buttonNumber": 4, "buttonLabel": "banner" });
         console.log('Event posted:', eventName);
-        alert('Event posted: ' + eventName);
         document.getElementById("textField5").value = '';
     });
 }
@@ -287,6 +286,11 @@ function clearNotificationCenterAction(pushwoosh) {
 function registerForPushNotificationAction(pushwoosh) {
     var switcher = document.getElementById("switcher");
 
+    // Native SDK persists registration across restarts, HTML default is OFF
+    pushwoosh.getPushToken(function (token) {
+        switcher.checked = token != null && token !== "";
+    });
+
     switcher.addEventListener("change", function () {
         if (this.checked) {
             // Register for Push Notifications
@@ -324,7 +328,6 @@ function pushwooshInitialize(pushwoosh) {
     document.addEventListener('push-notification', function (event) {
         var notification = event.notification;
         console.log('Received push notification:', JSON.stringify(notification));
-        alert('Push received: ' + (notification.message || notification.title || 'No message'));
     });
 
     // Initialize Pushwoosh

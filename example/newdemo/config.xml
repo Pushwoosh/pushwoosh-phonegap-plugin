@@ -9,6 +9,10 @@
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
 
+    <platform name="android">
+        <resource-file src="google-services.json" target="app/google-services.json" />
+    </platform>
+
     <!-- Local Pushwoosh Cordova Plugin -->
     <plugin name="pushwoosh-cordova-plugin" spec="../../">
         <variable name="LOG_LEVEL" value="DEBUG" />

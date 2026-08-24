@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="8.3.71">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="8.3.72">
 
 	<name>Pushwoosh</name>
 
@@ -88,7 +88,6 @@
 
         <framework src="build-extras-pushwoosh.gradle" custom="true" type="gradleReference" />
 
-		<framework src="androidx.work:work-runtime:2.7.1" />
 		<framework src="androidx.annotation:annotation:1.4.0" />
         <framework src="androidx.appcompat:appcompat:1.6.1" />
         <framework src="androidx.core:core-ktx:1.10.1"/>
@@ -98,13 +97,13 @@
         <framework src="org.jetbrains.kotlin:kotlin-stdlib:1.1.60" />
         <framework src="com.google.android.material:material:1.12.0"/>
 
-        <framework src="com.pushwoosh:pushwoosh:6.11.0"/>
-		<framework src="com.pushwoosh:pushwoosh-amazon:6.11.0"/>
-        <framework src="com.pushwoosh:pushwoosh-firebase:6.11.0"/>
-		<framework src="com.pushwoosh:pushwoosh-badge:6.11.0"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox:6.11.0"/>
-        <framework src="com.pushwoosh:pushwoosh-inbox-ui:6.11.0"/>
-		<framework src="com.pushwoosh:pushwoosh-huawei:6.11.0"/>
+        <framework src="com.pushwoosh:pushwoosh:6.11.1"/>
+		<framework src="com.pushwoosh:pushwoosh-amazon:6.11.1"/>
+        <framework src="com.pushwoosh:pushwoosh-firebase:6.11.1"/>
+		<framework src="com.pushwoosh:pushwoosh-badge:6.11.1"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox:6.11.1"/>
+        <framework src="com.pushwoosh:pushwoosh-inbox-ui:6.11.1"/>
+		<framework src="com.pushwoosh:pushwoosh-huawei:6.11.1"/>
     </platform>
 
 	<!-- ios -->
