@@ -1,11 +1,13 @@
 package com.pushwoosh.plugin.pushnotifications.calls;
 
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.util.List;
 
@@ -153,6 +155,28 @@ public class PWCordovaCallEventListener implements CallEventListener {
                 return;
             }
 
+            // If the app already has a live task (e.g. the video-call Activity is open behind the
+            // system incoming-call UI), bring that task to the front by targeting its TOP Activity
+            // with an explicit component intent instead of firing the LAUNCHER intent.
+            //
+            // Why not the LAUNCHER intent: getLaunchIntentForPackage() returns an
+            // ACTION_MAIN/CATEGORY_LAUNCHER intent; starting it on an already-running task resets
+            // the task to its root Activity (recreating MainActivity), which tears down the open
+            // video-call screen and looks like a full app restart.
+            //
+            // Why not AppTask.moveToFront(): it is silently blocked by the Android 10+
+            // background-activity-start (BAL) restriction when the call is answered from the
+            // full-screen incoming-call UI (it only worked when answered from the heads-up
+            // notification action, which grants a temporary BAL exemption). startActivity() keeps
+            // the BAL exemption granted while a Telecom call is being answered in BOTH paths.
+            //
+            // An explicit component intent + SINGLE_TOP brings the task forward and delivers
+            // onNewIntent to the already-running top Activity: no reset, no recreation.
+            if (startExistingTaskTopActivity(context)) {
+                PWLog.noise(TAG, "Foregrounded existing task via its top activity, skipping launcher intent");
+                return;
+            }
+
             Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
             if (launchIntent == null) {
                 PWLog.error(TAG, "cant launch activity: launchIntent is null");
@@ -167,10 +191,91 @@ public class PWCordovaCallEventListener implements CallEventListener {
         }
     }
 
+    /**
+     * Brings an existing task of this app to the foreground without recreating it, by starting an
+     * explicit intent aimed at the task's CURRENT top Activity.
+     *
+     * <p>Used instead of the LAUNCHER intent when the app is already running (e.g. the video-call
+     * Activity is open behind the Telecom incoming-call UI) so answering a call does not reset the
+     * task and destroy the open screen.
+     *
+     * <p>Unlike {@code AppTask.moveToFront()} — which the Android 10+ background-activity-start
+     * restriction silently blocks when the call is answered from the full-screen incoming-call UI —
+     * {@code startActivity()} keeps the BAL exemption granted while a Telecom call is answered.
+     * Targeting the top Activity by its concrete {@link ComponentName} (not CATEGORY_LAUNCHER) plus
+     * {@code FLAG_ACTIVITY_SINGLE_TOP} delivers {@code onNewIntent} to the running instance and
+     * brings its task forward without clearing anything above the task root.
+     *
+     * <p>The top Activity is discovered at runtime from the app's own task, so this stays generic
+     * across all Pushwoosh consumers (no hardcoded Activity class).
+     *
+     * @return {@code true} if a live task's top Activity was found and started, {@code false} if no
+     * live task exists (true cold start) and the caller should fall back to the launcher intent.
+     */
+    private boolean startExistingTaskTopActivity(Context context) {
+        try {
+            ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            if (activityManager == null) {
+                return false;
+            }
+
+            List<ActivityManager.AppTask> tasks = activityManager.getAppTasks();
+            if (tasks == null || tasks.isEmpty()) {
+                return false;
+            }
+
+            String packageName = context.getPackageName();
+            for (ActivityManager.AppTask task : tasks) {
+                ComponentName topActivity = resolveTopActivity(task, packageName);
+                if (topActivity == null) {
+                    continue;
+                }
+                try {
+                    Intent intent = new Intent();
+                    intent.setComponent(topActivity);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    context.startActivity(intent);
+                    PWLog.noise(TAG, "Started existing task top activity: " + topActivity.flattenToShortString());
+                    return true;
+                } catch (Exception e) {
+                    PWLog.warn(TAG, "startActivity for top activity failed: " + e.getMessage());
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            PWLog.warn(TAG, "startExistingTaskTopActivity failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Extracts this app's top Activity {@link ComponentName} from an {@link ActivityManager.AppTask}.
+     *
+     * <p>{@code getTaskInfo().topActivity} requires API 23+; on older devices, or when the field is
+     * unavailable, returns {@code null} so the caller falls back to the launcher intent.
+     */
+    @Nullable
+    private ComponentName resolveTopActivity(ActivityManager.AppTask task, String packageName) {
+        try {
+            ActivityManager.RecentTaskInfo info = task.getTaskInfo();
+            if (info == null) {
+                return null;
+            }
+            ComponentName top = info.topActivity;
+            if (top != null && packageName.equals(top.getPackageName())) {
+                return top;
+            }
+        } catch (Exception e) {
+            PWLog.warn(TAG, "resolveTopActivity failed: " + e.getMessage());
+        }
+        return null;
+    }
+
 
     @Override
     public void onCreateIncomingConnection(@Nullable Bundle bundle) {
         PWLog.noise(TAG, "onCreateIncomingConnection()");
+        Log.d("VideoCallVoIP", "PWCordovaCallEventListener.onCreateIncomingConnection()");
 
         setCurrentCallInfo(bundle);
         PushwooshCallsAdapter.onCreateIncomingConnection(bundle);
@@ -189,9 +294,11 @@ public class PWCordovaCallEventListener implements CallEventListener {
     @Override
     public void onAnswer(@NonNull PushwooshVoIPMessage pushwooshVoIPMessage, int i) {
         PWLog.noise(TAG, "onAnswer()");
+        Log.d("VideoCallVoIP", "PWCordovaCallEventListener.onAnswer() ENTRY");
 
         setCurrentCallInfo(pushwooshVoIPMessage.getRawPayload());
         PushwooshCallsAdapter.onAnswer(pushwooshVoIPMessage);
+        Log.d("VideoCallVoIP", "PWCordovaCallEventListener.onAnswer() after adapter.onAnswer");
 
         CallEventListener handler = getCustomHandler();
         if (handler != null) {

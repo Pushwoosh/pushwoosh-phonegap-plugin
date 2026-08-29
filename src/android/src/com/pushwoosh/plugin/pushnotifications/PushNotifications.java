@@ -12,6 +12,8 @@ package com.pushwoosh.plugin.pushnotifications;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -1213,11 +1215,93 @@ public class PushNotifications extends CordovaPlugin {
 		}
 	}
 
+	// Manifest meta-data key. When present, VoIP events are also broadcast with this action so a
+	// secondary WebView Activity (e.g. an in-progress video call presented on top of the main
+	// Capacitor WebView) can receive them directly. This is the Android analogue of the iOS
+	// NSNotification bypass: the main WebView is backgrounded while the secondary Activity is on
+	// top, so its JS never processes the Cordova callback and the event would otherwise be lost.
+	private static final String VOIP_BROADCAST_ACTION_META_KEY = "com.pushwoosh.cordova.VOIP_BROADCAST_ACTION";
+	// Payload keys expected by the secondary WebView's broadcast receiver.
+	private static final String VOIP_BROADCAST_EXTRA = "VIDEOCALL_BROADCAST_EVENT";
+
+	private static String sVoipBroadcastAction;
+	private static boolean sVoipBroadcastActionResolved;
+
+	/**
+	 * Reads (and caches) the opt-in broadcast action from the app manifest. Returns {@code null}
+	 * when the meta-data is absent, in which case the bypass is a no-op and behavior is unchanged.
+	 */
+	private static String getVoipBroadcastAction(Context context) {
+		if (sVoipBroadcastActionResolved) {
+			return sVoipBroadcastAction;
+		}
+		try {
+			ApplicationInfo appInfo = context.getPackageManager()
+					.getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+			if (appInfo.metaData != null) {
+				sVoipBroadcastAction = appInfo.metaData.getString(VOIP_BROADCAST_ACTION_META_KEY);
+			}
+		} catch (Exception e) {
+			PWLog.warn(TAG, "Failed to resolve VoIP broadcast action: " + e.getMessage());
+		}
+		sVoipBroadcastActionResolved = true;
+		return sVoipBroadcastAction;
+	}
+
+	/**
+	 * Delivers a VoIP event straight to a secondary WebView Activity via a local broadcast, bypassing
+	 * the (possibly backgrounded) main Cordova WebView. No-op unless the opt-in meta-data is set.
+	 */
+	private static void broadcastVoipEvent(@NonNull String type, @NonNull JSONObject payload) {
+		Context context = AndroidPlatformModule.getApplicationContext();
+		if (context == null) {
+			return;
+		}
+		String action = getVoipBroadcastAction(context);
+		if (action == null || action.isEmpty()) {
+			android.util.Log.d("VideoCallVoIP", "broadcastVoipEvent type=" + type + " SKIPPED (no action meta-data)");
+			return;
+		}
+		try {
+			JSONObject event = new JSONObject();
+			event.put("type", type);
+			event.put("data", payload);
+
+			Intent intent = new Intent(action);
+			intent.setPackage(context.getPackageName());
+			intent.putExtra(VOIP_BROADCAST_EXTRA, event.toString());
+			context.sendBroadcast(intent);
+			PWLog.info(TAG, "Broadcast VoIP event '" + type + "' to secondary WebView via " + action);
+		} catch (Exception e) {
+			PWLog.warn(TAG, "Failed to broadcast VoIP event '" + type + "': " + e.getMessage());
+		}
+	}
+
 	public static void emitVoipEvent(@NonNull String type, @NonNull JSONObject payload) {
 		PWLog.noise(TAG, "emitVoipEvent(), event type: " + type);
+		android.util.Log.d("VideoCallVoIP", "emitVoipEvent type=" + type);
+
+		// Deliver to any secondary WebView (e.g. an on-top video-call Activity) up front. Its own
+		// broadcast receiver is independent of the main WebView's foreground state, so this reaches
+		// the call UI even when the main WebView is backgrounded behind the call. No-op when the
+		// opt-in manifest meta-data is not present.
+		broadcastVoipEvent(type, payload);
 
 		if (!isCordovaReady()) {
 			PWLog.info(TAG, "Buffering VoIP event '" + type + "': Cordova not ready");
+			bufferVoipEvent(type, payload);
+			return;
+		}
+
+		// The JS side must have signaled readiness (onDeviceReady) before we attempt delivery.
+		// isCordovaReady() turns true as soon as the WebView is created, which happens BEFORE
+		// Angular re-registers its listeners. Delivering here would either hit a stale/dead
+		// CallbackContext left over in the static callbackContextMap from a previous WebView
+		// session (the event is then silently swallowed) or reach no live listener at all.
+		// Buffering until sAppReady guarantees the event is drained by processPersistedVoIPEvents()
+		// once the current session's listeners are registered.
+		if (!sAppReady.get()) {
+			PWLog.info(TAG, "Buffering VoIP event '" + type + "': JS not ready");
 			bufferVoipEvent(type, payload);
 			return;
 		}
@@ -1238,13 +1322,10 @@ public class PushNotifications extends CordovaPlugin {
 			return;
 		}
 
-		if (!sAppReady.get()) {
-			PWLog.info(TAG, "Buffering VoIP event '" + type + "': JS not ready");
-			bufferVoipEvent(type, payload);
-			return;
-		}
-
-		PWLog.warn(TAG, "No callback contexts registered for event: " + type);
+		// JS reports ready but no listener is registered yet (registration window). Buffer instead
+		// of dropping so the event survives until the listener attaches and the buffer is drained.
+		PWLog.info(TAG, "Buffering VoIP event '" + type + "': no callback contexts registered yet");
+		bufferVoipEvent(type, payload);
 	}
 
 	private static JSONObject inboxMessageToJson(InboxMessage message) {
