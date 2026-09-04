@@ -81,8 +81,45 @@ static NSMutableArray *pw_getVoIPBuffer(void) {
     return pw_voipEventBuffer;
 }
 
+// Rebuilds a value out of property-list types only, dropping anything else: NSUserDefaults raises
+// NSInvalidArgumentException on the first non-property-list object, and a VoIP payload carries
+// whatever the push sender put in it. NSNull is the common case — PWVoIPMessage strips it from
+// rawPayload one level deep only, so a null nested in an object or an array reaches this buffer.
+// Dropping is what the SDK itself does with the nulls it does strip.
+static id pw_plistSafeValue(id value) {
+    if ([value isKindOfClass:[NSDictionary class]]) {
+        NSMutableDictionary *safe = [NSMutableDictionary dictionaryWithCapacity:[value count]];
+        [value enumerateKeysAndObjectsUsingBlock:^(id key, id object, BOOL *stop) {
+            id safeObject = pw_plistSafeValue(object);
+            if ([key isKindOfClass:[NSString class]] && safeObject) {
+                safe[key] = safeObject;
+            }
+        }];
+        return safe;
+    }
+
+    if ([value isKindOfClass:[NSArray class]]) {
+        NSMutableArray *safe = [NSMutableArray arrayWithCapacity:[value count]];
+        for (id object in value) {
+            id safeObject = pw_plistSafeValue(object);
+            if (safeObject) {
+                [safe addObject:safeObject];
+            }
+        }
+        return safe;
+    }
+
+    if ([value isKindOfClass:[NSString class]] || [value isKindOfClass:[NSNumber class]] ||
+        [value isKindOfClass:[NSDate class]] || [value isKindOfClass:[NSData class]]) {
+        return value;
+    }
+
+    return nil;
+}
+
 static void pw_bufferVoIPEvent(NSString *eventName, NSDictionary *payload) {
-    NSDictionary *entry = @{@"event": eventName, @"payload": payload ?: @{}};
+    // Sanitized once: a replayed event must not depend on which buffer the process survived with.
+    NSDictionary *entry = pw_plistSafeValue(@{@"event": eventName, @"payload": payload ?: @{}});
 
     // Primary: in-memory
     [pw_getVoIPBuffer() addObject:entry];
@@ -354,17 +391,30 @@ API_AVAILABLE(ios(10))
 }
 
 - (void)setApiToken:(CDVInvokedUrlCommand *)command {
-    NSString *token = command.arguments[0];
+    // argumentAtIndex: maps NSNull and a missing slot to nil; raw arguments[0] hands NSNull to NSUserDefaults
+    NSString *token = [command argumentAtIndex:0];
     [[PWPreferences preferences] setApiToken:token];
+}
+
+// A blank app code is not nil, and the SDK stores it as is, wiping the one that came from Info.plist
+- (NSString *)appCodeFromOptions:(NSDictionary *)options {
+    for (NSString *key in @[ @"pw_appid", @"appid" ]) {
+        NSObject *value = options[key];
+        if (![value isKindOfClass:[NSString class]]) {
+            continue;
+        }
+        NSString *trimmed = [(NSString *)value stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        if (trimmed.length > 0) {
+            return trimmed;
+        }
+    }
+    return nil;
 }
 
 - (void)onDeviceReady:(CDVInvokedUrlCommand *)command {
     NSDictionary *options = [command.arguments firstObject];
 
-    NSString *appid = options[@"pw_appid"];
-    if (!appid) {
-        appid = options[@"appid"];
-    }
+    NSString *appid = [self appCodeFromOptions:options];
     
     NSString *appname = options[@"appname"];
 
@@ -486,22 +536,30 @@ API_AVAILABLE(ios(10.0)) {
     }
 }
 
+// the documented contract is "set 0 or don't specify the option", so the value has to be read and not just tested for presence
+static BOOL pw_authorizationOptionRequested(NSDictionary *options, NSString *name) {
+    id value = options[name];
+    return [value respondsToSelector:@selector(boolValue)] && [value boolValue];
+}
+
 // Authorization options in addition to UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCarPlay. Should be called before registering for pushes
 - (void)additionalAuthorizationOptions:(CDVInvokedUrlCommand *)command {
-    NSDictionary *options = [command.arguments firstObject];
-    NSString* critical = options[@"UNAuthorizationOptionCriticalAlert"];
-    NSString* provisional = options[@"UNAuthorizationOptionProvisional"];
-    NSString* providesSettings = options[@"UNAuthorizationOptionProvidesAppNotificationSettings"];
-    
+    id argument = [command argumentAtIndex:0];
+    if (argument != nil && ![argument isKindOfClass:[NSDictionary class]]) {
+        PWLogError(@"PushNotification.additionalAuthorizationOptions: expects a dictionary of options, got %@", NSStringFromClass([argument class]));
+        return;
+    }
+    NSDictionary *options = argument;
+
     UNAuthorizationOptions authOptions = 0;
     if (@available(iOS 12.0, *)) {
-        if (critical) {
+        if (pw_authorizationOptionRequested(options, @"UNAuthorizationOptionCriticalAlert")) {
             authOptions |= UNAuthorizationOptionCriticalAlert;
         }
-        if (provisional) {
+        if (pw_authorizationOptionRequested(options, @"UNAuthorizationOptionProvisional")) {
             authOptions |= UNAuthorizationOptionProvisional;
         }
-        if (providesSettings) {
+        if (pw_authorizationOptionRequested(options, @"UNAuthorizationOptionProvidesAppNotificationSettings")) {
             authOptions |= UNAuthorizationOptionProvidesAppNotificationSettings;
         }
         [Pushwoosh sharedInstance].additionalAuthorizationOptions = authOptions;
@@ -558,13 +616,24 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)setLanguage:(CDVInvokedUrlCommand *)command {
-    NSString *language = command.arguments[0];
-    [[Pushwoosh sharedInstance] setLanguage:language];
+    id language = [command argumentAtIndex:0];
+    // PWPreferences.setLanguage: sends -length to any non-nil value; nil is its system-language fallback
+    [[Pushwoosh sharedInstance] setLanguage:[language isKindOfClass:[NSString class]] ? language : nil];
 }
 
 - (void)setShowPushnotificationAlert:(CDVInvokedUrlCommand *)command {
-    id showPushnotificationAlert = command.arguments[0];
-    self.pushManager.showPushnotificationAlert = [showPushnotificationAlert boolValue];
+    id argument = [command argumentAtIndex:0];
+    NSNumber *flag = [argument isKindOfClass:[NSNumber class]] ? argument : nil;
+    if ([argument isKindOfClass:[NSString class]]) {
+        // -boolValue reads @"off" as NO and @"tomorrow" as YES; org.json on Android takes these two spellings and nothing else
+        NSString *text = [argument lowercaseString];
+        flag = [text isEqualToString:@"true"] ? @YES : ([text isEqualToString:@"false"] ? @NO : nil);
+    }
+    if (flag == nil) {
+        PWLogError(@"PushNotification.setShowPushnotificationAlert: expects a boolean, got %@", argument ? NSStringFromClass([argument class]) : @"nothing");
+        return;
+    }
+    self.pushManager.showPushnotificationAlert = flag.boolValue;
 }
 
 - (void)startBeaconPushes:(CDVInvokedUrlCommand *)command {
@@ -578,7 +647,16 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)setTags:(CDVInvokedUrlCommand *)command {
-    [[PushNotificationManager pushManager] setTags:command.arguments[0]];
+    id tags = [command argumentAtIndex:0];
+    // the JS facade turns a falsy config into an EMPTY argument array, and a raw subscript on it is NSRangeException
+    if (![tags isKindOfClass:[NSDictionary class]]) {
+        PWLogError(@"PushNotification.setTags: expects a dictionary of tags, got %@", tags ? NSStringFromClass([tags class]) : @"nothing");
+        CDVPluginResult *errorResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"setTags expects a dictionary of tags"];
+        [self.commandDelegate sendPluginResult:errorResult callbackId:command.callbackId];
+        return;
+    }
+
+    [[PushNotificationManager pushManager] setTags:tags];
 
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:nil];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -659,8 +737,19 @@ API_AVAILABLE(ios(10.0)) {
     }];
 }
 
+- (NSString *)inboxMessageCodeFromCommand:(CDVInvokedUrlCommand *)command {
+    id messageCode = [command argumentAtIndex:0];
+    if ([messageCode isKindOfClass:[NSString class]]) {
+        return messageCode;
+    }
+    // JS booleans also arrive as NSNumber, and coercing them would address the real messages "1" and "0"
+    BOOL isBoolean = messageCode == (id)kCFBooleanTrue || messageCode == (id)kCFBooleanFalse;
+    // Android coerces a numeric inbox id via data.getString(0); without the same coercion -length crashed here
+    return ([messageCode isKindOfClass:[NSNumber class]] && !isBoolean) ? [messageCode stringValue] : nil;
+}
+
 - (void)readMessage:(CDVInvokedUrlCommand *)command {
-    NSString *messageCode = command.arguments[0];
+    NSString *messageCode = [self inboxMessageCodeFromCommand:command];
     if (messageCode.length != 0) {
         NSArray *array = [NSArray arrayWithObject:messageCode];
         [PWInbox readMessagesWithCodes:array];
@@ -668,7 +757,7 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)deleteMessage:(CDVInvokedUrlCommand *)command {
-    NSString *messageCode = command.arguments[0];
+    NSString *messageCode = [self inboxMessageCodeFromCommand:command];
     if (messageCode.length != 0) {
         NSArray *array = [NSArray arrayWithObject:messageCode];
         [PWInbox deleteMessagesWithCodes:array];
@@ -676,7 +765,7 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)performAction:(CDVInvokedUrlCommand *)command {
-    NSString *messageCode = command.arguments[0];
+    NSString *messageCode = [self inboxMessageCodeFromCommand:command];
     if (messageCode.length != 0) {
         [PWInbox performActionForMessageWithCode:messageCode];
     }
@@ -684,7 +773,15 @@ API_AVAILABLE(ios(10.0)) {
 
 
 - (void)createLocalNotification:(CDVInvokedUrlCommand *)command {
-    NSDictionary *params = command.arguments[0];
+    id params = [command argumentAtIndex:0];
+    if (![params isKindOfClass:[NSDictionary class]]) {
+        // the JS facade sends an empty argument array for a falsy config, so both the missing slot and a non-dictionary land here
+        PWLogError(@"createLocalNotification: no parameters passed (missing parameters), got %@", params ? NSStringFromClass([params class]) : @"nothing");
+        CDVPluginResult *errorResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                        messageAsString:@"createLocalNotification expects a configuration object"];
+        [self.commandDelegate sendPluginResult:errorResult callbackId:command.callbackId];
+        return;
+    }
     NSString *body = params[@"msg"];
     NSUInteger delay = [params[@"seconds"] unsignedIntegerValue];
     NSDictionary *userData = params[@"userData"];
@@ -1059,8 +1156,8 @@ API_AVAILABLE(ios(10.0)) {
     
     [self.provider reportCallWithUUID:action.callUUID updated:callUpdate];
     [action fulfill];
-    NSDictionary *callData = @{@"callName":action.contactIdentifier,
-                               @"callId": action.handle.value,
+    NSDictionary *callData = @{@"callName": action.contactIdentifier ?: @"",
+                               @"callId": action.handle.value ?: @"",
                                @"isVideo": action.video ? @YES : @NO,
                                @"message": @"sendCall event called successfully"};
     pw_dispatchVoIPEvent(@"sendCall", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:callData]);
@@ -1248,13 +1345,26 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)setUserId:(CDVInvokedUrlCommand *)command {
-    NSString *userId = command.arguments[0];
+    // keep the class gate: the SDK never type-checks this argument and dies on any non-NSString
+    NSString *userId = [command argumentAtIndex:0 withDefault:nil andClass:[NSString class]];
+    if (userId == nil) {
+        PWLogError(@"PushNotification.setUserId: expects a user id string, got %@", [command.arguments firstObject]);
+        return;
+    }
     [[PWInAppManager sharedManager] setUserId:userId];
 }
 
 - (void) postEvent:(CDVInvokedUrlCommand *)command {
-    NSString *event = command.arguments[0];
-    NSDictionary *attributes = command.arguments[1];
+    id event = [command argumentAtIndex:0];
+    id attributes = [command argumentAtIndex:1];
+    // the SDK takes both on faith: -length on a non-string event, -addEntriesFromDictionary: on non-dictionary attributes
+    if (![event isKindOfClass:[NSString class]]) {
+        PWLogError(@"PushNotification.postEvent: expects an event name, got %@", event ? NSStringFromClass([event class]) : @"nothing");
+        return;
+    }
+    if (![attributes isKindOfClass:[NSDictionary class]]) {
+        attributes = nil;
+    }
     [[PWInAppManager sharedManager] postEvent:event withAttributes:attributes];
 }
 
@@ -1324,7 +1434,14 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)setEmails:(CDVInvokedUrlCommand *)command {
-    NSArray *emailsArray = command.arguments[0];
+    id emailsArray = [command argumentAtIndex:0];
+    // for-in over anything but a collection is an unrecognized selector, and the app is gone before the SDK is even called
+    if (![emailsArray isKindOfClass:[NSArray class]]) {
+        PWLogError(@"PushNotification.setEmails: expects an array of emails, got %@", emailsArray ? NSStringFromClass([emailsArray class]) : @"nothing");
+        CDVPluginResult *errorResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"setEmails expects an array of emails"];
+        [self.commandDelegate sendPluginResult:errorResult callbackId:command.callbackId];
+        return;
+    }
     for (NSString *email in emailsArray) {
         [[Pushwoosh sharedInstance] setEmail:email completion:^(NSError *error) {
             CDVPluginResult *pluginResult;
@@ -1339,8 +1456,15 @@ API_AVAILABLE(ios(10.0)) {
 }
 
 - (void)setUserEmails:(CDVInvokedUrlCommand *)command {
-    NSString *userId = command.arguments[0];
-    NSArray *emailsArray = command.arguments[1];
+    NSString *userId = [command argumentAtIndex:0];
+    id emailsArray = [command argumentAtIndex:1];
+    // for-in over anything but a collection is an unrecognized selector, and the app is gone before the SDK is even called
+    if (![emailsArray isKindOfClass:[NSArray class]]) {
+        PWLogError(@"PushNotification.setUserEmails: expects an array of emails, got %@", emailsArray ? NSStringFromClass([emailsArray class]) : @"nothing");
+        CDVPluginResult *errorResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"setUserEmails expects an array of emails"];
+        [self.commandDelegate sendPluginResult:errorResult callbackId:command.callbackId];
+        return;
+    }
     for (NSString *email in emailsArray) {
         [[Pushwoosh sharedInstance] setUser:userId emails:@[email] completion:^(NSError *error) {
             CDVPluginResult *pluginResult;

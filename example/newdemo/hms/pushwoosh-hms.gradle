@@ -1,0 +1,6 @@
+// com.pushwoosh:pushwoosh-huawei's POM carries no HMS dependency, so the sample pulls Push Kit itself.
+apply plugin: 'com.huawei.agconnect'
+
+dependencies {
+    implementation 'com.huawei.hms:push:6.13.0.300'
+}

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="8.3.72">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="8.3.73">
 
 	<name>Pushwoosh</name>
 
@@ -145,12 +145,13 @@
                 <source url="https://cdn.cocoapods.org/"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="PushwooshXCFramework" spec="7.2.4" />
+                <pod name="PushwooshXCFramework" spec="7.2.5" />
                 <pod name="PushwooshInboxUIXCFramework" spec="7.0.3" />
             </pods>
         </podspec>
 
         <hook type="after_plugin_install" src="spec/add-voip-pod.js" />
+        <hook type="before_plugin_uninstall" src="spec/remove-voip-pod.js" />
 
 		<header-file src="src/ios/PushNotification.h" />
 		<source-file src="src/ios/PushNotification.m" />

@@ -108,7 +108,8 @@ public class PWCordovaCallEventListener implements CallEventListener {
         } catch (NoSuchMethodException e) {
             PWLog.error(TAG, "Custom handler missing default constructor: " + e.getMessage());
             return null;
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
+            // Loading a host class raises LinkageError, not Exception, and telephony callbacks run unguarded.
             PWLog.error(TAG, "Failed to resolve custom CallEventHandler", e);
             return null;
         }

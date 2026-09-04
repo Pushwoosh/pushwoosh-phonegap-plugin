@@ -5,7 +5,7 @@
   "description": "Pushwoosh VoIP Sample App",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test \"hooks/__tests__/*.test.js\""
   },
   "keywords": [
     "ecosystem:cordova",
@@ -16,25 +16,14 @@
   "author": "Pushwoosh Team",
   "license": "Apache-2.0",
   "devDependencies": {
-    "cordova-android": "^14.0.1",
-    "cordova-ios": "^8.0.1",
-    "pushwoosh-cordova-plugin": "file:../..",
-    "second-webview-plugin": "file:second-webview-plugin"
+    "cordova-android": "^15.0.0",
+    "cordova-ios": "^7.1.1"
   },
   "cordova": {
     "platforms": [
       "android",
       "ios"
     ],
-    "plugins": {
-      "second-webview-plugin": {},
-      "pushwoosh-cordova-plugin": {
-        "PW_VOIP_ANDROID_ENABLED": "true",
-        "PW_VOIP_IOS_ENABLED": "true",
-        "LOG_LEVEL": "DEBUG",
-        "IOS_FOREGROUND_ALERT_TYPE": "ALERT",
-        "ANDROID_FOREGROUND_PUSH": "true"
-      }
-    }
+    "plugins": {}
   }
 }

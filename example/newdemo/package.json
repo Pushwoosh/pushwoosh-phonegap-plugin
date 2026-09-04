@@ -14,21 +14,13 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "cordova-android": "^15.0.0",
-    "cordova-ios": "^7.1.1",
-    "pushwoosh-cordova-plugin": "file:../.."
+    "cordova-ios": "^7.1.1"
   },
   "cordova": {
     "platforms": [
       "ios",
       "android"
     ],
-    "plugins": {
-      "pushwoosh-cordova-plugin": {
-        "LOG_LEVEL": "DEBUG",
-        "IOS_FOREGROUND_ALERT_TYPE": "NONE",
-        "ANDROID_FOREGROUND_PUSH": "false",
-        "PW_VOIP_IOS_ENABLED": "true"
-      }
-    }
+    "plugins": {}
   }
 }

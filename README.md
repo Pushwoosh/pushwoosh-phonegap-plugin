@@ -25,6 +25,7 @@
 - [Quick Start](#quick-start)
 - [API Reference](#api-reference)
 - [Plugin Preferences](#plugin-preferences)
+- [Huawei (HMS) Setup](#huawei-hms-setup)
 - [Support](#support)
 - [License](#license)
 
@@ -51,13 +52,13 @@
 Using npm:
 
 ```bash
-cordova plugin add pushwoosh-cordova-plugin@8.3.72
+cordova plugin add pushwoosh-cordova-plugin@8.3.73
 ```
 
 Using git:
 
 ```bash
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.72
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.73
 ```
 
 ## AI-Assisted Integration
@@ -280,6 +281,56 @@ Configure these in your `config.xml`:
 | `ANDROID_FOREGROUND_PUSH` | `true` | Show notifications when app is in foreground (Android) |
 | `PW_VOIP_IOS_ENABLED` | `false` | Enable VoIP calling features on iOS |
 | `PW_VOIP_ANDROID_ENABLED` | `false` | Enable VoIP calling features on Android |
+
+## Huawei (HMS) Setup
+
+The plugin ships the Pushwoosh Huawei transport (`com.pushwoosh:pushwoosh-huawei`), but its POM
+does not pull HMS Push Kit in. To deliver pushes on Huawei devices without Google services, add
+the Huawei build wiring to your app.
+
+**1. Huawei Maven repository** — in `platforms/android/app/repositories.gradle`:
+
+```groovy
+ext.repos = {
+    google()
+    mavenCentral()
+    maven { url 'https://developer.huawei.com/repo/' }
+}
+```
+
+**2. AGConnect Gradle plugin** — in the `buildscript { dependencies { … } }` block of
+`platforms/android/app/build.gradle`, next to the Android Gradle plugin classpath:
+
+```groovy
+classpath "com.huawei.agconnect:agcp:1.9.1.301"
+```
+
+**3. Push Kit dependency and the AGConnect plugin** — in
+`platforms/android/app/build-extras.gradle`:
+
+```groovy
+apply plugin: 'com.huawei.agconnect'
+
+dependencies {
+    implementation 'com.huawei.hms:push:6.13.0.300'
+}
+```
+
+**4. `agconnect-services.json`** — download it from AppGallery Connect and put it into
+`platforms/android/app/`, next to `google-services.json`.
+
+**5. Signing certificate fingerprint** — register the SHA-256 fingerprint of the certificate you
+sign the app with in AppGallery Connect (Project settings → General information → SHA-256
+certificate fingerprint). Without it the device fails registration with
+`6003: certificate fingerprint error`.
+
+No JavaScript changes are needed: the native SDK detects the transport automatically on HMS
+devices once Push Kit is on the classpath. A correctly wired app logs
+`PUSH TRANSPORT SET/CHANGED: Huawei (device type 17)` on a Huawei device.
+
+Since Cordova regenerates `platforms/android/`, wire these edits through an `after_prepare` hook
+rather than by hand — see `example/newdemo/hooks/hms-android.js` in this repository for a working
+one.
 
 ## VoIP in Capacitor
 

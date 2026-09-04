@@ -22,11 +22,20 @@ cordova platform add android
 ```
 
 **What happens automatically:**
-- `pushwoosh-cordova-plugin` is installed with VoIP enabled for the added platform
-  - iOS: `PW_VOIP_IOS_ENABLED=true` is set automatically
-  - Android: `PW_VOIP_ANDROID_ENABLED=true` is set in gradle.properties
-- Gradle 8.9 and AGP 8.5.1 are configured for Android
-- `google-services.json` is copied for Firebase/FCM
+- `pushwoosh-cordova-plugin` is installed from the local checkout (`../..`) by the
+  `after_platform_add` hook, with both `PW_VOIP_IOS_ENABLED` and
+  `PW_VOIP_ANDROID_ENABLED` forwarded on every install — cordova overwrites the saved
+  variables per platform instead of merging them, so forwarding only the platform you
+  added would disable VoIP on the other one
+- `second-webview-plugin`, the multi-WebView reproducer, is installed alongside it
+- `google-services.json` is copied into the Android project by the `<resource-file>`
+  entry in `config.xml`
+- the Gradle and AGP versions come from the preferences in `config.xml`
+
+The Pushwoosh plugin is **not** an npm dependency of the sample. It lives two directories
+up, and a `file:` dependency pointing at its own grandparent cannot be resolved by
+cordova-fetch. The hook installs it with `--link --nosave`, so `package.json` stays free
+of plugin entries and the next clean checkout builds exactly the same way.
 
 ### 2. Configure your VoIP App Code
 
@@ -76,6 +85,29 @@ cordova build android
 - Interactive demo UI with event logging
 - Manual SDK initialization with App ID input
 - VoIP parameters configuration (video, ringtone, handle type)
+
+## Project layout
+
+```
+demovoip/
+├── www/                     # application sources (index.html, js/index.js, css/index.css)
+├── hooks/
+│   ├── install-plugin.js    # after_platform_add: installs the plugin and the reproducer
+│   └── __tests__/           # unit suite for the hook
+├── second-webview-plugin/   # local plugin, opens a second WebView to reproduce the VoIP bug
+├── google-services.json     # Firebase configuration for Android
+├── config.xml               # cordova configuration, incl. the toolchain preferences
+└── package.json             # platform pins only, no plugin declarations
+```
+
+## Hook tests
+
+```bash
+cd demovoip
+npm test
+```
+
+From the repository root, `make test-samples` runs the hook suites of every example app.
 
 ## App Features
 
@@ -131,16 +163,21 @@ cordova build android
 
 ## Troubleshooting
 
-### Android: "Minimum supported Gradle version is 8.9"
-The hook automatically creates `gradle-wrapper.properties` with Gradle 8.9. If the error appears, run:
+### Android: "Minimum supported Gradle version" or "Incompatible AGP version"
+The Gradle and Android Gradle Plugin versions come from the `GradleVersion` and
+`AndroidGradlePluginVersion` preferences in `config.xml`, which is the only place they
+are declared. Change them there and re-create the platform:
 ```bash
-cordova prepare android
+cordova platform rm android
+cordova platform add android
 ```
 
-### Android: "Incompatible AGP version"
-The hook automatically fixes AGP to 8.5.1. If the error appears, run:
+### `platform add` failed and re-running says "Platform already added"
+The install hook throws after `platforms/<platform>` is already on disk, so a plain
+retry hits a half-ready platform. Remove it first:
 ```bash
-cordova prepare android
+cordova platform rm android
+cordova platform add android
 ```
 
 ### Android: Firebase FIS_AUTH_ERROR

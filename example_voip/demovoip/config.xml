@@ -6,19 +6,21 @@
         Pushwoosh Team
     </author>
     <content src="index.html" />
-    <preference name="LOG_LEVEL" value="DEBUG" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+
+    <platform name="ios">
+        <preference name="deployment-target" value="13.0" />
+    </platform>
+
     <platform name="android">
+        <resource-file src="google-services.json" target="app/google-services.json" />
         <preference name="AndroidLaunchMode" value="singleTask" />
         <preference name="GradleVersion" value="8.9" />
         <preference name="AndroidGradlePluginVersion" value="8.5.1" />
         <preference name="android-minSdkVersion" value="24" />
         <preference name="android-targetSdkVersion" value="35" />
     </platform>
-    <hook type="after_prepare" src="hooks/after_prepare/010_setup_gradle_wrapper.js" />
-    <hook type="after_prepare" src="hooks/after_prepare/015_fix_agp_version.js" />
-    <hook type="after_prepare" src="hooks/after_prepare/020_copy_google_services.js" />
-    <hook type="after_platform_add" src="hooks/after_platform_add/010_install_plugin.js" />
 
+    <hook type="after_platform_add" src="hooks/install-plugin.js" />
 </widget>

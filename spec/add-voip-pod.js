@@ -1,53 +1,56 @@
+#!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const childProcess = require('child_process');
 
-module.exports = function (context) {
-    let pwVoipEnabled = context.opts?.cli_variables?.PW_VOIP_IOS_ENABLED;
+const PLUGIN_ID = 'pushwoosh-cordova-plugin';
+const SUBSPEC = 'PushwooshXCFramework/PushwooshVoIP';
 
-    if (typeof pwVoipEnabled === 'undefined') {
-        try {
-            const packageJsonPath = path.join(context.opts.projectRoot, 'package.json');
-            if (fs.existsSync(packageJsonPath)) {
-                const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-                pwVoipEnabled =
-                    packageJson?.cordova?.plugins?.['pushwoosh-cordova-plugin']?.PW_VOIP_IOS_ENABLED;
-            }
-        } catch (_) {}
-    }
+/**
+ * after_plugin_install (ios): links the optional PushwooshVoIP subspec into the project
+ * Podfile when the plugin was installed with PW_VOIP_IOS_ENABLED=true, pinning it to the
+ * version already used by the base PushwooshXCFramework pod.
+ */
+module.exports = function (ctx) {
+  const projectRoot = ctx.opts.projectRoot;
 
-    if (pwVoipEnabled !== 'true') {
-        return;
-    }
+  // Cordova tracks plugin vars in plugins/fetch.json — the only source populated this early
+  const fetchPath = path.join(projectRoot, 'plugins', 'fetch.json');
+  if (!fs.existsSync(fetchPath)) return;
 
-    const iosPlatformPath = path.join(context.opts.projectRoot, 'platforms', 'ios');
-    const podfilePath = path.join(iosPlatformPath, 'Podfile');
+  let vars;
+  try {
+    const fetched = JSON.parse(fs.readFileSync(fetchPath, 'utf8'));
+    const entry = fetched[PLUGIN_ID];
+    vars = (entry && entry.variables) || {};
+  } catch (_) {
+    return;
+  }
 
-    if (!fs.existsSync(podfilePath)) {
-        return;
-    }
+  if (String(vars.PW_VOIP_IOS_ENABLED || 'false').toLowerCase() !== 'true') return;
 
-    let podfileContent = fs.readFileSync(podfilePath, 'utf8');
+  const iosPlatformPath = path.join(projectRoot, 'platforms', 'ios');
+  const podfilePath = path.join(iosPlatformPath, 'Podfile');
+  if (!fs.existsSync(podfilePath)) return;
 
-    if (!podfileContent.includes('PushwooshXCFramework/PushwooshVoIP')) {
-        const lines = podfileContent.split('\n');
-        const index = lines.findIndex(line =>
-            line.trim().startsWith(`pod 'PushwooshXCFramework'`) &&
-            !line.includes(`/`)
-        );
+  const lines = fs.readFileSync(podfilePath, 'utf8').split('\n');
+  if (lines.some(line => line.includes(SUBSPEC))) return;
 
-        if (index !== -1) {
-            // Extract version from existing pod line to avoid version conflicts
-            const versionMatch = lines[index].match(/'PushwooshXCFramework',\s*'([^']+)'/);
-            const voipPodLine = versionMatch
-                ? `\tpod 'PushwooshXCFramework/PushwooshVoIP', '${versionMatch[1]}'`
-                : `\tpod 'PushwooshXCFramework/PushwooshVoIP'`;
-            lines.splice(index + 1, 0, voipPodLine);
-            fs.writeFileSync(podfilePath, lines.join('\n'));
+  const index = lines.findIndex(line =>
+    line.trim().startsWith(`pod 'PushwooshXCFramework'`) && !line.includes('/')
+  );
+  if (index === -1) return;
 
-            try {
-                execSync('pod install', { cwd: iosPlatformPath, stdio: 'inherit' });
-            } catch (_) {}
-        }
-    }
+  const versionMatch = lines[index].match(/'PushwooshXCFramework',\s*'([^']+)'/);
+  const voipPodLine = versionMatch
+    ? `\tpod '${SUBSPEC}', '${versionMatch[1]}'`
+    : `\tpod '${SUBSPEC}'`;
+
+  lines.splice(index + 1, 0, voipPodLine);
+  fs.writeFileSync(podfilePath, lines.join('\n'), 'utf8');
+  console.log(`[${PLUGIN_ID}] Added ${SUBSPEC} to platforms/ios/Podfile`);
+
+  try {
+    childProcess.execSync('pod install', { cwd: iosPlatformPath, stdio: 'inherit' });
+  } catch (_) {}
 };
