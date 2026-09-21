@@ -1201,7 +1201,18 @@ static BOOL pw_authorizationOptionRequested(NSDictionary *options, NSString *nam
     [self setupAudioSession];
     [action fulfill];
 
-    pw_dispatchVoIPEvent(@"answer", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self handleVoIPMessage:voipMessage]]);
+    NSDictionary *voipPayload = [self handleVoIPMessage:voipMessage];
+
+    pw_dispatchVoIPEvent(@"answer", [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:voipPayload]);
+
+    // Forward the answer to the videollamada secondary WebView. When that WebView is on top,
+    // the main Capacitor WebView is backgrounded and its Cordova callbacks do not run,
+    // so VideoCallWebViewController (which observes this notification) injects the event via
+    // window.__pushwooshDispatch('answer', ...) directly into the second WebView.
+    [[NSNotificationCenter defaultCenter]
+        postNotificationName:@"PushwooshVoIPEventDispatched"
+                      object:nil
+                  userInfo:@{ @"eventName": @"answer", @"payload": voipPayload ?: @{} }];
 }
 
 // MARK: - End Call
