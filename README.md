@@ -52,14 +52,26 @@
 Using npm:
 
 ```bash
-cordova plugin add pushwoosh-cordova-plugin@8.3.75
+cordova plugin add pushwoosh-cordova-plugin@8.3.76
 ```
 
 Using git:
 
 ```bash
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.75
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.76
 ```
+
+### Requirements
+
+The Pushwoosh iOS SDK requires iOS 15.0 or later. The plugin sets the `deployment-target` preference to 15.0 by default, but a value in your app's `config.xml` takes precedence. If your app sets a lower value, raise it:
+
+```xml
+<platform name="ios">
+    <preference name="deployment-target" value="15.0" />
+</platform>
+```
+
+Capacitor does not read this preference. On Capacitor 6 and 7, set `platform :ios, '15.0'` in `ios/App/Podfile` and the iOS deployment target of the App target to 15.0, then run `npx cap sync ios`. Capacitor 8 already targets iOS 15.0.
 
 ## AI-Assisted Integration
 
@@ -338,6 +350,8 @@ one.
 This plugin works in Capacitor apps. Capacitor does not execute Cordova hooks, so VoIP dependencies must be added manually to your native projects.
 
 ### iOS
+
+`ios/App/Podfile` must target iOS 15.0 or later, see [Requirements](#requirements).
 
 Add the VoIP pod to `ios/App/Podfile`:
 

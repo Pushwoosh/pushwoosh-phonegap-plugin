@@ -10,7 +10,7 @@
     <allow-intent href="https://*/*" />
 
     <platform name="ios">
-        <preference name="deployment-target" value="13.0" />
+        <preference name="deployment-target" value="15.0" />
     </platform>
 
     <platform name="android">
