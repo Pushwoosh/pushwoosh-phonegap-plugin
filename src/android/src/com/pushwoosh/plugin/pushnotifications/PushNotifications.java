@@ -20,6 +20,7 @@ import androidx.core.app.NotificationManagerCompat;
 import android.webkit.JavascriptInterface;
 
 import com.pushwoosh.Pushwoosh;
+import com.pushwoosh.PushwooshPlatform;
 import com.pushwoosh.RegisterForPushNotificationsResultData;
 import com.pushwoosh.badge.PushwooshBadge;
 import com.pushwoosh.exception.GetTagsException;
@@ -625,6 +626,21 @@ public class PushNotifications extends CordovaPlugin {
 			result.put("enabled", enabled);
 			callbackContext.success(result);
 		} catch (Exception e) {
+			callbackContext.error(e.getMessage());
+		}
+		return true;
+	}
+
+	@CordovaMethod
+	private boolean isRegisteredForPushNotifications(JSONArray data, final CallbackContext callbackContext) {
+		try {
+			boolean registered = PushwooshPlatform.getInstance()
+					.getRegistrationPrefs()
+					.isRegisteredForPush()
+					.get();
+			callbackContext.success(registered);
+		} catch (Exception e) {
+			// Reporting the failure, not "false": an uninitialized SDK is not an unsubscribed device.
 			callbackContext.error(e.getMessage());
 		}
 		return true;

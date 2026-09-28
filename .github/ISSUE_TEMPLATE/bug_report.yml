@@ -52,49 +52,12 @@ body:
         This happens only if dependency XYZ v.1.2.3 is installed
     validations:
       required: true
-  - type: dropdown
+  - type: input
     id: affected-version
     attributes:
       label: Your Pushwoosh Cordova plugin version
       description: Your version of the Cordova plugin integrated into the application. You may find it on the [releases page](https://github.com/Pushwoosh/pushwoosh-phonegap-plugin/releases)
-      options:
-        - 8.3.74
-        - 8.3.73
-        - 8.3.72
-        - 8.3.71
-        - 8.3.70
-        - 8.3.69
-        - 8.3.68
-        - 8.3.67
-        - 8.3.66
-        - 8.3.65
-        - 8.3.64
-        - 8.3.63
-        - 8.3.62
-        - 8.3.61
-        - 8.3.60
-        - 8.3.59
-        - 8.3.58
-        - 8.3.57
-        - 8.3.56
-        - 8.3.55
-        - 8.3.54
-        - 8.3.53
-        - 8.3.52
-        - 8.3.51
-        - 8.3.50
-        - 8.3.49
-        - 8.3.48
-        - 8.3.47
-        - 8.3.46
-        - 8.3.45
-        - 8.3.44
-        - 8.3.43
-        - 8.3.42
-        - 8.3.41
-        - 8.3.40
-        - 8.3.39
-        - Other — specify it in the description
+      placeholder: "8.3.74"
     validations:
       required: true
   - type: input

@@ -41,6 +41,7 @@ export interface PushNotification {
 	onAppActivated(config: Object): void;
 	registerDevice(success?: (callback: SuccessRegistrationCallback) => void, fail?: (error: Error|string) => void): void;
 	unregisterDevice(success?: (callback?: string) => void, fail?: (error?: Error|string) => void): void;
+	isRegisteredForPushNotifications(success?: (registered: boolean) => void, fail?: (error?: Error|string) => void): void;
 	additionalAuthorizationOptions(options: AuthOptions): void;
 	setTags(config: PushwooshTags, success?: (tags?: Record<string,PushwooshTags>) => void, fail?: (error?: Error|string) => void): void;
 	getTags(success?: (tags: PushwooshTags) => void, fail?: (error?: Error|string) => void): void;

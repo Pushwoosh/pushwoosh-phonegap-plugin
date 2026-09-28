@@ -40,6 +40,8 @@ function onDeviceReady() {
     sendLocalNotificationAction(pushwoosh);
     clearNotificationCenterAction(pushwoosh);
     resetBadges(pushwoosh);
+    presentInboxUIAction(pushwoosh);
+    getInboxCountsAction(pushwoosh);
     setupModalHandlers();
 }
 
@@ -283,44 +285,104 @@ function clearNotificationCenterAction(pushwoosh) {
     });
 }
 
-function registerForPushNotificationAction(pushwoosh) {
-    var switcher = document.getElementById("switcher");
-
-    // Native SDK persists registration across restarts, HTML default is OFF
-    pushwoosh.getPushToken(function (token) {
-        switcher.checked = token != null && token !== "";
+// Open the Inbox UI screen
+function presentInboxUIAction(pushwoosh) {
+    document.getElementById('presentInboxUI').addEventListener('click', function() {
+        pushwoosh.presentInboxUI({ dateFormat: "dd.MM.yyyy" });
+        console.log('Inbox UI presented');
     });
+}
 
-    switcher.addEventListener("change", function () {
-        if (this.checked) {
-            // Register for Push Notifications
+// Show total and unread inbox message counts
+function getInboxCountsAction(pushwoosh) {
+    document.getElementById('getInboxCounts').addEventListener('click', function() {
+        pushwoosh.messagesCount(function(total) {
+            pushwoosh.unreadMessagesCount(function(unread) {
+                console.log('Inbox counts - total:', total, 'unread:', unread);
+                alert('Inbox messages: ' + total + '\nUnread: ' + unread);
+            });
+        });
+    });
+}
+
+// Push subscription toggle - reference implementation. isRegisteredForPushNotifications()
+// is the source of truth: the checkbox is told the state, never asked for it.
+function registerForPushNotificationAction(pushwoosh) {
+    var switcher = document.getElementById('switcher');
+    var track = document.getElementById('switcherTrack');
+
+    // True while a registerDevice/unregisterDevice call is in flight.
+    var pending = false;
+
+    function setToggleEnabled(enabled) {
+        switcher.disabled = !enabled;
+        if (enabled) {
+            track.classList.remove('disabled');
+        } else {
+            track.classList.add('disabled');
+        }
+    }
+
+    function syncFromSdk() {
+        pushwoosh.isRegisteredForPushNotifications(
+            function (registered) {
+                // Assigning .checked from code does not fire "change", so this never re-enters
+                switcher.checked = registered;
+            },
+            function (error) {
+                console.warn('isRegisteredForPushNotifications failed:', error);
+            }
+        );
+    }
+
+    function onCallDone() {
+        pending = false;
+        setToggleEnabled(true);
+        syncFromSdk();
+    }
+
+    switcher.addEventListener('change', function () {
+        // Overlapping register/unregister calls race, so lock until the SDK answers
+        pending = true;
+        setToggleEnabled(false);
+
+        if (switcher.checked) {
             pushwoosh.registerDevice(
                 function (status) {
-                    var pushToken = status.pushToken;
-                    console.log('Push token received:', pushToken);
-                    alert('Registered! Token: ' + pushToken);
+                    console.log('Registered, push token:', status.pushToken);
+                    alert('Registered! Token: ' + status.pushToken);
+                    onCallDone();
                 },
-                function (status) {
-                    console.error('Push registration failed:', status);
-                    alert('Registration failed: ' + status);
-                    switcher.checked = false;
+                function (error) {
+                    console.error('registerDevice failed:', error);
+                    alert('Registration failed: ' + error);
+                    onCallDone();
                 }
             );
         } else {
-            // Unregister from Push Notifications
             pushwoosh.unregisterDevice(
-                function (status) {
-                    console.log('Unregistered successfully', status);
-                    alert('Unregistered from push notifications');
+                function () {
+                    console.log('Unregistered from push notifications');
+                    alert('Unsubscribed from push notifications');
+                    onCallDone();
                 },
-                function (status) {
-                    console.error('Unregister failed', status);
-                    alert('Unregister failed: ' + status);
-                    switcher.checked = true;
+                function (error) {
+                    console.error('unregisterDevice failed:', error);
+                    alert('Unregister failed: ' + error);
+                    onCallDone();
                 }
             );
         }
     });
+
+    // The subscription may have been changed elsewhere while the app was away
+    document.addEventListener('resume', function () {
+        if (!pending) {
+            syncFromSdk();
+        }
+    }, false);
+
+    syncFromSdk();
 }
 
 function pushwooshInitialize(pushwoosh) {
@@ -328,6 +390,12 @@ function pushwooshInitialize(pushwoosh) {
     document.addEventListener('push-notification', function (event) {
         var notification = event.notification;
         console.log('Received push notification:', JSON.stringify(notification));
+    });
+
+    // Fired when a push is received while the app is running (both platforms)
+    document.addEventListener('push-receive', function (event) {
+        var notification = event.notification;
+        console.log('Received push (push-receive):', JSON.stringify(notification));
     });
 
     // Initialize Pushwoosh

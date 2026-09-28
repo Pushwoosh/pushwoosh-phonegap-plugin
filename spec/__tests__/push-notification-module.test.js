@@ -145,3 +145,32 @@ test('uses a bridge that cordova.js installed after the module was evaluated', (
     assert.strictEqual(bridge.calls.length, 1);
     assert.deepStrictEqual(bridge.calls[0], [null, null, 'PushNotification', 'setApiToken', ['token']]);
 });
+
+test('forwards isRegisteredForPushNotifications to the native handler with both callbacks', (t) => {
+    const bridge = recorder();
+    host(t, { cordova: { exec: bridge.exec } });
+    const success = () => {};
+    const fail = () => {};
+
+    loadModule().isRegisteredForPushNotifications(success, fail);
+
+    assert.strictEqual(bridge.calls.length, 1);
+    assert.deepStrictEqual(bridge.calls[0], [success, fail, 'PushNotification', 'isRegisteredForPushNotifications', []]);
+});
+
+// A subscription query must not answer "not subscribed" when it simply could not ask the native side.
+test('isRegisteredForPushNotifications without a bridge reports the failure instead of a false answer', { timeout: 5000 }, (t) => {
+    host(t, {});
+    silenceWarnings(t);
+    const pushwoosh = loadModule();
+
+    return new Promise((resolve) => {
+        pushwoosh.isRegisteredForPushNotifications(
+            () => assert.fail('the success callback must not run without a bridge'),
+            (error) => {
+                assert.match(error, /Pushwoosh.*isRegisteredForPushNotifications/);
+                resolve();
+            }
+        );
+    });
+});

@@ -18,7 +18,6 @@
 #import <PushwooshFramework/PWInbox.h>
 #import "PWBackward.h"
 
-#import "AppDelegate.h"
 #import <UserNotifications/UserNotifications.h>
 
 #if __has_include(<PushwooshVoIP/PushwooshVoIP.h>)
@@ -381,6 +380,13 @@ API_AVAILABLE(ios(10))
 - (void)getPushToken:(CDVInvokedUrlCommand *)command {
     NSString *token = [[PushNotificationManager pushManager] getPushToken];
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:token];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)isRegisteredForPushNotifications:(CDVInvokedUrlCommand *)command {
+    NSString *token = [[PushNotificationManager pushManager] getPushToken];
+    BOOL registered = token.length != 0;
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:registered];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
@@ -1710,7 +1716,8 @@ BOOL pwplugin_didRegisterUserNotificationSettings(id self, SEL _cmd, id applicat
 
 - (NSString*)dateToString:(NSDate*)date {
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"yyyy-MM-dd'T'H:mm:ssZ"];
+    [formatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
+    [formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
     return [formatter stringFromDate:date];
 }
 

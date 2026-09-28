@@ -142,6 +142,14 @@ body {
     background-color: #34c759;
 }
 
+.ios-switch.disabled {
+    opacity: 0.5;
+}
+
+.ios-switch.disabled label {
+    cursor: not-allowed;
+}
+
 /* Buttons */
 .btn {
     width: 100%;

@@ -52,13 +52,13 @@
 Using npm:
 
 ```bash
-cordova plugin add pushwoosh-cordova-plugin@8.3.74
+cordova plugin add pushwoosh-cordova-plugin@8.3.75
 ```
 
 Using git:
 
 ```bash
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.74
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.75
 ```
 
 ## AI-Assisted Integration
@@ -214,6 +214,7 @@ document.addEventListener('deviceready', function() {
 | Method | Description |
 |--------|-------------|
 | `getRemoteNotificationStatus(success, fail)` | Get push notification permission status |
+| `isRegisteredForPushNotifications(success, fail)` | Check whether the device is subscribed to push notifications |
 | `getLaunchNotification(success)` | Get notification that launched the app |
 | `createLocalNotification(config, success, fail)` | Schedule a local notification |
 | `clearLocalNotification()` | Clear all pending local notifications (Android) |

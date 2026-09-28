@@ -44,6 +44,13 @@ function initPushwoosh() {
 	 var pushwoosh = cordova.require("pushwoosh-cordova-plugin.PushNotification");
 
 //Should be called before pushwoosh.onDeviceReady
+  // push-receive: fired when a push is received while the app is running
+  document.addEventListener('push-receive', function(event) {
+      var notification = event.notification;
+      // handle received push here
+  });
+
+  // push-notification: fired when a push is opened by the user
   document.addEventListener('push-notification', function(event) {
       var notification = event.notification;
       // handle push open here

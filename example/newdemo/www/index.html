@@ -9,6 +9,7 @@
     <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover, user-scalable=no">
     <meta name="color-scheme" content="light dark">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="icon" type="image/png" href="img/logo.png">
     <title>Pushwoosh Demo</title>
 </head>
 <body>
@@ -31,7 +32,7 @@
                 <div class="card">
                     <div class="toggle-container">
                         <label for="switcher">Push Notifications</label>
-                        <div class="ios-switch">
+                        <div class="ios-switch" id="switcherTrack">
                             <input type="checkbox" id="switcher">
                             <label for="switcher"></label>
                         </div>
@@ -112,6 +113,19 @@
                 <button class="btn btn-secondary" id="localNotification">Send Local Notification</button>
                 <button class="btn btn-secondary" id="clearNotificationCenter">Clear Notification Center</button>
                 <button class="btn btn-secondary" id="resetBadges">Reset Badges</button>
+            </div>
+
+            <!-- Inbox Section -->
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📥</span>
+                    <h2>Inbox</h2>
+                </div>
+                <button class="btn btn-primary" id="presentInboxUI">
+                    <span class="btn-icon">📬</span>
+                    Open Inbox
+                </button>
+                <button class="btn btn-secondary" id="getInboxCounts">Get Inbox Counts</button>
             </div>
         </div>
     </div>
