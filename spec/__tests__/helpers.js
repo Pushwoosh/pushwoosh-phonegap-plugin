@@ -22,6 +22,60 @@ const PODFILE = [
 
 const VOIP_LINE = "\tpod 'PushwooshXCFramework/PushwooshVoIP', '7.2.4'";
 
+// cordova-ios 8 with nospm="true" on both pods still writes a Podfile, just without Pushwoosh entries
+const SPM_PODFILE = PODFILE.replace(
+    "\tpod 'PushwooshXCFramework', '7.2.4'\n\tpod 'PushwooshInboxUIXCFramework', '7.0.3'\n",
+    ''
+);
+
+// pods.json that plugin 8.3.76 and older leave on cordova-ios 8: the pods were installed before nospm existed
+const LEGACY_PODS_JSON = JSON.stringify({
+    declarations: { 'use_frameworks!': { declaration: 'use_frameworks!', count: 1 } },
+    sources: { 'https://cdn.cocoapods.org/': { source: 'https://cdn.cocoapods.org/', count: 1 } },
+    libraries: {
+        PushwooshXCFramework: { name: 'PushwooshXCFramework', spec: '7.2.7', count: 1 },
+        PushwooshInboxUIXCFramework: { name: 'PushwooshInboxUIXCFramework', spec: '7.0.42', count: 1 }
+    }
+}, null, 4);
+
+const SPM_PODS_JSON = JSON.stringify({ ...JSON.parse(LEGACY_PODS_JSON), libraries: {} }, null, 4);
+
+const VOIP_ANCHOR = 'pushwoosh-voip-anchor';
+const VOIP_PRODUCT_LINE = '                .product(name: "PushwooshVoIP", package: "Pushwoosh-XCFramework"),';
+
+const REPO_PACKAGE_SWIFT = fs.readFileSync(path.join(__dirname, '..', '..', 'Package.swift'), 'utf8');
+
+// The copy cordova-ios 8 leaves under platforms/ios/packages/<id>: the repo manifest with the cordova-ios line rewritten (SwiftPackage.js:77)
+function pluginPackageSwift() {
+    return REPO_PACKAGE_SWIFT.replace(/package\(.+cordova-ios.+\)/gm, 'package(name: "cordova-ios", path: "../cordova-ios")');
+}
+
+function packageSwiftWith(voipLine) {
+    const lines = pluginPackageSwift().split('\n');
+    const index = lines.findIndex((line) => line.includes(VOIP_ANCHOR));
+    lines.splice(index + 1, 0, voipLine);
+    return lines.join('\n');
+}
+
+function packageSwiftWithoutAnchor() {
+    return pluginPackageSwift().split('\n').filter((line) => !line.includes(VOIP_ANCHOR)).join('\n');
+}
+
+// What cordova-ios 8 appends to packages/cordova-ios-plugins/Package.swift (SwiftPackage.js:36-41)
+function pluginReference(pluginPath) {
+    return `
+package.dependencies.append(.package(name: "${PLUGIN_ID}", path: "${pluginPath}"))
+package.targets.first?.dependencies.append(.product(name: "${PLUGIN_ID}", package: "${PLUGIN_ID}"))
+`;
+}
+
+const CORDOVA_IOS_PLUGINS_MANIFEST = [
+    '// swift-tools-version:5.9',
+    'import PackageDescription',
+    'let package = Package(name: "CordovaPlugins", platforms: [.iOS(.v15)], products: [.library(name: "CordovaPlugins", targets: ["CordovaPlugins"])], targets: [.target(name: "CordovaPlugins")])',
+    ''
+].join('\n');
+
 function podfileWith(voipLine) {
     return PODFILE.replace(
         "\tpod 'PushwooshXCFramework', '7.2.4'\n",
@@ -29,7 +83,7 @@ function podfileWith(voipLine) {
     );
 }
 
-function project(t, { variables, podfile } = {}) {
+function project(t, { variables, podfile, podsJson, spm } = {}) {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'pw-cordova-'));
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
 
@@ -48,7 +102,55 @@ function project(t, { variables, podfile } = {}) {
         fs.writeFileSync(podfilePath(root), podfile);
     }
 
+    if (podsJson !== undefined) {
+        fs.mkdirSync(path.join(root, 'platforms', 'ios'), { recursive: true });
+        fs.writeFileSync(podsJsonPath(root), podsJson);
+    }
+
+    // spm: { linked, listed, packageSwift } mirrors a cordova-ios 8 platform after `plugin add` (SwiftPackage.js:55-87)
+    if (spm) {
+        const packages = path.join(root, 'platforms', 'ios', 'packages');
+        fs.mkdirSync(path.join(packages, 'cordova-ios-plugins'), { recursive: true });
+
+        const pluginPath = spm.linked ? `../../../../plugins/${PLUGIN_ID}` : `../${PLUGIN_ID}`;
+        const reference = spm.listed === false ? '' : pluginReference(pluginPath);
+        fs.writeFileSync(path.join(packages, 'cordova-ios-plugins', 'Package.swift'), CORDOVA_IOS_PLUGINS_MANIFEST + reference);
+
+        if (spm.linked) {
+            // --link: no copy under packages/, plugins/<id> is a symlink to the source checkout
+            fs.mkdirSync(linkedPackageDir(root), { recursive: true });
+            fs.writeFileSync(linkedPackagePath(root), pluginPackageSwift());
+        } else if (spm.listed !== false) {
+            fs.mkdirSync(path.join(packages, PLUGIN_ID), { recursive: true });
+            fs.writeFileSync(pluginPackagePath(root), spm.packageSwift !== undefined ? spm.packageSwift : pluginPackageSwift());
+        }
+    }
+
     return root;
+}
+
+function pluginPackagePath(root) {
+    return path.join(root, 'platforms', 'ios', 'packages', PLUGIN_ID, 'Package.swift');
+}
+
+function readPluginPackage(root) {
+    return fs.readFileSync(pluginPackagePath(root), 'utf8');
+}
+
+function linkedPackageDir(root) {
+    return path.join(root, 'plugins', PLUGIN_ID);
+}
+
+function linkedPackagePath(root) {
+    return path.join(linkedPackageDir(root), 'Package.swift');
+}
+
+function readLinkedPackage(root) {
+    return fs.readFileSync(linkedPackagePath(root), 'utf8');
+}
+
+function stubWarn(t) {
+    return t.mock.method(console, 'warn', () => {});
 }
 
 function podfilePath(root) {
@@ -59,8 +161,24 @@ function readPodfile(root) {
     return fs.readFileSync(podfilePath(root), 'utf8');
 }
 
+function podsJsonPath(root) {
+    return path.join(root, 'platforms', 'ios', 'pods.json');
+}
+
+function readPodsJson(root) {
+    return fs.readFileSync(podsJsonPath(root), 'utf8');
+}
+
 function stubExecSync(t) {
     return t.mock.method(childProcess, 'execSync', () => '');
+}
+
+// null makes `xcodebuild -version` fail, as it does without Xcode or with only the command line tools selected
+function stubXcodeVersion(t, output) {
+    return t.mock.method(childProcess, 'execFileSync', () => {
+        if (output === null) throw new Error('xcodebuild: command not found');
+        return output;
+    });
 }
 
 function silenceConsole(t) {
@@ -81,11 +199,26 @@ module.exports = {
     PLUGIN_ID,
     PODFILE,
     VOIP_LINE,
+    SPM_PODFILE,
+    LEGACY_PODS_JSON,
+    SPM_PODS_JSON,
+    VOIP_ANCHOR,
+    VOIP_PRODUCT_LINE,
     podfileWith,
+    pluginPackageSwift,
+    packageSwiftWith,
+    packageSwiftWithoutAnchor,
     project,
     podfilePath,
     readPodfile,
+    readPodsJson,
+    pluginPackagePath,
+    readPluginPackage,
+    linkedPackagePath,
+    readLinkedPackage,
     stubExecSync,
+    stubXcodeVersion,
+    stubWarn,
     silenceConsole,
     context,
     loadHook

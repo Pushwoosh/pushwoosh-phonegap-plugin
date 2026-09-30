@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="8.3.76">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="pushwoosh-cordova-plugin" version="8.3.77">
 
 	<name>Pushwoosh</name>
 
@@ -107,7 +107,7 @@
     </platform>
 
 	<!-- ios -->
-	<platform name="ios">
+	<platform name="ios" package="swift">
 		<framework src="Security.framework" />
 		<framework src="StoreKit.framework" />
 		<framework src="CoreLocation.framework" />
@@ -146,13 +146,14 @@
                 <source url="https://cdn.cocoapods.org/"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="PushwooshXCFramework" spec="7.2.7" />
-                <pod name="PushwooshInboxUIXCFramework" spec="7.0.42" />
+                <pod name="PushwooshXCFramework" spec="7.2.8" nospm="true" />
+                <pod name="PushwooshInboxUIXCFramework" spec="7.0.42" nospm="true" />
             </pods>
         </podspec>
 
         <hook type="after_plugin_install" src="spec/add-voip-pod.js" />
         <hook type="before_plugin_uninstall" src="spec/remove-voip-pod.js" />
+        <hook type="after_prepare" src="spec/warn-inbox-ui-deployment-target.js" />
 
 		<header-file src="src/ios/PushNotification.h" />
 		<source-file src="src/ios/PushNotification.m" />

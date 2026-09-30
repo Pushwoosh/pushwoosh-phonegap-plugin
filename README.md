@@ -52,13 +52,13 @@
 Using npm:
 
 ```bash
-cordova plugin add pushwoosh-cordova-plugin@8.3.76
+cordova plugin add pushwoosh-cordova-plugin@8.3.77
 ```
 
 Using git:
 
 ```bash
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.76
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.3.77
 ```
 
 ### Requirements
@@ -72,6 +72,75 @@ The Pushwoosh iOS SDK requires iOS 15.0 or later. The plugin sets the `deploymen
 ```
 
 Capacitor does not read this preference. On Capacitor 6 and 7, set `platform :ios, '15.0'` in `ios/App/Podfile` and the iOS deployment target of the App target to 15.0, then run `npx cap sync ios`. Capacitor 8 already targets iOS 15.0.
+
+### iOS: cordova-ios 8 (Swift Package Manager)
+
+On cordova-ios 8 the plugin is installed as a Swift package. The native Pushwoosh SDK comes from the `Pushwoosh-XCFramework` and `PushwooshInboxUI-XCFramework` Swift packages, which Xcode resolves from GitHub on the first build. No Pushwoosh pods are added to the project. cordova-ios still generates a `Podfile` without pods and runs `pod install` on it, so the CocoaPods tool must be installed, but nothing is downloaded from the CocoaPods trunk.
+
+### iOS: cordova-ios 7 (CocoaPods)
+
+On cordova-ios 7 the plugin keeps installing the native SDK as CocoaPods (`PushwooshXCFramework` and `PushwooshInboxUIXCFramework`). Nothing changes on this path. The iOS deployment target must be 15.0 or later, see [Requirements](#requirements).
+
+The `PushwooshInboxUIXCFramework` pod targets iOS 13.0, and Xcode 27 and later do not build pod targets below iOS 15.0: the build fails with "deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 13.0, but the range of supported deployment target versions is 15.0 to 27.0". The deployment target in `config.xml` does not change it. Raise the deployment target for the build instead:
+
+```bash
+cordova build ios --buildFlag="IPHONEOS_DEPLOYMENT_TARGET=15.0"
+```
+
+or in `build.json`:
+
+```json
+{
+    "ios": {
+        "debug": { "buildFlag": ["IPHONEOS_DEPLOYMENT_TARGET=15.0"] },
+        "release": { "buildFlag": ["IPHONEOS_DEPLOYMENT_TARGET=15.0"] }
+    }
+}
+```
+
+The flag applies to every target, the app included: use 15.0, or the app's deployment target if it is higher.
+
+Building or archiving in Xcode from `platforms/ios/<AppName>.xcworkspace` ignores `--buildFlag` and `build.json`. Build the release with the CLI and the same flag (`cordova build ios --release --device`), or in Xcode set iOS Deployment Target to 15.0 for the `PushwooshInboxUIXCFramework` target of the `Pods` project and for the `CordovaLib` project if it is below 15.0; every `cordova prepare ios` runs `pod install` and resets the `Pods` setting.
+
+The plugin prints this hint on every `cordova prepare ios` and `cordova build ios` unless `xcodebuild -version` reports Xcode 26 or older. cordova-ios 8 is not affected: there the Inbox UI comes as a Swift package.
+
+### Switching an existing project to cordova-ios 8
+
+```bash
+cordova platform rm ios
+cordova platform add ios@8
+```
+
+`platform add` reinstalls the plugin with the variables saved in `plugins/fetch.json`, and the native SDK is resolved through Swift Package Manager on the next build.
+
+To update the plugin later, remove it and add the new version with the same `--variable` flags you used at the first install. `cordova plugin rm` drops the saved variables, and `cordova plugin add` without them installs the defaults: VoIP off, `LOG_LEVEL` `DEBUG`, foreground alert type `ALERT`.
+
+```bash
+cordova plugin rm pushwoosh-cordova-plugin
+cordova plugin add pushwoosh-cordova-plugin@<version> --variable PW_VOIP_IOS_ENABLED=true # plus every other variable you set at install
+```
+
+Xcode picks up the new native SDK pin on the next build; there is no need to delete `Package.resolved`.
+
+### Updating a cordova-ios 8 project from 8.3.76 or older
+
+Plugin versions up to 8.3.76 install the native SDK as CocoaPods on cordova-ios 8 as well, and these pods have to go when you move to a Swift package version. If `plugins/` is intact, update with `cordova plugin rm` and `cordova plugin add` as shown above: removing the old version removes its pods.
+
+If you update by changing the version in `package.json` and restoring the plugins (`rm -rf plugins`, then `cordova prepare ios`), the old pods stay in `platforms/ios`. The plugin prints a warning during the install, and the build fails with `error: Multiple commands produce '.../PushwooshFramework.framework'` (and the same for `PushwooshCore`, `PushwooshBridge`, `PushwooshInboxUI`). `cordova plugin rm` does not remove them at this point, because cordova-ios 8 skips the pods of a Swift package plugin on uninstall. Recreate the iOS platform instead:
+
+```bash
+cordova platform rm ios && cordova platform add ios
+```
+
+`platform add` reinstalls the plugins with their saved variables. Changes you made by hand inside `platforms/ios` are lost, as with any platform re-add.
+
+### VoIP on cordova-ios 8
+
+`PW_VOIP_IOS_ENABLED=true` works the same way on both cordova-ios versions. On cordova-ios 8 the plugin's install hook adds the `PushwooshVoIP` product to the copy of the plugin package in `platforms/ios/packages/pushwoosh-cordova-plugin/Package.swift`. If the plugin was added with `--link`, there is no copy: the hook prints a warning and you add `.product(name: "PushwooshVoIP", package: "Pushwoosh-XCFramework")` to the target dependencies of the plugin's `Package.swift` yourself.
+
+### Notification Service Extension
+
+If your app has a Notification Service Extension that uses Pushwoosh, link `PushwooshFramework` to the extension target from the same source as the app: the `Pushwoosh-XCFramework` Swift package on cordova-ios 8, the `PushwooshXCFramework` pod on cordova-ios 7.
 
 ## AI-Assisted Integration
 
@@ -360,6 +429,8 @@ pod 'PushwooshXCFramework/PushwooshVoIP'
 ```
 
 Then run `pod install` in the `ios/App/` directory.
+
+Capacitor 8 with Swift Package Manager has no Podfile. Add `.product(name: "PushwooshVoIP", package: "Pushwoosh-XCFramework")` to the target dependencies in `node_modules/pushwoosh-cordova-plugin/Package.swift`, right after the `pushwoosh-voip-anchor` comment, run `npx cap sync ios` and clean-build the app once (Product > Clean Build Folder): an incremental build links the new framework but does not recompile the plugin with its headers. The edit lives in `node_modules`, so repeat it after `npm install` (a `patch-package` patch does that for you).
 
 ### Android
 

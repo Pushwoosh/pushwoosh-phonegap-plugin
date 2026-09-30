@@ -38,7 +38,7 @@
 #define PW_COMMUNICATION_ENABLED_PLIST_KEY @"Pushwoosh_ALLOW_SERVER_COMMUNICATION"
 
 static NSString * const kPWFrameworkType = @"Cordova";
-static NSString * const kPWFrameworkVersion = @"8.3.76";
+static NSString * const kPWFrameworkVersion = @"8.3.77";
 
 static void PWSetFrameworkTelemetry(NSString *type, NSString *version) {
     // Dispatched by name: setFrameworkType:version: arrives in a core newer than the pinned one.

@@ -3,3 +3,6 @@ example_voip
 example_capacitor
 .github
 spec/__tests__
+.build/
+.swiftpm/
+Package.resolved

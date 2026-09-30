@@ -4,7 +4,7 @@ import com.pushwoosh.internal.PluginProvider;
 
 public class PhonegapPluginProvider implements PluginProvider {
 	private static final String PLUGIN_TYPE = "Cordova";
-	private static final String PLUGIN_VERSION = "8.3.76";
+	private static final String PLUGIN_VERSION = "8.3.77";
 
 	@Override
 	public String getPluginType() {
