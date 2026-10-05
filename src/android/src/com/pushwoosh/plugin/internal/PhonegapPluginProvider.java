@@ -3,17 +3,16 @@ package com.pushwoosh.plugin.internal;
 import com.pushwoosh.internal.PluginProvider;
 
 public class PhonegapPluginProvider implements PluginProvider {
-	private static final String PLUGIN_TYPE = "Cordova";
-	private static final String PLUGIN_VERSION = "8.3.77";
-
 	@Override
 	public String getPluginType() {
-		return PLUGIN_TYPE;
-	}
-
-	// No @Override: PluginProvider gains getPluginVersion() only in the next Android SDK release.
-	public String getPluginVersion() {
-		return PLUGIN_VERSION;
+		try {
+			//If contains class Cordova than it's cordova plugin
+			Class.forName("org.apache.cordova.CordovaPlugin");
+			return "Cordova";
+		} catch (ClassNotFoundException ignore) {
+            //Otherwise this is PhoneGap build
+			return "PhoneGap Build";
+		}
 	}
 
 	@Override

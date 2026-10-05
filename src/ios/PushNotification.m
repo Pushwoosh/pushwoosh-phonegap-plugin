@@ -37,22 +37,6 @@
 #define PW_COMMUNICATION_ENABLED_KEY @"PushwooshCommunicationEnabled"
 #define PW_COMMUNICATION_ENABLED_PLIST_KEY @"Pushwoosh_ALLOW_SERVER_COMMUNICATION"
 
-static NSString * const kPWFrameworkType = @"Cordova";
-static NSString * const kPWFrameworkVersion = @"8.3.77";
-
-static void PWSetFrameworkTelemetry(NSString *type, NSString *version) {
-    // Dispatched by name: setFrameworkType:version: arrives in a core newer than the pinned one.
-    Class<PWConfiguration> configureTarget = [Pushwoosh configure];
-    SEL selector = NSSelectorFromString(@"setFrameworkType:version:");
-    if (![configureTarget respondsToSelector:selector]) {
-        return;
-    }
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-    [configureTarget performSelector:selector withObject:type withObject:version];
-#pragma clang diagnostic pop
-}
-
 // Wraps a Cordova callback ID together with the command delegate that owns it.
 // This allows VoIP events to be dispatched to the correct WebView when multiple
 // CDVViewControllers (WebViews) are active simultaneously.
@@ -450,9 +434,7 @@ API_AVAILABLE(ios(10))
     else {
         [PushNotificationManager initializeWithAppCode:appid appName:appname];
     }
-
-    PWSetFrameworkTelemetry(kPWFrameworkType, kPWFrameworkVersion);
-
+    
     [UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
     [self.pushManager sendAppOpen];
 
