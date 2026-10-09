@@ -11,6 +11,21 @@
 
     <platform name="ios">
         <preference name="deployment-target" value="15.0" />
+        <config-file target="*-Info.plist" parent="PW_APP_GROUPS_NAME">
+            <string>$(PW_APP_GROUP)</string>
+        </config-file>
+        <config-file target="*/Entitlements-Debug.plist" parent="com.apple.security.application-groups">
+            <array>
+                <string>$(PW_APP_GROUP)</string>
+            </array>
+        </config-file>
+        <config-file target="*/Entitlements-Release.plist" parent="com.apple.security.application-groups">
+            <array>
+                <string>$(PW_APP_GROUP)</string>
+            </array>
+        </config-file>
+        <hook type="before_prepare" src="hooks/ios-nse-before-prepare.js" />
+        <hook type="after_prepare" src="hooks/ios-nse.js" />
     </platform>
 
     <platform name="android">

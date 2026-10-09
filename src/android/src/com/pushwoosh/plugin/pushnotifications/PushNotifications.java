@@ -638,7 +638,7 @@ public class PushNotifications extends CordovaPlugin {
 					.getRegistrationPrefs()
 					.isRegisteredForPush()
 					.get();
-			callbackContext.success(registered);
+			callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, registered));
 		} catch (Exception e) {
 			// Reporting the failure, not "false": an uninitialized SDK is not an unsubscribed device.
 			callbackContext.error(e.getMessage());

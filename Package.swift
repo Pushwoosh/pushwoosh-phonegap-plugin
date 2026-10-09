@@ -16,7 +16,7 @@ let package = Package(
         .package(url: "https://github.com/apache/cordova-ios.git", from: "8.0.0"),
         // tools/release.bash rewrites this line's version via a sed anchored on its exact formatting — keep it on one line, spacing unchanged.
         // exact: is deliberate, mirroring plugin.xml's hard pin: relaxing to from: would let CocoaPods and SPM consumers land on different native SDK versions.
-        .package(url: "https://github.com/Pushwoosh/Pushwoosh-XCFramework.git", exact: "7.2.8"),
+        .package(url: "https://github.com/Pushwoosh/Pushwoosh-XCFramework.git", exact: "7.2.9"),
         // Legacy inbox UI used by presentInboxUI. Frozen at 7.0.42, the last published version (see CLAUDE.md).
         .package(url: "https://github.com/Pushwoosh/PushwooshInboxUI-XCFramework.git", exact: "7.0.42")
     ],
