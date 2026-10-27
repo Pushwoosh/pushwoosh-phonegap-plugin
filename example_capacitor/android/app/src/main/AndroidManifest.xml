@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
+        android:name="com.example.demovoip.DemoApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -24,6 +25,12 @@
 
         </activity>
 
+        <activity
+            android:name="com.example.demovoip.CallScreenActivity"
+            android:label="Call screen"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -33,6 +40,10 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <meta-data
+            android:name="com.pushwoosh.cordova.CALL_EVENT_HANDLER"
+            android:value="com.example.demovoip.CallScreenEventHandler" />
     </application>
 
     <!-- Permissions -->

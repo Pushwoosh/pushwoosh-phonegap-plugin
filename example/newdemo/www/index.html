@@ -134,7 +134,7 @@
     <div id="statusModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Notification Status</h2>
+                <h2 id="modalTitle">Notification Status</h2>
                 <span class="close" id="closeModal">&times;</span>
             </div>
             <div class="modal-body" id="modalBody">
@@ -142,6 +142,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Non-blocking messages; a blocking browser dialog would freeze the JS thread and delay push callbacks -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <script src="cordova.js"></script>
     <script src="js/index.js"></script>

@@ -1238,6 +1238,12 @@ public class PushNotifications extends CordovaPlugin {
 			return;
 		}
 
+		if (!sAppReady.get()) {
+			PWLog.info(TAG, "Buffering VoIP event '" + type + "': JS not ready");
+			bufferVoipEvent(type, payload);
+			return;
+		}
+
 		ArrayList<CallbackContext> callbackContexts = getCallbackContexts().get(type);
 		if (callbackContexts != null && !callbackContexts.isEmpty()) {
 			for (final CallbackContext callbackContext : callbackContexts) {
@@ -1254,13 +1260,8 @@ public class PushNotifications extends CordovaPlugin {
 			return;
 		}
 
-		if (!sAppReady.get()) {
-			PWLog.info(TAG, "Buffering VoIP event '" + type + "': JS not ready");
-			bufferVoipEvent(type, payload);
-			return;
-		}
-
-		PWLog.warn(TAG, "No callback contexts registered for event: " + type);
+		PWLog.info(TAG, "Buffering VoIP event '" + type + "': no callback contexts registered");
+		bufferVoipEvent(type, payload);
 	}
 
 	private static JSONObject inboxMessageToJson(InboxMessage message) {

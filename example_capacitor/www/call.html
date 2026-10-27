@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, width=device-width">
+  <title>Call screen</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; padding: 24px; background: #0b3d2e; color: #e8f5e9; }
+    h1 { font-size: 1.2rem; }
+    .log { background: #06261c; border: 1px solid #2e7d5b; padding: 12px; margin-top: 16px;
+           font-family: monospace; font-size: 0.85rem; max-height: 70vh; overflow-y: auto; }
+    .log-entry { border-bottom: 1px solid #1b4d3b; padding: 4px 0; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <h1>Call screen (second activity, plain WebView)</h1>
+  <div id="loaded"></div>
+  <div class="log" id="log"></div>
+  <script>
+    function log(msg) {
+      console.log(msg);
+      var entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.textContent = new Date().toLocaleTimeString() + ' ' + msg;
+      var el = document.getElementById('log');
+      el.insertBefore(entry, el.firstChild);
+    }
+
+    window.__pushwooshDispatch = function (name, payload) {
+      log('EVENT [' + name + ']: ' + JSON.stringify(payload));
+    };
+
+    document.getElementById('loaded').textContent = 'Page loaded at ' + new Date().toLocaleTimeString();
+    log('page loaded');
+  </script>
+</body>
+</html>

@@ -412,3 +412,52 @@ input[type="text"]::placeholder {
         content: '...';
     }
 }
+
+/* Toasts */
+.toast-container {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 0 20px;
+    /* Taps must reach the buttons underneath while a toast is on screen */
+    pointer-events: none;
+}
+
+.toast {
+    max-width: 100%;
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: rgba(40, 40, 45, 0.95);
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: center;
+    word-break: break-word;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.toast.hide {
+    opacity: 0;
+}
+
+.modal-text {
+    margin: 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #333;
+    white-space: pre-wrap;
+    word-break: break-all;
+}

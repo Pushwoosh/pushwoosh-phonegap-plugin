@@ -59,6 +59,14 @@ function onDeviceReady() {
     );
   });
 
+  document.getElementById('btnOpenCallScreen').addEventListener('click', function () {
+    log('Opening call screen...');
+    Capacitor.nativePromise('CallScreen', 'open', {}).then(
+      function () { log('Call screen opened'); },
+      function (err) { log('Call screen ERROR: ' + JSON.stringify(err)); }
+    );
+  });
+
   document.addEventListener('push-notification', function (event) {
     log('push-notification: ' + JSON.stringify(event.notification));
   });
