@@ -13,6 +13,8 @@ import java.util.List;
  * VoIP Event Buffering Storage
  *
  * Provides persistent storage for VoIP events when WebView/JavaScript is not ready.
+ * Reads and writes the whole buffer: load() returns the live events, replaceEvents() writes
+ * back what should stay.
  */
 public class VoIPEventStorage {
     private static final String TAG = "VoIPEventStorage";
@@ -37,38 +39,6 @@ public class VoIPEventStorage {
 
         public boolean isExpired() {
             return (System.currentTimeMillis() - timestamp) > TTL_MILLIS;
-        }
-    }
-
-    /**
-     * Save VoIP event to persistent storage
-     */
-    public static boolean saveEvent(@NonNull Context context, @NonNull String type, @NonNull JSONObject payload) {
-        PWLog.noise(TAG, "saveEvent()");
-
-        try {
-            synchronized (STORAGE_LOCK) {
-                SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-                String existingData = prefs.getString(KEY_BUFFERED_EVENTS, "[]");
-                JSONArray events = new JSONArray(existingData);
-
-                JSONObject event = new JSONObject();
-                event.put("type", type);
-                event.put("payload", payload);
-                event.put("timestamp", System.currentTimeMillis());
-
-                events.put(event);
-
-                boolean success = prefs.edit()
-                    .putString(KEY_BUFFERED_EVENTS, events.toString())
-                    .commit();
-                
-                return success;
-            }
-
-        } catch (Exception e) {
-            PWLog.error(TAG, "Failed to save VoIP event", e);
-            return false;
         }
     }
 
@@ -115,16 +85,37 @@ public class VoIPEventStorage {
         return result;
     }
 
-    public static void clearEvents(@NonNull Context context) {
-        PWLog.noise(TAG, "clearEvents()");
+    /**
+     * Replace the whole buffer with the given events; an empty list removes the buffer.
+     */
+    public static boolean replaceEvents(@NonNull Context context, @NonNull List<StoredEvent> events) {
+        PWLog.noise(TAG, "replaceEvents()");
 
         try {
             synchronized (STORAGE_LOCK) {
                 SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-                prefs.edit().remove(KEY_BUFFERED_EVENTS).commit();
+
+                if (events.isEmpty()) {
+                    return prefs.edit().remove(KEY_BUFFERED_EVENTS).commit();
+                }
+
+                JSONArray array = new JSONArray();
+                for (StoredEvent storedEvent : events) {
+                    JSONObject event = new JSONObject();
+                    event.put("type", storedEvent.type);
+                    event.put("payload", storedEvent.payload);
+                    event.put("timestamp", storedEvent.timestamp);
+                    array.put(event);
+                }
+
+                return prefs.edit()
+                    .putString(KEY_BUFFERED_EVENTS, array.toString())
+                    .commit();
             }
+
         } catch (Exception e) {
-            PWLog.error(TAG, "Failed to clear VoIP events", e);
+            PWLog.error(TAG, "Failed to replace VoIP events", e);
+            return false;
         }
     }
 }

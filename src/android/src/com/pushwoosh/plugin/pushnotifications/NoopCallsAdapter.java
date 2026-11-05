@@ -3,6 +3,7 @@ package com.pushwoosh.plugin.pushnotifications;
 import com.pushwoosh.internal.utils.PWLog;
 
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 
 public class NoopCallsAdapter implements CallsAdapter{
@@ -21,13 +22,13 @@ public class NoopCallsAdapter implements CallsAdapter{
     }
 
     @Override
-    public boolean registerEvent(JSONArray data, CallbackContext callbackContext) {
+    public boolean registerEvent(JSONArray data, CallbackContext callbackContext, CordovaPlugin owner) {
         PWLog.error(TAG,"Method not implemented");
         return false;
     }
 
     @Override
-    public boolean unregisterEvent(JSONArray data, CallbackContext callbackContext) {
+    public boolean unregisterEvent(JSONArray data, CallbackContext callbackContext, CordovaPlugin owner) {
         PWLog.error(TAG,"Method not implemented");
         return false;
     }

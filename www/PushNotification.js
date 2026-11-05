@@ -785,6 +785,18 @@ PushNotification.prototype.notificationCallback = function(notification) {
  * broadcasts every VoIP event via the `PushwooshVoIPEventDispatched` NSNotification so your native
  * view controller can inject the event into that WebView. See the README section
  * "Forwarding VoIP events to a secondary WebView (iOS)".
+ *
+ * @remarks Events that arrive before a subscription exists are buffered and replayed when
+ * you call registerEvent() for that event name, in the order they occurred. Replay happens
+ * per event name, so subscribe to every event you handle ("voipPushPayload", "answer",
+ * "hangup", ...) back to back at startup, preferably after Cordova's `deviceready` event and
+ * before the plugin's own onDeviceReady() call (the Init); subscribing to them at different
+ * times changes the order in which a buffered call's events reach you.
+ * This applies to iOS and Android alike. Known gap on Android under Capacitor: an in-page reload
+ * (location.reload(), live reload) does not reset the native plugin, so the previous page's
+ * subscriptions survive until the activity is recreated, and an event arriving between the reload
+ * and the new page's registerEvent() call may reach the stale subscription instead of being
+ * buffered - call registerEvent() as early as possible after a reload.
  */
 PushNotification.prototype.registerEvent = function(eventName, success, fail) {
 	exec(success, fail, "PushNotification", "registerEvent", [eventName]);

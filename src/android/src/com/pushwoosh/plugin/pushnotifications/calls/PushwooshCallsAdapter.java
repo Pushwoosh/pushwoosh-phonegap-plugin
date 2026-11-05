@@ -1,6 +1,5 @@
 package com.pushwoosh.plugin.pushnotifications.calls;
 
-import static com.pushwoosh.plugin.pushnotifications.PushNotifications.getCallbackContextMap;
 import static com.pushwoosh.plugin.pushnotifications.PushNotifications.getCordovaInterface;
 
 import android.content.Context;
@@ -19,10 +18,9 @@ import com.pushwoosh.plugin.pushnotifications.CallsAdapter;
 import com.pushwoosh.plugin.pushnotifications.PushNotifications;
 
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 import org.json.JSONException;
-
-import java.util.ArrayList;
 
 public class PushwooshCallsAdapter implements CallsAdapter {
     public static final String TAG = "PushwooshCallsAdapter";
@@ -59,15 +57,10 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     }
 
     @Override
-    public boolean registerEvent(JSONArray data, CallbackContext callbackContext) {
+    public boolean registerEvent(JSONArray data, CallbackContext callbackContext, CordovaPlugin owner) {
         PWLog.noise(TAG, "registerEvent()");
         try {
-
-            String eventType = data.getString(0);
-            ArrayList<CallbackContext> callbackContextList = getCallbackContextMap().get(eventType);
-            if (callbackContextList != null) {
-                callbackContextList.add(callbackContext);
-            }
+            PushNotifications.getVoipEventRegistry().subscribe(data.getString(0), callbackContext, owner);
             return true;
         } catch (Exception e) {
             return false;
@@ -75,13 +68,12 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     }
 
     @Override
-    public boolean unregisterEvent(JSONArray data, CallbackContext callbackContext) {
+    public boolean unregisterEvent(JSONArray data, CallbackContext callbackContext, CordovaPlugin owner) {
         PWLog.noise(TAG, "unregisterEvent()");
         try {
             String eventType = data.getString(0);
-            ArrayList<CallbackContext> callbackContextList = getCallbackContextMap().get(eventType);
-            if (callbackContextList != null) {
-                callbackContextList.clear();
+            boolean known = PushNotifications.getVoipEventRegistry().unsubscribe(eventType, owner);
+            if (known) {
                 callbackContext.success("Successfully unregistered from " + eventType + " event");
             } else {
                 callbackContext.error("Event " + eventType + " not found or not supported");
