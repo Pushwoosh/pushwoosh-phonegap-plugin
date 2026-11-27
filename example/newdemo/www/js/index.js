@@ -41,6 +41,8 @@ function onDeviceReady() {
     clearNotificationCenterAction(pushwoosh);
     resetBadges(pushwoosh);
     presentInboxUIAction(pushwoosh);
+    getInboxTabsAction(pushwoosh);
+    loadInboxMessagesAction(pushwoosh);
     getInboxCountsAction(pushwoosh);
     setupModalHandlers();
 }
@@ -363,11 +365,125 @@ function clearNotificationCenterAction(pushwoosh) {
     });
 }
 
-// Open the Inbox UI screen
+// Inbox styles to start from. The iOS keys of the InboxKit preset need cordova-ios 8 and PW_INBOX_IOS_ENABLED,
+// which this sample links through hooks/ios-modules-spm.js. iOS reads hex colors in upper case only.
+var INBOX_STYLES = {
+    inboxStyleDefault: { dateFormat: 'dd.MM.yyyy' },
+    inboxStyleLegacy: {
+        dateFormat: 'dd MMM yyyy HH:mm',
+        defaultImageIcon: 'img/logo.png',
+        listEmptyMessage: 'Nothing here yet',
+        listErrorMessage: 'Could not load the inbox',
+        accentColor: '#E91E63',
+        backgroundColor: '#FFF8E1',
+        defaultTextColor: '#5D4037',
+        titleColor: '#1A237E',
+        readTitleColor: '#9FA8DA',
+        descriptionColor: '#004D40',
+        readDescriptionColor: '#80CBC4',
+        dateColor: '#BF360C',
+        barTitle: 'Legacy style',
+        barBackgroundColor: '#3949AB',
+        barTextColor: '#FFFFFF',
+        barAccentColor: '#FFEB3B'
+    },
+    inboxStyleKit: {
+        barTitle: 'InboxKit settings',
+        swipeToDeleteEnabled: false,
+        automaticReadOnDisplay: false,
+        automaticReadOnDisappear: false,
+        enableDarkTheme: true,
+        pinningEnabled: true,
+        pinIndicatorVisible: true,
+        pinIndicatorColor: '#E53935',
+        pinIndicatorImage: 'img/logo.png',
+        inlineButtonsEnabled: true,
+        buttonTextColor: '#FFFFFF',
+        buttonBackgroundColor: '#2E7D32',
+        buttonFontSize: 18,
+        buttonCornerRadius: 2
+    }
+};
+
+var handleMessageTap = false;
+var inboxTaps = [];
+
+function showInboxStyle(style) {
+    document.getElementById('inboxStyle').value = JSON.stringify(style, null, 2);
+}
+
+function logInboxTap(message) {
+    var button = message.tappedButton;
+    var line = new Date().toLocaleTimeString() + ' ' + message.code + ' "' + message.title + '"' +
+        (button ? ' button "' + button.title + '" ' + button.action + (button.url ? ' ' + button.url : '') +
+            (button.payload ? ' ' + JSON.stringify(button.payload) : '') : ' card') +
+        ' isRead=' + message.isRead + ' isActionPerformed=' + message.isActionPerformed;
+    console.log('[demo] inbox tap', JSON.stringify(message));
+    inboxTaps.unshift(line);
+    inboxTaps = inboxTaps.slice(0, 10);
+    document.getElementById('inboxTapLog').textContent = inboxTaps.join('\n');
+}
+
+// Open the Inbox UI screen with the style from the text field
 function presentInboxUIAction(pushwoosh) {
+    showInboxStyle(INBOX_STYLES.inboxStyleDefault);
+    Object.keys(INBOX_STYLES).forEach(function(id) {
+        document.getElementById(id).addEventListener('click', function() {
+            showInboxStyle(INBOX_STYLES[id]);
+        });
+    });
+
+    var toggle = document.getElementById('toggleHandleMessageTap');
+    toggle.addEventListener('click', function() {
+        handleMessageTap = !handleMessageTap;
+        toggle.textContent = 'handleMessageTap: ' + (handleMessageTap ? 'on' : 'off');
+    });
+
     document.getElementById('presentInboxUI').addEventListener('click', function() {
-        pushwoosh.presentInboxUI({ dateFormat: "dd.MM.yyyy" });
-        console.log('Inbox UI presented');
+        var style;
+        try {
+            style = JSON.parse(document.getElementById('inboxStyle').value || '{}');
+        } catch (e) {
+            showToast('Style is not valid JSON: ' + e.message);
+            return;
+        }
+        if (handleMessageTap) {
+            style.handleMessageTap = true;
+        }
+        pushwoosh.presentInboxUI(style, logInboxTap, function(error) {
+            showToast('presentInboxUI: ' + error);
+        });
+        console.log('Inbox UI presented', JSON.stringify(style));
+    });
+}
+
+// Show the Inbox tabs from the Pushwoosh Control Panel
+function getInboxTabsAction(pushwoosh) {
+    document.getElementById('getInboxTabs').addEventListener('click', function() {
+        modalOwner = 'inboxTabs';
+        pushwoosh.getTabs(function(tabs) {
+            console.log('[demo] inbox tabs', JSON.stringify(tabs));
+            var lines = tabs.tabs.map(function(tab) { return tab.id + ': ' + tab.title; });
+            showTextModal('inboxTabs', 'Inbox tabs', 'allTitle: ' + tabs.allTitle + '\n' + (lines.length ? lines.join('\n') : 'no tabs'));
+        }, function(error) {
+            showToast('getTabs: ' + error);
+        });
+    });
+}
+
+// Show the inbox messages with their read and action state
+function loadInboxMessagesAction(pushwoosh) {
+    document.getElementById('loadInboxMessages').addEventListener('click', function() {
+        modalOwner = 'inboxMessages';
+        pushwoosh.loadMessages(function(messages) {
+            console.log('[demo] inbox messages', JSON.stringify(messages));
+            var lines = messages.map(function(message) {
+                return message.code + ' "' + message.title + '" isRead=' + message.isRead + ' isActionPerformed=' + message.isActionPerformed;
+            });
+            showTextModal('inboxMessages', 'Inbox messages', lines.length ? lines.join('\n') : 'no messages');
+        }, function(error) {
+            showToast('loadMessages: ' + error);
+        });
     });
 }
 

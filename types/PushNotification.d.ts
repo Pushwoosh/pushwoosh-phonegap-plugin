@@ -27,6 +27,22 @@ type InboxNotification = {
 	isActionPerformed?: boolean;
 }
 
+type InboxButton = {
+	title: string;
+	action?: 'openURL' | 'dismiss' | 'markRead' | 'custom';
+	url?: string;
+	payload?: Record<string, any>;
+}
+
+type InboxMessageTap = InboxNotification & {
+	tappedButton?: InboxButton;
+}
+
+type InboxTabs = {
+	allTitle: string;
+	tabs: { id: string; title: string }[];
+}
+
 
 type AuthOptions = Record<string, number|string>
 
@@ -65,7 +81,8 @@ export interface PushNotification {
 	cancelAllLocalNotifications(success?: () => void): void;
 	pushReceivedCallback(notification: string): void;
 	notificationCallback(notification: string): void;
-	presentInboxUI(params?: Record<string,any>): void;
+	presentInboxUI(params?: Record<string,any> | null, onMessageTap?: ((message: InboxMessageTap) => void) | null, onError?: (error: string) => void): void;
+	getTabs(success?: (tabs: InboxTabs) => void, fail?: (error?: Error|string) => void): void;
 	loadMessages(success?: (messages: InboxNotification[]) =>void, fail?: (error?: Error|string) => void): void;
 	messagesWithNoActionPerformedCount(callback: (result: number) => void): void;
     unreadMessagesCount(callback: (result: number) => void): void;

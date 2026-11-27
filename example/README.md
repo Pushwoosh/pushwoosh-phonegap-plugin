@@ -83,9 +83,10 @@ Nothing to do by hand in Xcode for the simulator. `hooks/ios-nse.js` runs after 
 - adds the `NotificationService` target (`<app id>.NotificationService`, same deployment target as
   the app) built from `ios-nse/NotificationService/NotificationService.swift`, a subclass of
   `PushwooshNotificationServiceExtension`;
-- appends the `NotificationService` block with the `PushwooshXCFramework` pod to
-  `platforms/ios/Podfile` and runs `pod install` (cordova-ios rewrites the Podfile on every
-  prepare, so the hook puts the block back each time);
+- links `PushwooshFramework` into the extension from the same Swift package the plugin resolves
+  (`Pushwoosh-XCFramework`, the version pinned in the plugin's `Package.swift`); the sample runs on
+  cordova-ios 8, where the plugin is a Swift package and the app target has no pods to host an
+  extension pod;
 - shares the App Group `group.<app id>` between the app and the extension. The group is the
   `PW_APP_GROUP` build setting; both entitlements files and both `Info.plist` files
   (`PW_APP_GROUPS_NAME`) reference it as `$(PW_APP_GROUP)`, and `config.xml` declares the app side.
@@ -93,8 +94,8 @@ Nothing to do by hand in Xcode for the simulator. `hooks/ios-nse.js` runs after 
 The App Group is how the extension learns the application code passed to `pushwooshInitialize` in
 `www/js/index.js`: without it the extension skips the delivery event. The extension is what sends
 delivery statistics, keeps the badge in sync and downloads the image of a notification. Repeated
-builds and `cordova platform rm ios && cordova platform add ios` keep one target and one Podfile
-block.
+builds and `cordova platform rm ios && cordova platform add ios` keep one target and one package
+reference.
 
 Running on a real device is the one case that still needs Xcode by hand: open the generated
 project and set your signing team on both the app target and the new `NotificationService`

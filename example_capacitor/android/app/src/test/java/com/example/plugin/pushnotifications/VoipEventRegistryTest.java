@@ -21,6 +21,7 @@ import java.util.Set;
 public class VoipEventRegistryTest {
     private static final String ANSWER = "answer";
     private static final String HANGUP = "hangup";
+    private static final String MUTED = "muted";
     private static final String UNKNOWN = "held";
     private static final int BUFFER_CAP = 50;
 
@@ -75,6 +76,16 @@ public class VoipEventRegistryTest {
             targets.add(target);
             owners.add(owner);
             payloads.add(payload);
+            return accept && !rejecting.contains(target) && !rejectingOwners.contains(owner);
+        }
+
+        final List<CallbackContext> stateTargets = new ArrayList<>();
+        final List<String> stateValues = new ArrayList<>();
+
+        @Override
+        public boolean deliverState(@NonNull CallbackContext target, @NonNull Object owner, @NonNull String value) {
+            stateTargets.add(target);
+            stateValues.add(value);
             return accept && !rejecting.contains(target) && !rejectingOwners.contains(owner);
         }
     }
@@ -408,5 +419,41 @@ public class VoipEventRegistryTest {
         assertEquals(BUFFER_CAP, buffered.size());
         assertEquals(1, Collections.frequency(buffered, ANSWER));
         assertEquals(BUFFER_CAP - 1, Collections.frequency(buffered, HANGUP));
+    }
+
+    @Test
+    public void emitStateHandsTheValueToEveryLiveSubscriberAndStoresNothing() {
+        registry.subscribe(MUTED, targetA, owner1);
+        registry.subscribe(MUTED, targetB, owner2);
+
+        registry.emitState(MUTED, "true");
+
+        assertEquals(Arrays.asList(targetA, targetB), deliverer.stateTargets);
+        assertEquals(Arrays.asList("true", "true"), deliverer.stateValues);
+        assertEquals(Collections.emptyList(), deliverer.targets);
+        assertEquals(Collections.emptyList(), store.types());
+    }
+
+    @Test
+    public void emitStateWithoutSubscribersIsDroppedAndNotReplayedToALaterOne() {
+        registry.emitState(MUTED, "true");
+
+        registry.subscribe(MUTED, targetA, owner1);
+        registry.flush();
+
+        assertEquals(Collections.emptyList(), store.types());
+        assertEquals(Collections.emptyList(), deliverer.targets);
+        assertEquals(Collections.emptyList(), deliverer.stateTargets);
+    }
+
+    @Test
+    public void emitStateRejectedByEverySubscriberIsNotBuffered() {
+        registry.subscribe(MUTED, targetA, owner1);
+        deliverer.accept = false;
+
+        registry.emitState(MUTED, "false");
+
+        assertEquals(Collections.singletonList(targetA), deliverer.stateTargets);
+        assertEquals(Collections.emptyList(), store.types());
     }
 }

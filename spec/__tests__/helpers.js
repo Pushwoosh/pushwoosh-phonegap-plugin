@@ -42,6 +42,10 @@ const SPM_PODS_JSON = JSON.stringify({ ...JSON.parse(LEGACY_PODS_JSON), librarie
 
 const VOIP_ANCHOR = 'pushwoosh-voip-anchor';
 const VOIP_PRODUCT_LINE = '                .product(name: "PushwooshVoIP", package: "Pushwoosh-XCFramework"),';
+const INAPP_ANCHOR = 'pushwoosh-inapp-anchor';
+const INAPP_PRODUCT_LINE = '                .product(name: "PushwooshInApp", package: "Pushwoosh-XCFramework"),';
+const INBOX_ANCHOR = 'pushwoosh-inbox-anchor';
+const INBOX_TARGET_LINE = '                .target(name: "PushwooshCordovaInbox"),';
 
 const REPO_PACKAGE_SWIFT = fs.readFileSync(path.join(__dirname, '..', '..', 'Package.swift'), 'utf8');
 
@@ -51,9 +55,16 @@ function pluginPackageSwift() {
 }
 
 function packageSwiftWith(voipLine) {
+    return packageSwiftWithDependencies([[VOIP_ANCHOR, voipLine]]);
+}
+
+// entries: [anchor, line] pairs, each line inserted right after its anchor
+function packageSwiftWithDependencies(entries) {
     const lines = pluginPackageSwift().split('\n');
-    const index = lines.findIndex((line) => line.includes(VOIP_ANCHOR));
-    lines.splice(index + 1, 0, voipLine);
+    for (const [anchor, dependencyLine] of entries) {
+        const index = lines.findIndex((line) => line.includes(anchor));
+        lines.splice(index + 1, 0, dependencyLine);
+    }
     return lines.join('\n');
 }
 
@@ -204,9 +215,14 @@ module.exports = {
     SPM_PODS_JSON,
     VOIP_ANCHOR,
     VOIP_PRODUCT_LINE,
+    INAPP_ANCHOR,
+    INAPP_PRODUCT_LINE,
+    INBOX_ANCHOR,
+    INBOX_TARGET_LINE,
     podfileWith,
     pluginPackageSwift,
     packageSwiftWith,
+    packageSwiftWithDependencies,
     packageSwiftWithoutAnchor,
     project,
     podfilePath,

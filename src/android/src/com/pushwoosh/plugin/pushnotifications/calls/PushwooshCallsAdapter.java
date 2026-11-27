@@ -4,13 +4,16 @@ import static com.pushwoosh.plugin.pushnotifications.PushNotifications.getCordov
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.os.Bundle;
+import android.telecom.CallAudioState;
 
 import com.pushwoosh.calls.CallPermissionsCallback;
+import com.pushwoosh.calls.PushwooshCallControl;
 import com.pushwoosh.calls.PushwooshCallReceiver;
 import com.pushwoosh.calls.PushwooshCallSettings;
 import com.pushwoosh.calls.PushwooshVoIPMessage;
+import com.pushwoosh.exception.PushwooshException;
+import com.pushwoosh.function.Callback;
 import com.pushwoosh.internal.platform.AndroidPlatformModule;
 import com.pushwoosh.internal.utils.JsonUtils;
 import com.pushwoosh.internal.utils.PWLog;
@@ -150,55 +153,42 @@ public class PushwooshCallsAdapter implements CallsAdapter {
     }
 
     @Override
-    public boolean mute() {
+    public boolean mute(JSONArray data, CallbackContext callbackContext) {
         PWLog.noise(TAG, "mute()");
-        try {
-            AudioManager audioManager = (AudioManager) getCordovaInterface().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-            audioManager.setMicrophoneMute(true);
-            return true;
-        } catch (Exception e) {
-            PWLog.error("Failed to mute audio channel");
-            return false;
-        }
+        PushwooshCallControl.mute(callControlCallback(callbackContext));
+        return true;
     }
 
     @Override
-    public boolean unmute() {
+    public boolean unmute(JSONArray data, CallbackContext callbackContext) {
         PWLog.noise(TAG, "unmute()");
-        try {
-            AudioManager audioManager = (AudioManager) getCordovaInterface().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-            audioManager.setMicrophoneMute(false);
-            return true;
-        } catch (Exception e) {
-            PWLog.error("Failed to unmute audio channel");
-            return false;
-        }
+        PushwooshCallControl.unmute(callControlCallback(callbackContext));
+        return true;
     }
 
     @Override
-    public boolean speakerOn() {
+    public boolean speakerOn(JSONArray data, CallbackContext callbackContext) {
         PWLog.noise(TAG, "speakerOn()");
-        try {
-            AudioManager audioManager = (AudioManager) getCordovaInterface().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-            audioManager.setSpeakerphoneOn(true);
-            return true;
-        } catch (Exception e) {
-            PWLog.error("Failed to turn speaker on");
-            return false;
-        }
+        PushwooshCallControl.speakerOn(callControlCallback(callbackContext));
+        return true;
     }
 
     @Override
-    public boolean speakerOff() {
+    public boolean speakerOff(JSONArray data, CallbackContext callbackContext) {
         PWLog.noise(TAG, "speakerOff()");
-        try {
-            AudioManager audioManager = (AudioManager) getCordovaInterface().getActivity().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-            audioManager.setSpeakerphoneOn(false);
-            return true;
-        } catch (Exception e) {
-            PWLog.error("Failed to turn speaker off");
-            return false;
-        }
+        PushwooshCallControl.speakerOff(callControlCallback(callbackContext));
+        return true;
+    }
+
+    private static Callback<Void, PushwooshException> callControlCallback(final CallbackContext callbackContext) {
+        return result -> {
+            if (result.isSuccess()) {
+                callbackContext.success();
+                return;
+            }
+            PushwooshException exception = result.getException();
+            callbackContext.error(exception != null ? exception.getMessage() : "Call control request failed");
+        };
     }
 
     public static void onAnswer(PushwooshVoIPMessage voIPMessage) {
@@ -235,6 +225,20 @@ public class PushwooshCallsAdapter implements CallsAdapter {
             payload.put("reason", reason != null ? reason : "");
         } catch (org.json.JSONException ignored) {}
         PushNotifications.emitVoipEvent("voipDidFailToCancelCall", payload);
+    }
+
+    public static void onMuteChanged(boolean muted) {
+        PWLog.noise(TAG, "onMuteChanged(), muted: " + muted);
+        PushNotifications.emitVoipStateEvent("muted", muted ? "true" : "false");
+    }
+
+    public static void onAudioRouteChanged(int route) {
+        PWLog.noise(TAG, "onAudioRouteChanged(), route: " + route);
+        if (route == CallAudioState.ROUTE_SPEAKER) {
+            PushNotifications.emitVoipStateEvent("speakerOn", "speakerOn event called successfully");
+        } else {
+            PushNotifications.emitVoipStateEvent("speakerOff", "speakerOff event called successfully");
+        }
     }
 
     private static org.json.JSONObject parseVoIPMessage(PushwooshVoIPMessage message) {

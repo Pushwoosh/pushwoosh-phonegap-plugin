@@ -24,8 +24,8 @@
                 <string>$(PW_APP_GROUP)</string>
             </array>
         </config-file>
-        <hook type="before_prepare" src="hooks/ios-nse-before-prepare.js" />
         <hook type="after_prepare" src="hooks/ios-nse.js" />
+        <hook type="after_prepare" src="hooks/ios-modules-spm.js" />
     </platform>
 
     <platform name="android">

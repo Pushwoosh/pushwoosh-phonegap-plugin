@@ -33,6 +33,8 @@ import com.pushwoosh.function.Result;
 import com.pushwoosh.inapp.InAppManager;
 import com.pushwoosh.inbox.PushwooshInbox;
 import com.pushwoosh.inbox.data.InboxMessage;
+import com.pushwoosh.inbox.data.InboxTab;
+import com.pushwoosh.inbox.data.InboxTabs;
 import com.pushwoosh.inbox.exception.InboxMessagesException;
 import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
 import com.pushwoosh.internal.platform.utils.GeneralUtils;
@@ -83,7 +85,7 @@ public class PushNotifications extends CordovaPlugin {
 	private static CallsAdapter callsAdapter;
 
 	private static final VoipEventRegistry sVoipEventRegistry = new VoipEventRegistry(
-			new PersistedVoipEventStore(), PushNotifications::deliverVoipEvent, PushNotifications::voipNotReadyReason);
+			new PersistedVoipEventStore(), new CordovaVoipEventDeliverer(), PushNotifications::voipNotReadyReason);
 
 	private final HashMap<String, CallbackContext> callbackIds = new HashMap<String, CallbackContext>();
 
@@ -685,6 +687,31 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@CordovaMethod
+	private boolean getTabs(JSONArray data, final CallbackContext callbackContext) {
+		try {
+			InboxTabs inboxTabs = PushwooshInbox.getTabs();
+			JSONArray tabs = new JSONArray();
+			if (inboxTabs != null) {
+				for (InboxTab tab : inboxTabs.getTabs()) {
+					JSONObject json = new JSONObject();
+					json.put("id", tab.getId());
+					json.put("title", tab.getTitle());
+					tabs.put(json);
+				}
+			}
+			JSONObject result = new JSONObject();
+			result.put("allTitle", inboxTabs != null ? inboxTabs.getAllTitle() : "");
+			result.put("tabs", tabs);
+			callbackContext.success(result);
+		} catch (JSONException | RuntimeException e) {
+			PWLog.error(TAG, "Failed to get inbox tabs", e);
+			callbackContext.error(e.getMessage());
+		}
+
+		return true;
+	}
+
+	@CordovaMethod
 	public boolean messagesWithNoActionPerformedCount(JSONArray data, final CallbackContext callbackContext) {
 		try {
 			callbackIds.put("messagesWithNoActionPerformedCount", callbackContext);
@@ -1164,23 +1191,23 @@ public class PushNotifications extends CordovaPlugin {
 	}
 
 	@CordovaMethod
-	private boolean mute() {
-		return callsAdapter.mute();
+	private boolean mute(JSONArray data, final CallbackContext callbackContext) {
+		return callsAdapter.mute(data, callbackContext);
 	}
 
 	@CordovaMethod
-	private boolean unmute() {
-		return callsAdapter.unmute();
+	private boolean unmute(JSONArray data, final CallbackContext callbackContext) {
+		return callsAdapter.unmute(data, callbackContext);
 	}
 
 	@CordovaMethod
-	private boolean speakerOn() {
-		return callsAdapter.speakerOn();
+	private boolean speakerOn(JSONArray data, final CallbackContext callbackContext) {
+		return callsAdapter.speakerOn(data, callbackContext);
 	}
 
 	@CordovaMethod
-	private boolean speakerOff() {
-		return callsAdapter.speakerOff();
+	private boolean speakerOff(JSONArray data, final CallbackContext callbackContext) {
+		return callsAdapter.speakerOff(data, callbackContext);
 	}
 
 	private void processPendingPushNotifications() {
@@ -1221,14 +1248,25 @@ public class PushNotifications extends CordovaPlugin {
 		}
 	}
 
-	private static boolean deliverVoipEvent(@NonNull CallbackContext target, @NonNull Object owner, @NonNull JSONObject payload) {
+	private static final class CordovaVoipEventDeliverer implements VoipEventRegistry.Deliverer {
+		@Override
+		public boolean deliver(@NonNull CallbackContext target, @NonNull Object owner, @NonNull JSONObject payload) {
+			return deliverVoipEvent(target, owner, new PluginResult(PluginResult.Status.OK, payload));
+		}
+
+		@Override
+		public boolean deliverState(@NonNull CallbackContext target, @NonNull Object owner, @NonNull String value) {
+			return deliverVoipEvent(target, owner, new PluginResult(PluginResult.Status.OK, value));
+		}
+	}
+
+	private static boolean deliverVoipEvent(@NonNull CallbackContext target, @NonNull Object owner, @NonNull PluginResult result) {
 		if (!isOwnerAlive(owner)) {
 			PWLog.info(TAG, "Skipping VoIP event delivery: owner activity is gone");
 			return false;
 		}
 
 		try {
-			PluginResult result = new PluginResult(PluginResult.Status.OK, payload);
 			result.setKeepCallback(true);
 			target.sendPluginResult(result);
 			return true;
@@ -1267,6 +1305,11 @@ public class PushNotifications extends CordovaPlugin {
 	public static void emitVoipEvent(@NonNull String type, @NonNull JSONObject payload) {
 		PWLog.noise(TAG, "emitVoipEvent(), event type: " + type);
 		sVoipEventRegistry.emit(type, payload);
+	}
+
+	public static void emitVoipStateEvent(@NonNull String type, @NonNull String value) {
+		PWLog.noise(TAG, "emitVoipStateEvent(), event type: " + type);
+		sVoipEventRegistry.emitState(type, value);
 	}
 
 	private static JSONObject inboxMessageToJson(InboxMessage message) {

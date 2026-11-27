@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.pushwoosh.calls.PushwooshVoIPMessage;
+import com.pushwoosh.calls.listener.CallAudioStateListener;
 import com.pushwoosh.calls.listener.CallEventListener;
 import com.pushwoosh.internal.platform.AndroidPlatformModule;
 import com.pushwoosh.internal.utils.PWLog;
@@ -25,6 +26,9 @@ import com.pushwoosh.internal.utils.PWLog;
  *
  * <p>If no custom handler is set, {@code onAnswer} launches the main activity as default behavior.
  *
+ * <p>Call audio state changes reach the custom handler only if it also implements
+ * {@link CallAudioStateListener}.
+ *
  * <p><b>Custom handler setup</b> (in Cordova app's {@code config.xml}):
  * <pre>{@code
  * <platform name="android">
@@ -36,7 +40,7 @@ import com.pushwoosh.internal.utils.PWLog;
  * </platform>
  * }</pre>
  */
-public class PWCordovaCallEventListener implements CallEventListener {
+public class PWCordovaCallEventListener implements CallEventListener, CallAudioStateListener {
 
     private static final String TAG = "PWCordovaCallEventListener";
     private static final String CUSTOM_HANDLER_META_KEY = "com.pushwoosh.cordova.CALL_EVENT_HANDLER";
@@ -297,6 +301,38 @@ public class PWCordovaCallEventListener implements CallEventListener {
                 handler.onCallCancellationFailed(callId, reason);
             } catch (Exception e) {
                 PWLog.error(TAG, "Custom handler onCallCancellationFailed() threw exception", e);
+            }
+        }
+    }
+
+    @Override
+    public void onMuteChanged(boolean muted) {
+        PWLog.noise(TAG, "onMuteChanged()");
+
+        PushwooshCallsAdapter.onMuteChanged(muted);
+
+        CallEventListener handler = getCustomHandler();
+        if (handler instanceof CallAudioStateListener) {
+            try {
+                ((CallAudioStateListener) handler).onMuteChanged(muted);
+            } catch (Exception e) {
+                PWLog.error(TAG, "Custom handler onMuteChanged() threw exception", e);
+            }
+        }
+    }
+
+    @Override
+    public void onAudioRouteChanged(int route) {
+        PWLog.noise(TAG, "onAudioRouteChanged()");
+
+        PushwooshCallsAdapter.onAudioRouteChanged(route);
+
+        CallEventListener handler = getCustomHandler();
+        if (handler instanceof CallAudioStateListener) {
+            try {
+                ((CallAudioStateListener) handler).onAudioRouteChanged(route);
+            } catch (Exception e) {
+                PWLog.error(TAG, "Custom handler onAudioRouteChanged() threw exception", e);
             }
         }
     }

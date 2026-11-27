@@ -5,12 +5,34 @@ const childProcess = require('child_process');
 
 const PLUGIN_ID = 'pushwoosh-cordova-plugin';
 const SUBSPEC = 'PushwooshXCFramework/PushwooshVoIP';
-const SPM_ANCHOR = 'pushwoosh-voip-anchor';
-const SPM_PRODUCT = '.product(name: "PushwooshVoIP", package: "Pushwoosh-XCFramework")';
+
+// Optional native modules linked on cordova-ios 8, each after its anchor line in the plugin Package.swift.
+// Only VoIP has a CocoaPods counterpart; the others are Swift Package Manager only.
+const SPM_MODULES = [
+  {
+    variable: 'PW_VOIP_IOS_ENABLED',
+    name: 'PushwooshVoIP',
+    anchor: 'pushwoosh-voip-anchor',
+    dependency: '.product(name: "PushwooshVoIP", package: "Pushwoosh-XCFramework")'
+  },
+  {
+    variable: 'PW_INAPP_IOS_ENABLED',
+    name: 'PushwooshInApp',
+    anchor: 'pushwoosh-inapp-anchor',
+    dependency: '.product(name: "PushwooshInApp", package: "Pushwoosh-XCFramework")'
+  },
+  {
+    // The plugin's own Swift target: it brings the PushwooshInboxKit product along
+    variable: 'PW_INBOX_IOS_ENABLED',
+    name: 'PushwooshInboxKit',
+    anchor: 'pushwoosh-inbox-anchor',
+    dependency: '.target(name: "PushwooshCordovaInbox")'
+  }
+];
 
 /**
- * after_plugin_install (ios): links PushwooshVoIP when PW_VOIP_IOS_ENABLED=true. cordova-ios 8 gets the SPM
- * product added to the plugin copy under platforms/ios/packages, older cordova-ios gets the Podfile subspec.
+ * after_plugin_install (ios): links the optional modules whose variables are true. cordova-ios 8 gets the SPM
+ * dependencies added to the plugin copy under platforms/ios/packages, older cordova-ios gets the VoIP Podfile subspec.
  */
 module.exports = function (ctx) {
   const projectRoot = ctx.opts.projectRoot;
@@ -31,12 +53,19 @@ module.exports = function (ctx) {
     return;
   }
 
-  if (String(vars.PW_VOIP_IOS_ENABLED || 'false').toLowerCase() !== 'true') return;
+  const enabled = variable => String(vars[variable] || 'false').toLowerCase() === 'true';
 
   if (swiftPackage) {
-    linkSwiftPackageProduct(iosPlatformPath);
+    SPM_MODULES.filter(module => enabled(module.variable)).forEach(module => linkSwiftPackageModule(iosPlatformPath, module));
     return;
   }
+
+  const spmOnly = SPM_MODULES.filter(module => module.variable !== 'PW_VOIP_IOS_ENABLED' && enabled(module.variable));
+  if (spmOnly.length) {
+    console.warn(`[${PLUGIN_ID}] ${spmOnly.map(module => module.variable).join(', ')} only work on cordova-ios 8 and later, where the plugin gets the native SDK through Swift Package Manager. This platform uses CocoaPods, so the plugin does not link ${spmOnly.map(module => module.name).join(' or ')}.`);
+  }
+
+  if (!enabled('PW_VOIP_IOS_ENABLED')) return;
 
   const podfilePath = path.join(iosPlatformPath, 'Podfile');
   if (!fs.existsSync(podfilePath)) return;
@@ -91,28 +120,28 @@ function warnAboutLeftoverPods(iosPlatformPath) {
   console.warn(`[${PLUGIN_ID}] platforms/ios still has the CocoaPods ${[...pods].join(', ')} from an earlier plugin version, while this version gets the native SDK through Swift Package Manager. The build will fail with "Multiple commands produce ... PushwooshFramework.framework". Recreate the iOS platform: cordova platform rm ios && cordova platform add ios`);
 }
 
-function linkSwiftPackageProduct(iosPlatformPath) {
+function linkSwiftPackageModule(iosPlatformPath, module) {
   const packagesPath = path.join(iosPlatformPath, 'packages');
 
   // With --link cordova-ios references the plugin sources in place instead of copying them:
   // editing that Package.swift would modify the plugin checkout, so leave it to the developer.
   const copyPath = path.join(packagesPath, PLUGIN_ID, 'Package.swift');
   if (!fs.existsSync(copyPath)) {
-    console.warn(`[${PLUGIN_ID}] PushwooshVoIP was not linked: the plugin is installed with --link, so there is no copy under platforms/ios/packages to edit. Add ${SPM_PRODUCT} to the plugin target dependencies in its Package.swift.`);
+    console.warn(`[${PLUGIN_ID}] ${module.name} was not linked: the plugin is installed with --link, so there is no copy under platforms/ios/packages to edit. Add ${module.dependency} to the plugin target dependencies in its Package.swift.`);
     return;
   }
 
   const lines = fs.readFileSync(copyPath, 'utf8').split('\n');
-  if (lines.some(line => line.includes(SPM_PRODUCT))) return;
+  if (lines.some(line => line.includes(module.dependency))) return;
 
-  const index = lines.findIndex(line => line.includes(SPM_ANCHOR));
+  const index = lines.findIndex(line => line.includes(module.anchor));
   if (index === -1) {
-    console.warn(`[${PLUGIN_ID}] PushwooshVoIP was not linked: anchor "${SPM_ANCHOR}" is missing in ${copyPath}. Add ${SPM_PRODUCT} to the plugin target dependencies there.`);
+    console.warn(`[${PLUGIN_ID}] ${module.name} was not linked: anchor "${module.anchor}" is missing in ${copyPath}. Add ${module.dependency} to the plugin target dependencies there.`);
     return;
   }
 
   const indent = lines[index].match(/^\s*/)[0];
-  lines.splice(index + 1, 0, `${indent}${SPM_PRODUCT},`);
+  lines.splice(index + 1, 0, `${indent}${module.dependency},`);
   fs.writeFileSync(copyPath, lines.join('\n'), 'utf8');
-  console.log(`[${PLUGIN_ID}] Added PushwooshVoIP to platforms/ios/packages/${PLUGIN_ID}/Package.swift`);
+  console.log(`[${PLUGIN_ID}] Added ${module.name} to platforms/ios/packages/${PLUGIN_ID}/Package.swift`);
 }

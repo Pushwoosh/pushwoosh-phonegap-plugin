@@ -121,11 +121,27 @@
                     <span class="section-icon">📥</span>
                     <h2>Inbox</h2>
                 </div>
+                <div class="card">
+                    <label for="inboxStyle">presentInboxUI style (JSON)</label>
+                    <textarea id="inboxStyle" rows="6" spellcheck="false"></textarea>
+                    <div class="input-group">
+                        <button class="btn btn-small" id="inboxStyleDefault">Default</button>
+                        <button class="btn btn-small" id="inboxStyleLegacy">Legacy keys</button>
+                        <button class="btn btn-small" id="inboxStyleKit">InboxKit</button>
+                    </div>
+                    <button class="btn btn-secondary" id="toggleHandleMessageTap">handleMessageTap: off</button>
+                </div>
                 <button class="btn btn-primary" id="presentInboxUI">
                     <span class="btn-icon">📬</span>
                     Open Inbox
                 </button>
+                <button class="btn btn-secondary" id="getInboxTabs">Get Tabs</button>
+                <button class="btn btn-secondary" id="loadInboxMessages">Load Messages</button>
                 <button class="btn btn-secondary" id="getInboxCounts">Get Inbox Counts</button>
+                <div class="card">
+                    <label>Inbox taps</label>
+                    <pre class="modal-text" id="inboxTapLog">No taps yet</pre>
+                </div>
             </div>
         </div>
     </div>

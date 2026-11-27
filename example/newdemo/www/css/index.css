@@ -254,6 +254,18 @@ input[type="text"]::placeholder {
     color: #999;
 }
 
+textarea {
+    width: 100%;
+    margin: 10px 0;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 13px;
+    background: white;
+    box-sizing: border-box;
+}
+
 /* Modal */
 .modal {
     display: none;

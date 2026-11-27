@@ -29,6 +29,9 @@ import java.util.Map;
  * cannot crowd out the one event another type is still waiting to replay. Buffering goes through
  * load and replace, so the cap applies to what ends up on disk and expired events leave it on
  * every write.
+ *
+ * Call audio state events ({@link #emitState}) are never buffered: replayed later they would
+ * report the microphone or speaker of a call that is already over.
  */
 public final class VoipEventRegistry {
     public static final String TAG = "VoipEventRegistry";
@@ -57,6 +60,16 @@ public final class VoipEventRegistry {
          * @return true when the payload was handed to the bridge.
          */
         boolean deliver(@NonNull CallbackContext target, @NonNull Object owner, @NonNull JSONObject payload);
+
+        /**
+         * Hands a call audio state value to the Cordova bridge of the subscription owner as a
+         * plain string.
+         *
+         * @return true when the value was handed to the bridge; the default takes nothing.
+         */
+        default boolean deliverState(@NonNull CallbackContext target, @NonNull Object owner, @NonNull String value) {
+            return false;
+        }
     }
 
     /**
@@ -106,6 +119,9 @@ public final class VoipEventRegistry {
         entriesByType.put("voipPushPayload", new ArrayList<>());
         entriesByType.put("voipDidCancelCall", new ArrayList<>());
         entriesByType.put("voipDidFailToCancelCall", new ArrayList<>());
+        entriesByType.put("muted", new ArrayList<>());
+        entriesByType.put("speakerOn", new ArrayList<>());
+        entriesByType.put("speakerOff", new ArrayList<>());
     }
 
     /**
@@ -191,6 +207,31 @@ public final class VoipEventRegistry {
             }
 
             PWLog.info(TAG, "Delivered VoIP event '" + type + "' to " + delivered + " subscribers");
+        }
+    }
+
+    /**
+     * Delivers a call audio state event to the live subscriptions of its type and drops it when
+     * nobody took it.
+     */
+    public void emitState(@NonNull String type, @NonNull String value) {
+        synchronized (lock) {
+            List<Entry> entries = entriesByType.get(type);
+            int delivered = 0;
+            if (entries != null) {
+                for (Entry entry : new ArrayList<>(entries)) {
+                    if (deliverer.deliverState(entry.target, entry.owner, value)) {
+                        delivered++;
+                    }
+                }
+            }
+
+            if (delivered == 0) {
+                PWLog.info(TAG, "Dropping VoIP state event '" + type + "': " + bufferingReason(entries));
+                return;
+            }
+
+            PWLog.info(TAG, "Delivered VoIP state event '" + type + "' to " + delivered + " subscribers");
         }
     }
 

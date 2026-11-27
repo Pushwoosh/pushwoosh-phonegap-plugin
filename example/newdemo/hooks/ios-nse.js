@@ -2,21 +2,36 @@
 
 'use strict';
 
-const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
 const xcode = require('xcode');
 
-const { ensureExtensionTarget, APP_GROUP_SETTING } = require('./ios-nse-project');
-const { addExtensionTarget, podVersionFromPluginXml } = require('./ios-nse-podfile');
-const { TARGET_NAME, iosPlatformDir, xcodeprojName, repairProject } = require('./ios-nse-reorder');
+const { ensureExtensionTarget } = require('./ios-nse-project');
 
+const TARGET_NAME = 'NotificationService';
 const SOURCE_FILE = 'NotificationService.swift';
 // Not literally 'ios': a top-level dir named after a platform makes `cordova platform add ios` treat it as a local path spec.
 const SOURCE_DIR = path.join('ios-nse', TARGET_NAME);
-const PLUGIN_XML = path.join('plugins', 'pushwoosh-cordova-plugin', 'plugin.xml');
-const PODS_SUPPORT_DIR = path.join('Pods', 'Target Support Files');
+const PLUGIN_MANIFEST = path.join('plugins', 'pushwoosh-cordova-plugin', 'Package.swift');
+const SDK_PACKAGE_URL = 'https://github.com/Pushwoosh/Pushwoosh-XCFramework.git';
+// The products the plugin itself links; the extension's code needs PushwooshFramework, the other two are what it loads.
+const SDK_PRODUCTS = ['PushwooshFramework', 'PushwooshCore', 'PushwooshBridge'];
+
+// platforms/ios on an iOS run that already has it, otherwise null: nothing to wire, nothing wrong.
+function iosPlatformDir(context) {
+    const platforms = context.opts.platforms || [];
+    if (platforms.indexOf('ios') === -1) {
+        return null;
+    }
+    const iosDir = path.join(context.opts.projectRoot, 'platforms', 'ios');
+    return fs.existsSync(iosDir) ? iosDir : null;
+}
+
+function xcodeprojName(iosDir) {
+    const found = fs.readdirSync(iosDir).find((entry) => entry.endsWith('.xcodeproj'));
+    return found ? path.basename(found, '.xcodeproj') : null;
+}
 
 function readConfig(context, projectRoot) {
     const { ConfigParser } = context.requireCordovaModule('cordova-common');
@@ -33,12 +48,17 @@ function readConfig(context, projectRoot) {
     return { appId, deploymentTarget };
 }
 
-function readPodVersion(projectRoot) {
-    const file = path.join(projectRoot, PLUGIN_XML);
-    const version = podVersionFromPluginXml(fs.readFileSync(file, 'utf8'));
+// The extension has to ask for exactly the version the plugin's manifest pins, or Swift Package Manager cannot resolve the two.
+function sdkVersionFromManifest(text) {
+    const escaped = SDK_PACKAGE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = new RegExp(`\\.package\\(url:\\s*"${escaped}",\\s*exact:\\s*"([^"]+)"`).exec(text);
+    return match ? match[1] : null;
+}
 
+function readSdkVersion(projectRoot) {
+    const version = sdkVersionFromManifest(fs.readFileSync(path.join(projectRoot, PLUGIN_MANIFEST), 'utf8'));
     if (!version) {
-        throw new Error(`[NSE] No PushwooshXCFramework pin in ${PLUGIN_XML}`);
+        throw new Error(`[NSE] No exact Pushwoosh-XCFramework pin in ${PLUGIN_MANIFEST}`);
     }
     return version;
 }
@@ -68,50 +88,6 @@ function updateProject(iosDir, projectName, options) {
     }
 }
 
-function podInstall(iosDir) {
-    try {
-        childProcess.execFileSync('pod', ['install'], { cwd: iosDir, stdio: 'inherit' });
-    } catch (error) {
-        if (error.code === 'ENOENT') {
-            throw new Error('[NSE] `pod` not found: install CocoaPods (https://cocoapods.org) and build again');
-        }
-        throw error;
-    }
-}
-
-// The installed state has to be read off the Pods, not off the Podfile: writing the block and
-// integrating it are two operations, and a pod install that died in between leaves the first done.
-function podsIntegrated(iosDir) {
-    return fs.existsSync(path.join(iosDir, PODS_SUPPORT_DIR, `Pods-${TARGET_NAME}`));
-}
-
-function updatePodfile(iosDir, projectName, version) {
-    const podfilePath = path.join(iosDir, 'Podfile');
-
-    if (!fs.existsSync(podfilePath)) {
-        // The plugin presence check above already ran: a missing Podfile here means cordova-ios hasn't generated one for this platform yet.
-        throw new Error('[NSE] platforms/ios/Podfile not found: cordova-ios has not generated one for this platform yet');
-    }
-
-    const result = addExtensionTarget(fs.readFileSync(podfilePath, 'utf8'), {
-        target: TARGET_NAME,
-        project: projectName,
-        version
-    });
-
-    if (result.changed) {
-        fs.writeFileSync(podfilePath, result.text, 'utf8');
-        console.log(`[NSE] Added target ${TARGET_NAME} to Podfile, running pod install`);
-    } else if (podsIntegrated(iosDir)) {
-        console.log(`[NSE] Podfile and Pods already have target ${TARGET_NAME}`);
-        return;
-    } else {
-        console.log(`[NSE] Podfile has target ${TARGET_NAME} but ${PODS_SUPPORT_DIR}/Pods-${TARGET_NAME} is missing, running pod install`);
-    }
-
-    podInstall(iosDir);
-}
-
 module.exports = function (context) {
     const iosDir = iosPlatformDir(context);
     if (!iosDir) {
@@ -120,37 +96,26 @@ module.exports = function (context) {
 
     const projectRoot = context.opts.projectRoot;
 
-    if (!fs.existsSync(path.join(projectRoot, PLUGIN_XML))) {
+    if (!fs.existsSync(path.join(projectRoot, PLUGIN_MANIFEST))) {
         // Must not throw here: it would abort the benign `cordova platform add ios` race this handles.
-        console.log(`[NSE] ${PLUGIN_XML} not found, skipping: the ${TARGET_NAME} target is added by the next \`cordova prepare ios\` or \`cordova build ios\` once the Pushwoosh plugin is installed`);
+        console.log(`[NSE] ${PLUGIN_MANIFEST} not found, skipping: the ${TARGET_NAME} target is added by the next \`cordova prepare ios\` or \`cordova build ios\` once the Pushwoosh plugin is installed`);
         return;
     }
 
     const { appId, deploymentTarget } = readConfig(context, projectRoot);
-    const version = readPodVersion(projectRoot);
+    const version = readSdkVersion(projectRoot);
     const projectName = xcodeprojName(iosDir);
     if (!projectName) {
         throw new Error(`[NSE] No .xcodeproj in ${iosDir}`);
     }
 
-    const appGroup = `group.${appId}`;
-
     copySources(projectRoot, iosDir);
     updateProject(iosDir, projectName, {
         name: TARGET_NAME,
         bundleId: `${appId}.${TARGET_NAME}`,
-        appGroup,
+        appGroup: `group.${appId}`,
         deploymentTarget,
-        sourceFile: SOURCE_FILE
+        sourceFile: SOURCE_FILE,
+        sdkPackage: { url: SDK_PACKAGE_URL, version, products: SDK_PRODUCTS }
     });
-    // The pbxproj goes first: pod install integrates the extension target it finds there.
-    updatePodfile(iosDir, projectName, version);
-
-    const repaired = repairProject(iosDir, projectName, { targetName: TARGET_NAME, appGroup });
-    if (repaired.reordered) {
-        console.log(`[NSE] pod install reordered ${projectName}.xcodeproj; restored the app's Info.plist as the first entry`);
-    }
-    if (repaired.appGroupRestored) {
-        console.log(`[NSE] pod install dropped ${APP_GROUP_SETTING} from ${projectName}.xcodeproj; restored it`);
-    }
 };

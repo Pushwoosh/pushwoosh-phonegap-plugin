@@ -58,26 +58,28 @@ public class NoopCallsAdapter implements CallsAdapter{
     }
 
     @Override
-    public boolean mute() {
-        PWLog.error(TAG,"Method not implemented");
-        return false;
+    public boolean mute(JSONArray data, CallbackContext callbackContext) {
+        return voipNotEnabled(callbackContext);
     }
 
     @Override
-    public boolean unmute() {
-        PWLog.error(TAG,"Method not implemented");
-        return false;
+    public boolean unmute(JSONArray data, CallbackContext callbackContext) {
+        return voipNotEnabled(callbackContext);
     }
 
     @Override
-    public boolean speakerOn() {
-        PWLog.error(TAG,"Method not implemented");
-        return false;
+    public boolean speakerOn(JSONArray data, CallbackContext callbackContext) {
+        return voipNotEnabled(callbackContext);
     }
 
     @Override
-    public boolean speakerOff() {
-        PWLog.error(TAG,"Method not implemented");
-        return false;
+    public boolean speakerOff(JSONArray data, CallbackContext callbackContext) {
+        return voipNotEnabled(callbackContext);
+    }
+
+    private static boolean voipNotEnabled(CallbackContext callbackContext) {
+        PWLog.error(TAG, "VoIP is not enabled");
+        callbackContext.error("VoIP is not enabled");
+        return true;
     }
 }

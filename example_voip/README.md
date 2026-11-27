@@ -62,9 +62,14 @@ To work with Firebase/FCM:
 - Enable "Push Notifications"
 
 #### b. Configure CallKit in Xcode
-Open the Xcode project (`platforms/ios/demovoip.xcworkspace`) and ensure:
+Open the Xcode project (`platforms/ios/App.xcworkspace`) and ensure:
 - Background Modes → Voice over IP is enabled
 - Push Notifications capability is added
+
+The sample runs on cordova-ios 8 and installs the plugin with `--link`, so the plugin is built from
+this checkout as a Swift package. `hooks/ios-voip-spm.js` links `PushwooshVoIP` into
+`platforms/ios/packages/cordova-ios-plugins/Package.swift` on every `cordova prepare ios` and
+`cordova build ios`, at the version pinned in the plugin's `Package.swift`.
 
 ### 5. Build and Run
 
@@ -129,6 +134,8 @@ From the repository root, `make test-samples` runs the hook suites of every exam
 - Get push token
 
 ### Call Controls
+- Mute / unmute the microphone of the active call (Android; iOS returns "not supported on iOS")
+- Turn the speaker on / off for the active call (Android; iOS returns "not supported on iOS")
 - End active VoIP call
 
 ### VoIP Events Log
@@ -137,7 +144,8 @@ From the repository root, `make test-samples` runs the hook suites of every exam
   - `answer` - Incoming call answered
   - `reject` - Incoming call rejected
   - `hangup` - Call ended
-  - `muted` / `unmuted` - Microphone muted/unmuted
+  - `muted` - Microphone muted or unmuted (`"true"` / `"false"`)
+  - `speakerOn` / `speakerOff` - Call audio routed to / away from the speaker
   - `held` / `unheld` - Call held/unheld
   - `dtmf` - DTMF tones
   - `audioInterruption` - Audio interruption

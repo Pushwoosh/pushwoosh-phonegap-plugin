@@ -52,13 +52,13 @@
 Using npm:
 
 ```bash
-cordova plugin add pushwoosh-cordova-plugin@8.4.0
+cordova plugin add pushwoosh-cordova-plugin@8.4.1
 ```
 
 Using git:
 
 ```bash
-cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.4.0
+cordova plugin add https://github.com/Pushwoosh/pushwoosh-phonegap-plugin.git#8.4.1
 ```
 
 ### Requirements
@@ -75,7 +75,7 @@ Capacitor does not read this preference. On Capacitor 6 and 7, set `platform :io
 
 ### iOS: cordova-ios 8 (Swift Package Manager)
 
-On cordova-ios 8 the plugin is installed as a Swift package. The native Pushwoosh SDK comes from the `Pushwoosh-XCFramework` and `PushwooshInboxUI-XCFramework` Swift packages, which Xcode resolves from GitHub on the first build. No Pushwoosh pods are added to the project. cordova-ios still generates a `Podfile` without pods and runs `pod install` on it, so the CocoaPods tool must be installed, but nothing is downloaded from the CocoaPods trunk.
+On cordova-ios 8 the plugin is installed as a Swift package. The native Pushwoosh SDK comes from the `Pushwoosh-XCFramework` Swift package, which Xcode resolves from GitHub on the first build. No Pushwoosh pods are added to the project. cordova-ios still generates a `Podfile` without pods and runs `pod install` on it, so the CocoaPods tool must be installed, but nothing is downloaded from the CocoaPods trunk.
 
 ### iOS: cordova-ios 7 (CocoaPods)
 
@@ -102,7 +102,7 @@ The flag applies to every target, the app included: use 15.0, or the app's deplo
 
 Building or archiving in Xcode from `platforms/ios/<AppName>.xcworkspace` ignores `--buildFlag` and `build.json`. Build the release with the CLI and the same flag (`cordova build ios --release --device`), or in Xcode set iOS Deployment Target to 15.0 for the `PushwooshInboxUIXCFramework` target of the `Pods` project and for the `CordovaLib` project if it is below 15.0; every `cordova prepare ios` runs `pod install` and resets the `Pods` setting.
 
-The plugin prints this hint on every `cordova prepare ios` and `cordova build ios` unless `xcodebuild -version` reports Xcode 26 or older. cordova-ios 8 is not affected: there the Inbox UI comes as a Swift package.
+The plugin prints this hint on every `cordova prepare ios` and `cordova build ios` unless `xcodebuild -version` reports Xcode 26 or older. cordova-ios 8 is not affected: it has no `PushwooshInboxUIXCFramework`, the Inbox screen there is InboxKit, see [Inbox on cordova-ios 8](#inbox-on-cordova-ios-8).
 
 ### Switching an existing project to cordova-ios 8
 
@@ -113,7 +113,7 @@ cordova platform add ios@8
 
 `platform add` reinstalls the plugin with the variables saved in `plugins/fetch.json`, and the native SDK is resolved through Swift Package Manager on the next build.
 
-To update the plugin later, remove it and add the new version with the same `--variable` flags you used at the first install. `cordova plugin rm` drops the saved variables, and `cordova plugin add` without them installs the defaults: VoIP off, `LOG_LEVEL` `DEBUG`, foreground alert type `ALERT`.
+To update the plugin later, remove it and add the new version with the same `--variable` flags you used at the first install. `cordova plugin rm` drops the saved variables, and `cordova plugin add` without them installs the defaults: VoIP, In-App and Inbox off, `LOG_LEVEL` `DEBUG`, foreground alert type `ALERT`.
 
 ```bash
 cordova plugin rm pushwoosh-cordova-plugin
@@ -126,7 +126,7 @@ Xcode picks up the new native SDK pin on the next build; there is no need to del
 
 Plugin versions up to 8.3.76 install the native SDK as CocoaPods on cordova-ios 8 as well, and these pods have to go when you move to a Swift package version. If `plugins/` is intact, update with `cordova plugin rm` and `cordova plugin add` as shown above: removing the old version removes its pods.
 
-If you update by changing the version in `package.json` and restoring the plugins (`rm -rf plugins`, then `cordova prepare ios`), the old pods stay in `platforms/ios`. The plugin prints a warning during the install, and the build fails with `error: Multiple commands produce '.../PushwooshFramework.framework'` (and the same for `PushwooshCore`, `PushwooshBridge`, `PushwooshInboxUI`). `cordova plugin rm` does not remove them at this point, because cordova-ios 8 skips the pods of a Swift package plugin on uninstall. Recreate the iOS platform instead:
+If you update by changing the version in `package.json` and restoring the plugins (`rm -rf plugins`, then `cordova prepare ios`), the old pods stay in `platforms/ios`. The plugin prints a warning during the install, and the build fails with `error: Multiple commands produce '.../PushwooshFramework.framework'` (and the same for `PushwooshCore` and `PushwooshBridge`). `cordova plugin rm` does not remove them at this point, because cordova-ios 8 skips the pods of a Swift package plugin on uninstall. Recreate the iOS platform instead:
 
 ```bash
 cordova platform rm ios && cordova platform add ios
@@ -137,6 +137,60 @@ cordova platform rm ios && cordova platform add ios
 ### VoIP on cordova-ios 8
 
 `PW_VOIP_IOS_ENABLED=true` works the same way on both cordova-ios versions. On cordova-ios 8 the plugin's install hook adds the `PushwooshVoIP` product to the copy of the plugin package in `platforms/ios/packages/pushwoosh-cordova-plugin/Package.swift`. If the plugin was added with `--link`, there is no copy: the hook prints a warning and you add `.product(name: "PushwooshVoIP", package: "Pushwoosh-XCFramework")` to the target dependencies of the plugin's `Package.swift` yourself.
+
+### Inbox on cordova-ios 8
+
+On cordova-ios 8 `presentInboxUI` shows InboxKit, the Inbox screen of the native iOS SDK, and it needs the plugin added with `--variable PW_INBOX_IOS_ENABLED=true`. The install hook then links the plugin's InboxKit part (the `PushwooshCordovaInbox` target, which brings `PushwooshInboxKit`) in `platforms/ios/packages/pushwoosh-cordova-plugin/Package.swift`. Without the flag the app is built without InboxKit, and `presentInboxUI` does not open a screen: it logs a warning and calls its `onError` callback with `Inbox module is not linked`; this is the only case `onError` is called. The data methods (`loadMessages`, the counters, `readMessage`, `deleteMessage`, `performAction`) work with and without the flag.
+
+If you update from 8.4.0 or older on cordova-ios 8 and open the Inbox screen, add the flag when you add the new plugin version: without it the screen no longer opens.
+
+The style keys of `presentInboxUI` keep working where InboxKit has a counterpart, in the same format (colors as strings, images as paths from `www`): `dateFormat`, `listEmptyMessage`, `listErrorMessage`, `accentColor`, `backgroundColor`, `titleColor`, `readTitleColor`, `descriptionColor`, `readDescriptionColor`, `dateColor`, `defaultTextColor`, `defaultImageIcon`, and `barTitle`, `barBackgroundColor`, `barTextColor`, `barAccentColor` for the navigation bar, which has a close button on the right. `unreadImage`, `listEmptyImage`, `listErrorImage`, `highlightColor` and `dividerColor` are not supported on iOS with InboxKit; `readDateColor` is Android only. Any of `backgroundColor`, `defaultTextColor`, `titleColor`, `readTitleColor`, `descriptionColor`, `readDescriptionColor` or `dateColor` keeps the inbox light in the iOS dark appearance, as these colors were chosen for the light inbox; `enableDarkTheme: true` turns the dark theme back on.
+
+InboxKit settings, iOS and cordova-ios 8 only; left unset, each keeps the InboxKit default:
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `swipeToDeleteEnabled` | boolean | `true` | Swipe a message to the left to delete it |
+| `automaticReadOnDisplay` | boolean | `true` | Mark messages as read once they are on screen |
+| `automaticReadOnDisappear` | boolean | `true` | Mark the messages on screen as read when the inbox closes |
+| `enableDarkTheme` | boolean | `true` | Follow the system dark appearance; `false` keeps the light colors in dark mode |
+| `pinningEnabled` | boolean | `true` | Put the messages pinned in the Control Panel on top |
+| `pinIndicatorVisible` | boolean | `true` | Show the pin mark on pinned messages |
+| `pinIndicatorColor` | color | | The color of the pin mark |
+| `pinIndicatorImage` | path | pin symbol | The image of the pin mark |
+| `inlineButtonsEnabled` | boolean | `true` | Show the buttons a message carries |
+| `buttonTextColor`, `buttonBackgroundColor` | color | | The colors of message buttons |
+| `buttonFontSize` | number | `14` | The font size of message buttons in points |
+| `buttonCornerRadius` | number | `10` | The corner radius of message buttons in points |
+| `handleMessageTap` | boolean | `false` | Leave the action of a tap to the app, see below |
+
+The tabs set in the Control Panel show up on the screen by themselves; `getTabs` returns them on iOS and Android to build your own UI.
+
+#### Message taps
+
+`onMessageTap` gets every tap on a message and on every button inside it, as many times as the user taps. The message has the fields of `loadMessages`; a tap on a button adds `tappedButton`: `title`, `action` (`openURL`, `dismiss`, `markRead` or `custom`), `url` for `openURL` and `payload` for `custom`. `isRead` and `isActionPerformed` in this message may still show the state before the tap; `loadMessages` returns the current state.
+
+```javascript
+pushwoosh.presentInboxUI({ handleMessageTap: true }, function(message) {
+    if (message.tappedButton) {
+        console.log('button', message.tappedButton.title, 'of', message.code);
+    } else {
+        console.log('message', message.code);
+    }
+}, function(error) {
+    console.warn(error);
+});
+```
+
+Without `handleMessageTap` the inbox also performs its own action, as in the native SDK: it opens the message's rich media, URL or deep link, and performs the button's action (opens its URL, removes or reads the message). With `handleMessageTap: true` the tap only reaches `onMessageTap`: the inbox opens nothing and performs no button action, the app does. A tap still counts as opening the message, as in the native SDK: the inbox marks it read and action performed, and `loadMessages` returns it with `isRead` and `isActionPerformed` set. The preview of a video message plays the video by itself either way.
+
+On cordova-ios 7 nothing changes: `presentInboxUI` shows the legacy Inbox screen of the `PushwooshInboxUIXCFramework` pod with the same style keys, and the flag does nothing there. If the plugin was added with `--link`, the hook prints a warning and you add `.target(name: "PushwooshCordovaInbox")` to the dependencies of the `pushwoosh-cordova-plugin` target in the plugin's `Package.swift` yourself.
+
+### Native In-App on cordova-ios 8
+
+Native in-app messages from the server need the `PushwooshInApp` module. On cordova-ios 8 add it with `--variable PW_INAPP_IOS_ENABLED=true` at `cordova plugin add`: the install hook adds the `PushwooshInApp` product to `platforms/ios/packages/pushwoosh-cordova-plugin/Package.swift`, and the SDK shows the messages without any code on your side. Without the flag the module is not in the app, and the SDK skips native in-app messages with a warning in the log. Rich media (HTML) in-apps work either way.
+
+The flag works only on cordova-ios 8. On cordova-ios 7 the hook prints a warning and leaves the `Podfile` as it is. If the plugin was added with `--link`, the hook prints a warning and you add `.product(name: "PushwooshInApp", package: "Pushwoosh-XCFramework")` to the target dependencies of the plugin's `Package.swift` yourself.
 
 ### Notification Service Extension
 
@@ -320,7 +374,8 @@ document.addEventListener('deviceready', function() {
 
 | Method | Description |
 |--------|-------------|
-| `presentInboxUI(params)` | Open inbox UI with optional style customization |
+| `presentInboxUI(params, onMessageTap, onError)` | Open inbox UI with optional style customization; taps and errors on iOS (cordova-ios 8), see [Inbox on cordova-ios 8](#inbox-on-cordova-ios-8) |
+| `getTabs(success, fail)` | Get the Inbox tabs set in the Control Panel: `{ allTitle, tabs: [{ id, title }] }`, `tabs` is empty without tabs |
 | `loadMessages(success, fail)` | Load inbox messages programmatically |
 | `unreadMessagesCount(success)` | Get unread message count |
 | `messagesCount(success)` | Get total message count |
@@ -344,16 +399,10 @@ document.addEventListener('deviceready', function() {
 
 ## Plugin Preferences
 
-Configure these in your `config.xml`:
+Set the preferences with `--variable` when you add the plugin:
 
-```xml
-<plugin name="pushwoosh-cordova-plugin">
-    <variable name="LOG_LEVEL" value="DEBUG" />
-    <variable name="IOS_FOREGROUND_ALERT_TYPE" value="ALERT" />
-    <variable name="ANDROID_FOREGROUND_PUSH" value="true" />
-    <variable name="PW_VOIP_IOS_ENABLED" value="false" />
-    <variable name="PW_VOIP_ANDROID_ENABLED" value="false" />
-</plugin>
+```bash
+cordova plugin add pushwoosh-cordova-plugin@8.4.1 --variable LOG_LEVEL=DEBUG --variable PW_INAPP_IOS_ENABLED=true
 ```
 
 | Preference | Default | Description |
@@ -363,6 +412,18 @@ Configure these in your `config.xml`:
 | `ANDROID_FOREGROUND_PUSH` | `true` | Show notifications when app is in foreground (Android) |
 | `PW_VOIP_IOS_ENABLED` | `false` | Enable VoIP calling features on iOS |
 | `PW_VOIP_ANDROID_ENABLED` | `false` | Enable VoIP calling features on Android |
+| `PW_INAPP_IOS_ENABLED` | `false` | Link the native In-App module on iOS, see [Native In-App on cordova-ios 8](#native-in-app-on-cordova-ios-8). cordova-ios 8 only |
+| `PW_INBOX_IOS_ENABLED` | `false` | Link the InboxKit screen of `presentInboxUI` on iOS, see [Inbox on cordova-ios 8](#inbox-on-cordova-ios-8). cordova-ios 8 only |
+
+The module flags (`PW_VOIP_IOS_ENABLED`, `PW_VOIP_ANDROID_ENABLED`, `PW_INAPP_IOS_ENABLED`, `PW_INBOX_IOS_ENABLED`) are applied by the plugin's install hooks, which read them from `plugins/fetch.json`. Cordova writes only the `--variable` flags of `cordova plugin add` there: a `<variable>` under `<plugin>` in `config.xml` does not turn a module on.
+
+To change a flag, remove the plugin and add it again with every variable you need; `cordova plugin rm` drops the saved ones, and a flag you leave out goes back to `false`. On cordova-ios 8 clean the build afterwards, so Xcode links or drops the module:
+
+```bash
+cordova plugin rm pushwoosh-cordova-plugin
+cordova plugin add pushwoosh-cordova-plugin@<version> --variable PW_INAPP_IOS_ENABLED=true # plus every other variable you set at install
+cordova clean ios
+```
 
 ## Huawei (HMS) Setup
 

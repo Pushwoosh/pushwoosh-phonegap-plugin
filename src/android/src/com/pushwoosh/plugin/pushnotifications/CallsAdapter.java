@@ -13,8 +13,8 @@ public interface CallsAdapter {
     public boolean initializeVoIPParameters(JSONArray data, final CallbackContext callbackContext);
     public boolean setIncomingCallTimeout(JSONArray data, final CallbackContext callbackContext);
     public boolean setRingtone(JSONArray data, final CallbackContext callbackContext);
-    public boolean mute();
-    public boolean unmute();
-    public boolean speakerOn();
-    public boolean speakerOff();
+    public boolean mute(JSONArray data, final CallbackContext callbackContext);
+    public boolean unmute(JSONArray data, final CallbackContext callbackContext);
+    public boolean speakerOn(JSONArray data, final CallbackContext callbackContext);
+    public boolean speakerOff(JSONArray data, final CallbackContext callbackContext);
     }

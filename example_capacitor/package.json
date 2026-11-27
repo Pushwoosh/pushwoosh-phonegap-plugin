@@ -4,16 +4,23 @@
   "description": "Pushwoosh Capacitor VoIP Demo (Variant B)",
   "scripts": {
     "cap:sync": "npx cap sync android",
-    "cap:build": "npx cap sync android && cd android && ./gradlew assembleDebug"
+    "cap:build": "npx cap sync android && cd android && ./gradlew assembleDebug",
+    "cap:add:ios": "npx cap add ios --packagemanager CocoaPods",
+    "cap:sync:ios": "npx cap sync ios"
   },
   "dependencies": {
-    "@capacitor/ios": "^6.2.1",
+    "@capacitor/ios": "^8.6.2",
     "pushwoosh-cordova-plugin": "file:../"
   },
   "devDependencies": {
     "@capacitor/android": "^6.2.0",
-    "@capacitor/cli": "^6.2.0",
-    "@capacitor/core": "^6.2.0",
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
     "typescript": "^5.0.0"
+  },
+  "overrides": {
+    "@capacitor/android": {
+      "@capacitor/core": "$@capacitor/core"
+    }
   }
 }

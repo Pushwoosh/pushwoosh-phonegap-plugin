@@ -12,13 +12,21 @@
 
 #import "PushNotification.h"
 #import "PWLog.h"
-#import <PushwooshInboxUI/PushwooshInboxUI.h>
 #import <PushwooshCore/PWInAppManager.h>
 #import <PushwooshFramework/PushNotificationManager.h>
 #import <PushwooshFramework/PWInbox.h>
 #import "PWBackward.h"
 
 #import <UserNotifications/UserNotifications.h>
+
+// CocoaPods (cordova-ios 7) keeps the legacy InboxUI screen; Swift Package Manager (cordova-ios 8) shows InboxKit
+// through the PushwooshCordovaInbox target, which the app links with PW_INBOX_IOS_ENABLED.
+#if __has_include(<PushwooshInboxUI/PushwooshInboxUI.h>)
+#import <PushwooshInboxUI/PushwooshInboxUI.h>
+#define PW_INBOX_UI_ENABLED 1
+#else
+#define PW_INBOX_UI_ENABLED 0
+#endif
 
 #if __has_include(<PushwooshVoIP/PushwooshVoIP.h>)
 #import <PushwooshVoIP/PushwooshVoIP.h>
@@ -53,6 +61,16 @@
     entry.commandDelegate = delegate;
     return entry;
 }
+@end
+
+// Implemented in Swift by the PushwooshCordovaInbox target (src/ios-inbox) and looked up at runtime.
+@protocol PWCordovaInbox <NSObject>
++ (void)presentFrom:(UIViewController *)presenter
+              style:(NSDictionary *)style
+              color:(UIColor * _Nullable (^)(NSString *value))color
+              image:(UIImage * _Nullable (^)(NSString *path))image
+       onMessageTap:(void (^)(id<PWInboxMessageProtocol> message, NSDictionary * _Nullable button))onMessageTap
+            onClose:(void (^)(void))onClose;
 @end
 
 NSMutableDictionary *callbackIds;
@@ -691,9 +709,7 @@ static BOOL pw_authorizationOptionRequested(NSDictionary *options, NSString *nam
 }
 
 - (void)loadMessages:(CDVInvokedUrlCommand *)command {
-    // The first argument in the arguments parameter is the callbackID.
-    self.callbackIds[@"loadMessages"] = command.callbackId;
-    [PWInbox loadMessagesWithCompletion:^(NSArray<NSObject<PWInboxMessageProtocol> *> *messages, NSError *error) {
+    [[Pushwoosh inbox] loadMessagesWithCompletion:^(NSArray<NSObject<PWInboxMessageProtocol> *> *messages, NSError *error) {
         if (!error) {
             NSMutableArray* array = [[NSMutableArray alloc] init];
             for (NSObject<PWInboxMessageProtocol>* message in messages) {
@@ -702,45 +718,50 @@ static BOOL pw_authorizationOptionRequested(NSDictionary *options, NSString *nam
             }
             
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:array];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"loadMessages"]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         } else {
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.localizedDescription];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"loadMessages"]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         }
     }];
 }
 
 - (void)unreadMessagesCount:(CDVInvokedUrlCommand *)command {
-    // The first argument in the arguments parameter is the callbackID.
-    self.callbackIds[@"unreadMessagesCount"] = command.callbackId;
-    [PWInbox unreadMessagesCountWithCompletion:^(NSInteger count, NSError *error) {
+    [[Pushwoosh inbox] unreadMessagesCountWithCompletion:^(NSInteger count, NSError *error) {
         if (!error) {
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)count];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"unreadMessagesCount"]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         }
     }];
 }
 
 - (void)messagesWithNoActionPerformedCount:(CDVInvokedUrlCommand *)command {
-    // The first argument in the arguments parameter is the callbackID.
-    self.callbackIds[@"messagesWithNoActionPerformedCount"] = command.callbackId;
-    [PWInbox messagesWithNoActionPerformedCountWithCompletion:^(NSInteger count, NSError *error) {
+    [[Pushwoosh inbox] messagesWithNoActionPerformedCountWithCompletion:^(NSInteger count, NSError *error) {
         if (!error) {
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)count];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"messagesWithNoActionPerformedCount"]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         }
     }];
 }
 
 - (void)messagesCount:(CDVInvokedUrlCommand *)command {
-    // The first argument in the arguments parameter is the callbackID.
-    self.callbackIds[@"messagesCount"] = command.callbackId;
-    [PWInbox messagesCountWithCompletion:^(NSInteger count, NSError *error) {
+    [[Pushwoosh inbox] messagesCountWithCompletion:^(NSInteger count, NSError *error) {
         if (!error) {
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)count];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackIds[@"messagesCount"]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         }
     }];
+}
+
+- (void)getTabs:(CDVInvokedUrlCommand *)command {
+    PWInboxTabs *inboxTabs = [[Pushwoosh inbox] getTabs];
+    NSMutableArray *tabs = [NSMutableArray array];
+    for (PWInboxTab *tab in inboxTabs.tabs) {
+        [tabs addObject:@{@"id": tab.identifier ?: @"", @"title": tab.title ?: @""}];
+    }
+    NSDictionary *result = @{@"allTitle": inboxTabs.allTitle ?: @"", @"tabs": tabs};
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (NSString *)inboxMessageCodeFromCommand:(CDVInvokedUrlCommand *)command {
@@ -758,7 +779,7 @@ static BOOL pw_authorizationOptionRequested(NSDictionary *options, NSString *nam
     NSString *messageCode = [self inboxMessageCodeFromCommand:command];
     if (messageCode.length != 0) {
         NSArray *array = [NSArray arrayWithObject:messageCode];
-        [PWInbox readMessagesWithCodes:array];
+        [[Pushwoosh inbox] readMessagesWithCodes:array];
     }
 }
 
@@ -766,14 +787,14 @@ static BOOL pw_authorizationOptionRequested(NSDictionary *options, NSString *nam
     NSString *messageCode = [self inboxMessageCodeFromCommand:command];
     if (messageCode.length != 0) {
         NSArray *array = [NSArray arrayWithObject:messageCode];
-        [PWInbox deleteMessagesWithCodes:array];
+        [[Pushwoosh inbox] deleteMessagesWithCodes:array];
     }
 }
 
 - (void)performAction:(CDVInvokedUrlCommand *)command {
     NSString *messageCode = [self inboxMessageCodeFromCommand:command];
     if (messageCode.length != 0) {
-        [PWInbox performActionForMessageWithCode:messageCode];
+        [[Pushwoosh inbox] performActionForMessageWithCode:messageCode];
     }
 }
 
@@ -1299,6 +1320,29 @@ static BOOL pw_authorizationOptionRequested(NSDictionary *options, NSString *nam
 }
 #endif
 
+// MARK: - Call audio control (Android only)
+- (void)mute:(CDVInvokedUrlCommand *)command {
+    [self sendCallAudioControlNotSupported:command];
+}
+
+- (void)unmute:(CDVInvokedUrlCommand *)command {
+    [self sendCallAudioControlNotSupported:command];
+}
+
+- (void)speakerOn:(CDVInvokedUrlCommand *)command {
+    [self sendCallAudioControlNotSupported:command];
+}
+
+- (void)speakerOff:(CDVInvokedUrlCommand *)command {
+    [self sendCallAudioControlNotSupported:command];
+}
+
+- (void)sendCallAudioControlNotSupported:(CDVInvokedUrlCommand *)command {
+    NSString *message = [NSString stringWithFormat:@"%@ is not supported on iOS", command.methodName];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:message];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 - (void)getRemoteNotificationStatus:(CDVInvokedUrlCommand *)command {
     NSMutableDictionary *results = [PushNotificationManager getRemoteNotificationStatus];
 
@@ -1505,6 +1549,7 @@ static BOOL pw_authorizationOptionRequested(NSDictionary *options, NSString *nam
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+#if PW_INBOX_UI_ENABLED
 - (UIImage *)imageFromInboxStyleDict:(NSDictionary *)dict forKey:(NSString *)key {
     NSObject *object = dict[key];
     if (object != nil && [object isKindOfClass:[NSString class]]) {
@@ -1588,6 +1633,49 @@ static BOOL pw_authorizationOptionRequested(NSDictionary *options, NSString *nam
         [self.viewController dismissViewControllerAnimated:YES completion:nil];
     }
 }
+#else
+- (void)presentInboxUI:(CDVInvokedUrlCommand *)command {
+    Class<PWCordovaInbox> inbox = NSClassFromString(@"PWCordovaInbox");
+    if (inbox == nil) {
+        PWLogWarn(@"Inbox module is not linked: presentInboxUI needs the plugin added with --variable PW_INBOX_IOS_ENABLED=true (cordova-ios 8)");
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Inbox module is not linked"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+
+    NSDictionary *styleDictionary = [command argumentAtIndex:0];
+    if (![styleDictionary isKindOfClass:[NSDictionary class]]) {
+        styleDictionary = @{};
+    }
+    CDVViewController *cordovaViewController = (CDVViewController *)self.viewController;
+    __weak id<CDVCommandDelegate> commandDelegate = self.commandDelegate;
+    __weak typeof(self) weakSelf = self;
+    NSString *callbackId = command.callbackId;
+    [inbox presentFrom:self.viewController
+                 style:styleDictionary
+                 color:^UIColor *(NSString *value) {
+                     return [PWBackward colorFromColorString:value cordovaViewController:cordovaViewController];
+                 }
+                 image:^UIImage *(NSString *path) {
+                     NSString *file = [commandDelegate pathForResource:path];
+                     return file != nil ? [UIImage imageWithContentsOfFile:file] : nil;
+                 }
+          onMessageTap:^(id<PWInboxMessageProtocol> message, NSDictionary *button) {
+                     NSMutableDictionary *tap = [[weakSelf inboxMessageToDictionary:(NSObject<PWInboxMessageProtocol> *)message] mutableCopy];
+                     if (tap == nil) {
+                         return;
+                     }
+                     tap[@"tappedButton"] = button;
+                     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:tap];
+                     [pluginResult setKeepCallbackAsBool:YES];
+                     [commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+                 }
+               onClose:^{
+                     // NO_RESULT without keepCallback releases this call's callbacks in JS and calls neither of them.
+                     [commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT] callbackId:callbackId];
+                 }];
+}
+#endif
 
 void pwplugin_didReceiveRemoteNotification(id self, SEL _cmd, UIApplication * application, NSDictionary * userInfo, void (^completionHandler)(UIBackgroundFetchResult)) {
     if ([self respondsToSelector:@selector(application:pwplugin_didReceiveRemoteNotification:fetchCompletionHandler:)]) {

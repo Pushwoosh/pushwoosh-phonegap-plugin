@@ -200,13 +200,16 @@
  *
  * @section Plugin Preferences
  *
- * Configure these in your config.xml:
+ * Set these with `--variable` on `cordova plugin add`. The module flags (PW_VOIP_*, PW_INAPP_IOS_ENABLED, PW_INBOX_IOS_ENABLED)
+ * are read from the command line only: a <variable> in config.xml does not turn a module on.
  *
  * - LOG_LEVEL (default: "DEBUG") - Logging level
  * - IOS_FOREGROUND_ALERT_TYPE (default: "ALERT") - iOS foreground notification display type
  * - ANDROID_FOREGROUND_PUSH (default: "true") - Show notifications when app is in foreground on Android
  * - PW_VOIP_IOS_ENABLED (default: "false") - Enable VoIP calling features on iOS
  * - PW_VOIP_ANDROID_ENABLED (default: "false") - Enable VoIP calling features on Android
+ * - PW_INAPP_IOS_ENABLED (default: "false") - Link the native In-App module on iOS (cordova-ios 8 only)
+ * - PW_INBOX_IOS_ENABLED (default: "false") - Link the InboxKit screen of presentInboxUI on iOS (cordova-ios 8 only)
  *
  * @section Events
  *
@@ -766,7 +769,9 @@ PushNotification.prototype.notificationCallback = function(notification) {
  *                             - "answer": Triggered when the call is answered.
  *                             - "hangup": Triggered when the call is hung up.
  *                             - "reject": Triggered when the call is rejected.
- *                             - "muted": Triggered when the call is muted or unmuted.
+ *                             - "muted": Triggered when the microphone of the call is muted or unmuted; the payload is "true" or "false".
+ *                             - "speakerOn": Triggered when the call audio is routed to the speaker; the payload is the fixed string "speakerOn event called successfully".
+ *                             - "speakerOff": Triggered when the call audio is routed away from the speaker; the payload is the fixed string "speakerOff event called successfully".
  *                             - "held": Triggered when the call is put on or off hold.
  *                             - "voipPushPayload": Triggered when a VoIP push notification is received.
  *                             - "incomingCallSuccess": Triggered when an incoming call is successfully displayed.
@@ -792,11 +797,20 @@ PushNotification.prototype.notificationCallback = function(notification) {
  * "hangup", ...) back to back at startup, preferably after Cordova's `deviceready` event and
  * before the plugin's own onDeviceReady() call (the Init); subscribing to them at different
  * times changes the order in which a buffered call's events reach you.
- * This applies to iOS and Android alike. Known gap on Android under Capacitor: an in-page reload
+ * This applies to iOS and Android alike, except the call audio events ("muted", "speakerOn",
+ * "speakerOff") on Android: they describe the current call only and are not buffered.
+ * Known gap on Android under Capacitor: an in-page reload
  * (location.reload(), live reload) does not reset the native plugin, so the previous page's
  * subscriptions survive until the activity is recreated, and an event arriving between the reload
  * and the new page's registerEvent() call may reach the stale subscription instead of being
  * buffered - call registerEvent() as early as possible after a reload.
+ *
+ * @remarks Android: "muted", "speakerOn" and "speakerOff" carry the current audio state of the
+ * call, not only user actions. "muted" and one of "speakerOn"/"speakerOff" arrive at the start of
+ * every call; after that "muted" arrives on every mute change and "speakerOn"/"speakerOff" on every
+ * audio route change. "speakerOff" means the call is on any route other than the speaker, so it
+ * also arrives when the call moves between non-speaker routes (for example, from the earpiece to
+ * Bluetooth or a wired headset).
  */
 PushNotification.prototype.registerEvent = function(eventName, success, fail) {
 	exec(success, fail, "PushNotification", "registerEvent", [eventName]);
@@ -814,7 +828,9 @@ PushNotification.prototype.registerEvent = function(eventName, success, fail) {
  *                             - "answer": Triggered when the call is answered.
  *                             - "hangup": Triggered when the call is hung up.
  *                             - "reject": Triggered when the call is rejected.
- *                             - "muted": Triggered when the call is muted or unmuted.
+ *                             - "muted": Triggered when the microphone of the call is muted or unmuted; the payload is "true" or "false".
+ *                             - "speakerOn": Triggered when the call audio is routed to the speaker; the payload is the fixed string "speakerOn event called successfully".
+ *                             - "speakerOff": Triggered when the call audio is routed away from the speaker; the payload is the fixed string "speakerOff event called successfully".
  *                             - "held": Triggered when the call is put on or off hold.
  *                             - "voipPushPayload": Triggered when a VoIP push notification is received.
  *                             - "incomingCallSuccess": Triggered when an incoming call is successfully displayed.
@@ -881,13 +897,16 @@ PushNotification.prototype.initializeVoIPParameters = function(supportsVideo, ri
 };
 
 /**
- * Enables the device speaker during an active call.
+ * Routes the audio of the active call to the speaker.
  *
- * This method routes the call audio output through the device’s loudspeaker
- * instead of the earpiece. Useful for hands-free or speakerphone mode.
+ * The success callback means the request was handed to the system, not that the route has changed:
+ * the actual route arrives in the "speakerOn" and "speakerOff" events (see registerEvent()).
  *
- * @param {Function} success - Callback invoked when the speaker is successfully enabled.
- * @param {Function} error - Callback invoked if the operation fails.
+ * Android: the error callback is invoked when there is no answered call or VoIP is not enabled.
+ * iOS: not supported, the error callback is always invoked.
+ *
+ * @param {Function} success - Callback invoked when the request is handed to the system.
+ * @param {Function} error - Callback invoked if the request cannot be made.
  *
  * @example
  * PushNotification.speakerOn(onSuccess, onError);
@@ -897,13 +916,17 @@ PushNotification.prototype.speakerOn = function(success, error) {
 };
 
 /**
- * Disables the device speaker and routes audio back to the earpiece.
+ * Routes the audio of the active call away from the speaker: to the route used before speakerOn(),
+ * otherwise to the earpiece, wired headset or Bluetooth, whichever is available.
  *
- * This method returns the audio output to the default mode (typically the earpiece),
- * which is used for private voice conversations.
+ * The success callback means the request was handed to the system, not that the route has changed:
+ * the actual route arrives in the "speakerOn" and "speakerOff" events (see registerEvent()).
  *
- * @param {Function} success - Callback invoked when the speaker is successfully disabled.
- * @param {Function} error - Callback invoked if the operation fails.
+ * Android: the error callback is invoked when there is no answered call or VoIP is not enabled.
+ * iOS: not supported, the error callback is always invoked.
+ *
+ * @param {Function} success - Callback invoked when the request is handed to the system.
+ * @param {Function} error - Callback invoked if the request cannot be made.
  *
  * @example
  * PushNotification.speakerOff(onSuccess, onError);
@@ -913,24 +936,36 @@ PushNotification.prototype.speakerOff = function(success, error) {
 };
 
 /**
- * Mute device microphone
- * @param {Function} success - Callback invoked when the microphone is successfully disabled.
- * @param {Function} error - Callback invoked if the operation fails.
+ * Mutes the microphone of the active call.
+ *
+ * The success callback means the request was handed to the system, not that the microphone is muted:
+ * the actual state arrives in the "muted" event (see registerEvent()).
+ *
+ * Android: the error callback is invoked when there is no answered call or VoIP is not enabled.
+ * iOS: not supported, the error callback is always invoked.
+ *
+ * @param {Function} success - Callback invoked when the request is handed to the system.
+ * @param {Function} error - Callback invoked if the request cannot be made.
  */
 PushNotification.prototype.mute = function(success, error) {
-	    exec(success, error, "PushNotification", "speakerOff", []);
-
-}
+    exec(success, error, "PushNotification", "mute", []);
+};
 
 /**
- * Unmute device microphone
- * @param {Function} success - Callback invoked when the microphone is successfully enable.
- * @param {Function} error - Callback invoked if the operation fails.
+ * Unmutes the microphone of the active call.
+ *
+ * The success callback means the request was handed to the system, not that the microphone is unmuted:
+ * the actual state arrives in the "muted" event (see registerEvent()).
+ *
+ * Android: the error callback is invoked when there is no answered call or VoIP is not enabled.
+ * iOS: not supported, the error callback is always invoked.
+ *
+ * @param {Function} success - Callback invoked when the request is handed to the system.
+ * @param {Function} error - Callback invoked if the request cannot be made.
  */
 PushNotification.prototype.unmute = function(success, error) {
-	    exec(success, error, "PushNotification", "unmute", []);
-
-}
+    exec(success, error, "PushNotification", "unmute", []);
+};
 
 // Android calls
 /**
@@ -966,21 +1001,36 @@ PushNotification.prototype.endCall = function(success, error) {
 
 // Opens Inbox screen.
 //
+// iOS: on cordova-ios 8 (Swift Package) the screen is InboxKit and needs the plugin added with
+// --variable PW_INBOX_IOS_ENABLED=true; without it onError gets "Inbox module is not linked" and a warning
+// goes to the log. On cordova-ios 7 (CocoaPods) the screen is the legacy InboxUI, as before.
+//
+// onMessageTap(message) - optional, iOS cordova-ios 8 only: called on every tap on a message and on every button
+// inside it. message has the fields of loadMessages; a tap on a button adds tappedButton:
+// { title, action: "openURL" | "dismiss" | "markRead" | "custom", url (openURL), payload (custom) }.
+// The inbox performs its own action as well (opens the rich media, URL or deep link, performs the button action)
+// unless the style sets handleMessageTap to true. isRead and isActionPerformed in message may still show the
+// state before the tap; loadMessages returns the current state.
+//
+// onError(message) - optional, iOS cordova-ios 8 only: called with "Inbox module is not linked" when the plugin
+// was added without PW_INBOX_IOS_ENABLED, and in no other case
+//
 // Supported style keys:
 //
 // Customizes the date formatting
 // "dateFormat"
 //
-// The default icon in the cell next to the message; if not specified, the app icon is used
+// The default icon in the cell next to the message; if not specified, the app icon is used.
+// On iOS with InboxKit, the placeholder of the picture in a card with a picture
 // "defaultImageIcon"
 //
-// The appearance of the unread messages mark (iOS only)
+// The appearance of the unread messages mark (iOS only; not supported on iOS with InboxKit)
 // "unreadImage"
 //
-// The image which is displayed if an error occurs and the list of inbox messages is empty
+// The image which is displayed if an error occurs and the list of inbox messages is empty (not supported on iOS with InboxKit)
 // "listErrorImage"
 //
-// The image which is displayed if the list of inbox messages is empty
+// The image which is displayed if the list of inbox messages is empty (not supported on iOS with InboxKit)
 // "listEmptyImage"
 //
 // The error text which is displayed when an error occurs; cannot be localized
@@ -989,28 +1039,28 @@ PushNotification.prototype.endCall = function(success, error) {
 // The text which is displayed if the list of inbox messages is empty; cannot be localized
 // "listEmptyMessage"
 //
-// The default text color (iOS only)
+// The default text color (iOS only): titles and descriptions, unless their own colors are set
 // "defaultTextColor"
 //
-// The accent color
+// The accent color. On iOS with InboxKit, the unread mark and the selected tab
 // "accentColor"
 //
-// The default background color
+// The default background color. On iOS with InboxKit, the background of a message card
 // "backgroundColor"
 //
-// The default selection color
+// The default selection color (not supported on iOS with InboxKit)
 // "highlightColor"
 //
 // The color of message titles
 // "titleColor"
 //
-// The color of message titles if message was readed (Android only)
+// The color of message titles if message was readed (Android, and iOS with InboxKit)
 // "readTitleColor"
 //
 // The color of messages descriptions
 // "descriptionColor"
 //
-// The color of messages descriptions if message was readed (Android only)
+// The color of messages descriptions if message was readed (Android, and iOS with InboxKit)
 // "readDescriptionColor"
 //
 // The color of message dates
@@ -1019,27 +1069,87 @@ PushNotification.prototype.endCall = function(success, error) {
 // The color of message dates if message was readed (Android only)
 // "readDateColor"
 //
-// The color of the separator
+// The color of the separator (not supported on iOS with InboxKit, where messages are separate cards)
 // "dividerColor"
+//
+// The title of the inbox screen, "Inbox" by default (iOS only)
+// "barTitle"
+//
+// The color of the navigation bar, its title and its buttons (iOS only)
+// "barBackgroundColor", "barTextColor", "barAccentColor"
+//
+// On iOS with InboxKit, any of backgroundColor, defaultTextColor, titleColor, readTitleColor, descriptionColor,
+// readDescriptionColor or dateColor keeps the inbox light in the iOS dark appearance unless enableDarkTheme is set:
+// these colors were chosen for the light inbox.
+//
+// The keys below are iOS only and work on cordova-ios 8 (Swift Package), where the screen is InboxKit.
+// Left unset, each keeps the InboxKit default.
+//
+// Swipe a message to the left to delete it (boolean, default true)
+// "swipeToDeleteEnabled"
+//
+// Mark messages as read once they are on screen (boolean, default true)
+// "automaticReadOnDisplay"
+//
+// Mark the messages on screen as read when the inbox closes (boolean, default true)
+// "automaticReadOnDisappear"
+//
+// Follow the system dark appearance; false keeps the light colors in dark mode (boolean, default true)
+// "enableDarkTheme"
+//
+// Put the messages pinned in the Pushwoosh Control Panel on top (boolean, default true)
+// "pinningEnabled"
+//
+// Show the pin mark on pinned messages; false keeps them on top without the mark (boolean, default true)
+// "pinIndicatorVisible"
+//
+// The color of the pin mark
+// "pinIndicatorColor"
+//
+// The image of the pin mark, a path like defaultImageIcon (default: a pin symbol)
+// "pinIndicatorImage"
+//
+// Show the buttons a message carries (boolean, default true)
+// "inlineButtonsEnabled"
+//
+// The text and background colors of message buttons
+// "buttonTextColor", "buttonBackgroundColor"
+//
+// The font size of message buttons in points (number, default 14) and their corner radius (number, default 10)
+// "buttonFontSize", "buttonCornerRadius"
+//
+// When true, a tap on a message or on a button inside it only reaches onMessageTap: the inbox does not open the
+// message's rich media, URL or deep link and does not perform the button's action (open its URL, remove the
+// message), the app does. A tap still counts as opening the message, as in the native SDK: the inbox marks it
+// read and action performed, and loadMessages returns it with isRead and isActionPerformed set. The preview of
+// a video message plays the video by itself either way (boolean, default false)
+// "handleMessageTap"
 //
 //Example:
 // Pushwoosh.presentInboxUI({
 //   "dateFormat" : "dd.MMMM.yyyy",
 //   "defaultImageIcon" : 'img/icon.png',
-//   "listErrorImage" : 'img/error.png',
-//   "listEmptyImage" : 'img/empty.png',
 //   "listErrorMessage" : "Error message",
 //   "listEmptyMessage" : "Empty message",
 //   "accentColor" : '#ff00ff',
-//   "highlightColor" : '#ff00ff',
 //   "dateColor" : '#ff00ff',
 //   "titleColor" : '#ff00ff',
-//   "dividerColor" : '#ff00ff',
 //   "descriptionColor" : '#ff00ff',
-//   "backgroundColor" : '#ff00ff'
+//   "backgroundColor" : '#ff00ff',
+//   "handleMessageTap" : true
+// }, function(message) {
+//   console.log(message.code, message.tappedButton);
+// }, function(error) {
+//   console.warn(error);
 // });
-PushNotification.prototype.presentInboxUI = function(params) {
-	exec(null, null, "PushNotification", "presentInboxUI", [ params ]);
+PushNotification.prototype.presentInboxUI = function(params, onMessageTap, onError) {
+	exec(onMessageTap, onError, "PushNotification", "presentInboxUI", [ params ]);
+}
+
+// Get the Inbox tabs configured in the Pushwoosh Control Panel: { allTitle, tabs: [{ id, title }] }.
+// tabs is empty when the app has no tabs and the Inbox is one feed.
+PushNotification.prototype.getTabs = function(success, fail) {
+	exec(success, fail, "PushNotification", "getTabs", []);
 }
 
 // Load an array of InboxNotification objects

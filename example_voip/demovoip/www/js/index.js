@@ -33,7 +33,8 @@ const VOIP_EVENTS = [
     'reject',
     'hangup',
     'muted',
-    'unmuted',
+    'speakerOn',
+    'speakerOff',
     'held',
     'unheld',
     'dtmf',
@@ -289,6 +290,31 @@ function setupUIEventListeners() {
                 logEventToUI('endCall ERROR', error);
             }
         );
+    });
+
+    // Call audio control buttons
+    [
+        { id: 'btnMute', method: 'mute' },
+        { id: 'btnUnmute', method: 'unmute' },
+        { id: 'btnSpeakerOn', method: 'speakerOn' },
+        { id: 'btnSpeakerOff', method: 'speakerOff' }
+    ].forEach(function(control) {
+        document.getElementById(control.id).addEventListener('click', function() {
+            if (!pushwoosh) {
+                logEventToUI(control.method, 'Pushwoosh not ready yet. Wait for device ready.');
+                return;
+            }
+            pushwoosh[control.method](
+                function() {
+                    console.log(TAG + '[' + control.method.toUpperCase() + '] success');
+                    logEventToUI(control.method, 'Request handed to the system');
+                },
+                function(error) {
+                    console.log(TAG + '[' + control.method.toUpperCase() + '] error: ' + error);
+                    logEventToUI(control.method + ' ERROR', error);
+                }
+            );
+        });
     });
 
     // Open Second WebView button
